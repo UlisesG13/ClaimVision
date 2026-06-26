@@ -73,6 +73,22 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<bool> verifySession() async {
+    try {
+      await _remote.me();
+      return true;
+    } on UnauthorizedException {
+      return false;
+    } on ForbiddenException {
+      return false;
+    } on AppException {
+      // Error de red u otro: no podemos confirmar que el token es inválido,
+      // así que conservamos la sesión.
+      return true;
+    }
+  }
+
+  @override
   Future<void> logout() => _local.clearSession();
 
   /// Traduce una excepción técnica de la capa data a un Failure de presentación.

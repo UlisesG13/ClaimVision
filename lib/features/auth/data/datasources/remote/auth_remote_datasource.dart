@@ -14,6 +14,10 @@ import '../../dtos/register_request_dto.dart';
 abstract interface class AuthRemoteDataSource {
   Future<AuthResponseDto> login(LoginRequestDto body);
   Future<AuthResponseDto> register(RegisterRequestDto body);
+
+  /// Verifica el token actual contra `GET /auth/me`. Lanza
+  /// [UnauthorizedException] si el token es inválido o expiró.
+  Future<void> me();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -29,6 +33,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AuthResponseDto> register(RegisterRequestDto body) {
     return _post(ApiConstants.register, body.toJson());
+  }
+
+  @override
+  Future<void> me() async {
+    try {
+      final response = await _dio.get(ApiConstants.me);
+      final status = response.statusCode ?? 500;
+      if (status >= 400) {
+        throw ApiErrorMapper.fromResponse(response);
+      }
+    } on DioException catch (e) {
+      throw ApiErrorMapper.fromDioException(e);
+    }
   }
 
   /// POST que devuelve un `LoginResponseDTO` (login y register comparten forma).

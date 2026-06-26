@@ -16,7 +16,19 @@ import '../services/secure_storage_service.dart';
 class DioClient {
   DioClient._();
 
-  static Dio create(SecureStorageService storage) {
+  /// Rutas donde un 401 es esperado/manejado por la propia pantalla y NO debe
+  /// disparar el cierre de sesión global (login/registro fallido, validación
+  /// de sesión en el arranque).
+  static const Set<String> _skipAuthBounce = {
+    ApiConstants.login,
+    ApiConstants.register,
+    ApiConstants.me,
+  };
+
+  static Dio create(
+    SecureStorageService storage, {
+    void Function()? onUnauthorized,
+  }) {
     final dio = Dio(
       BaseOptions(
         baseUrl: ApiConstants.baseUrl,
@@ -42,6 +54,11 @@ class DioClient {
           if (response.statusCode == 401) {
             // Token ausente/expirado: descartamos la sesión local.
             await storage.clearSession();
+            final path = response.requestOptions.path;
+            if (!_skipAuthBounce.contains(path)) {
+              // Llamada protegida con sesión inválida → volver al login.
+              onUnauthorized?.call();
+            }
           }
           handler.next(response);
         },

@@ -9,6 +9,7 @@ import '../../features/auth/presentation/state/auth_controller.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/profile_page.dart';
 import '../../features/incident/presentation/pages/client_home_page.dart';
+import '../../features/incident/presentation/pages/report_analysis_page.dart';
 import '../../features/incident/presentation/pages/report_damage_page.dart';
 import '../../features/incident/presentation/pages/report_location_page.dart';
 import '../../features/incident/presentation/pages/report_narration_page.dart';
@@ -96,8 +97,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: RoutePaths.reportarAnalisis,
-        builder: (_, _) =>
-            const _ComingSoonScreen(titulo: 'Análisis Preliminar'),
+        builder: (_, _) => const ReportAnalysisPage(),
       ),
       GoRoute(
         path: RoutePaths.perfil,
@@ -130,21 +130,6 @@ class _SplashScreen extends StatelessWidget {
       body: Center(
         child: CircularProgressIndicator(color: AppColors.amber),
       ),
-    );
-  }
-}
-
-/// Placeholder temporal para pantallas del flujo del cliente que aún no se
-/// implementan (se reemplazan al construir cada una).
-class _ComingSoonScreen extends StatelessWidget {
-  const _ComingSoonScreen({required this.titulo});
-  final String titulo;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(titulo)),
-      body: const Center(child: Text('En construcción')),
     );
   }
 }

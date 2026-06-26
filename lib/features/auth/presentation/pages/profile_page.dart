@@ -1,122 +1,185 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/di/providers.dart';
+import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
+import '../state/auth_controller.dart';
+import '../state/onboarding_controller.dart';
 
-class ProfilePage extends StatelessWidget {
+/// Perfil de Usuario (Figma node 70:868).
+///
+/// Muestra los datos reales del usuario autenticado (`/auth/me` vía sesión) y
+/// lo capturado en el onboarding (póliza + consentimientos). El backend no
+/// expone aún nombre completo ni datos de aseguradora del cliente, así que se
+/// muestran solo los datos disponibles. "Cerrar sesión" hace logout real.
+class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final session = ref.watch(currentSessionProvider);
+    final onboarding = ref.watch(onboardingControllerProvider);
+
+    final email = session?.email ?? '';
+    final nombre = _nombreDesdeEmail(email);
+    final rol = session?.rol.label ?? 'Cliente';
+    final tienePoliza = onboarding.numeroPoliza.trim().isNotEmpty;
+
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(
-          'Mi Perfil',
-          style: theme.textTheme.titleLarge?.copyWith(
-            color: AppColors.blueprint,
-            fontWeight: FontWeight.bold,
+        title: Text('Mi Perfil',
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: AppColors.blueprint,
+              fontWeight: FontWeight.bold,
+            )),
+      ),
+      bottomNavigationBar: ClaimVisionBottomNav(
+        currentIndex: 2,
+        onTap: (i) {
+          switch (i) {
+            case 0:
+              context.go(RoutePaths.inicio);
+            case 1:
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Historial — próximamente.')),
+              );
+          }
+        },
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        children: [
+          _Header(nombre: nombre, email: email, rol: rol),
+          const Gap(AppSpacing.lg),
+          if (tienePoliza)
+            _PolicyCard(
+              numeroPoliza: onboarding.numeroPoliza,
+              vigencia: onboarding.vigenciaPoliza,
+              curpRfc: onboarding.curpRfc,
+            )
+          else
+            _LinkPolicyCard(onTap: () => context.push(RoutePaths.onboarding)),
+          const Gap(AppSpacing.lg),
+          _ConsentCard(
+            avisoPrivacidad: onboarding.avisoPrivacidad,
+            biometria: onboarding.biometria,
+            transferenciaTalleres: onboarding.transferenciaTalleres,
+            sinDatos: !onboarding.hasDetected && !tienePoliza,
           ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.edit_outlined, color: AppColors.blueprint),
+          const Gap(AppSpacing.lg),
+          _MenuCard(
+            onVehiculos: () => _proximamente(context, 'Vehículos registrados'),
+            onConfiguracion: () => _proximamente(context, 'Configuración'),
+          ),
+          const Gap(AppSpacing.lg),
+          _LogoutButton(onTap: () => _confirmarLogout(context, ref)),
+          const Gap(AppSpacing.md),
+          Center(
+            child: Text('ClaimVision · v1.0',
+                style: theme.textTheme.bodySmall),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          children: [
-            ProfileHeader(),
-            const Gap(AppSpacing.xl),
-            MenuOptionsSection(),
-            const Gap(AppSpacing.lg),
-            LogoutButton(),
-          ],
-        ),
-      ),
-      bottomNavigationBar: ClaimVisionBottomNav(currentIndex: 2),
     );
+  }
+
+  String _nombreDesdeEmail(String email) {
+    if (email.isEmpty) return 'Cliente';
+    final local = email.split('@').first.replaceAll(RegExp(r'[._]'), ' ');
+    return local
+        .split(' ')
+        .where((w) => w.isNotEmpty)
+        .map((w) => w[0].toUpperCase() + w.substring(1))
+        .join(' ');
+  }
+
+  void _proximamente(BuildContext context, String que) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text('$que — próximamente.')));
+  }
+
+  Future<void> _confirmarLogout(BuildContext context, WidgetRef ref) async {
+    final salir = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Cerrar sesión'),
+        content: const Text('¿Seguro que quieres cerrar tu sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.alert),
+            child: const Text('Cerrar sesión'),
+          ),
+        ],
+      ),
+    );
+    if (salir == true) {
+      // El router detecta la sesión nula y redirige al login automáticamente.
+      await ref.read(authControllerProvider.notifier).logout();
+    }
   }
 }
 
-class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({super.key});
+class _Header extends StatelessWidget {
+  const _Header({required this.nombre, required this.email, required this.rol});
+  final String nombre;
+  final String email;
+  final String rol;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final iniciales = nombre.trim().isEmpty
+        ? 'CL'
+        : nombre.trim().split(' ').take(2).map((w) => w[0]).join().toUpperCase();
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: AppColors.borderLight),
       ),
       child: Column(
         children: [
-          Stack(
-            children: [
-              CircleAvatar(
-                radius: 40,
-                backgroundColor: AppColors.blueprint,
-                child: Text(
-                  'JP',
-                  style: theme.textTheme.displayMedium?.copyWith(
-                    color: AppColors.white,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: AppColors.amber,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.white, width: 2),
-                  ),
-                  child: Icon(Icons.camera_alt, size: 14, color: AppColors.white),
-                ),
-              ),
-            ],
+          CircleAvatar(
+            radius: 40,
+            backgroundColor: AppColors.blueprint,
+            child: Text(iniciales,
+                style: theme.textTheme.displayMedium
+                    ?.copyWith(color: AppColors.white)),
           ),
           const Gap(AppSpacing.md),
-          Text('Juan Pérez', style: theme.textTheme.headlineLarge),
+          Text(nombre, style: theme.textTheme.headlineLarge),
           const Gap(AppSpacing.xs),
-          Text(
-            'juan.perez@email.com',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
+          Text(email,
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: AppColors.textSecondary)),
           const Gap(AppSpacing.sm),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.blueprint.withValues(alpha: 0.05),
+              color: AppColors.blueprint.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Text(
-              'Cliente',
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.blueprint,
-              ),
-            ),
+            child: Text(rol,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.blueprint,
+                )),
           ),
         ],
       ),
@@ -124,61 +187,142 @@ class ProfileHeader extends StatelessWidget {
   }
 }
 
-class MenuOptionsSection extends StatelessWidget {
-  const MenuOptionsSection({super.key});
+class _PolicyCard extends StatelessWidget {
+  const _PolicyCard({
+    required this.numeroPoliza,
+    required this.vigencia,
+    required this.curpRfc,
+  });
+  final String numeroPoliza;
+  final String vigencia;
+  final String curpRfc;
 
-  final List<Map<String, dynamic>> menuItems = const [
-    {'icon': Icons.person_outlined, 'title': 'Datos personales'},
-    {'icon': Icons.description_outlined, 'title': 'Mis pólizas'},
-    {'icon': Icons.history_outlined, 'title': 'Historial de siniestros'},
-    {'icon': Icons.notifications_outlined, 'title': 'Notificaciones'},
-    {'icon': Icons.payment_outlined, 'title': 'Métodos de pago'},
-    {'icon': Icons.help_outline, 'title': 'Ayuda y soporte'},
-    {'icon': Icons.info_outline, 'title': 'Acerca de'},
-  ];
+  @override
+  Widget build(BuildContext context) {
+    return _SectionCard(
+      titulo: 'Mi Póliza',
+      children: [
+        _InfoRow(label: 'Número de Póliza', value: numeroPoliza),
+        _InfoRow(label: 'Vigencia', value: vigencia.isEmpty ? '—' : vigencia),
+        _InfoRow(label: 'CURP / RFC', value: _mask(curpRfc)),
+      ],
+    );
+  }
+
+  String _mask(String v) {
+    if (v.trim().isEmpty) return '—';
+    final t = v.trim();
+    if (t.length <= 6) return '$t (cifrado)';
+    return '${t.substring(0, 6)}••• (cifrado)';
+  }
+}
+
+class _LinkPolicyCard extends StatelessWidget {
+  const _LinkPolicyCard({required this.onTap});
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    return _SectionCard(
+      titulo: 'Mi Póliza',
+      children: [
+        Text('Aún no has vinculado tu póliza.',
+            style: theme.textTheme.bodyMedium),
+        const Gap(AppSpacing.md),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: onTap,
+            icon: const Icon(Icons.add),
+            label: const Text('Vincular póliza'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ConsentCard extends StatelessWidget {
+  const _ConsentCard({
+    required this.avisoPrivacidad,
+    required this.biometria,
+    required this.transferenciaTalleres,
+    required this.sinDatos,
+  });
+  final bool avisoPrivacidad;
+  final bool biometria;
+  final bool transferenciaTalleres;
+  final bool sinDatos;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return _SectionCard(
+      titulo: 'Consentimientos (ARCO)',
+      children: sinDatos
+          ? [
+              Text('Se registran al vincular tu póliza.',
+                  style: theme.textTheme.bodySmall),
+            ]
+          : [
+              _ConsentRow(label: 'Aviso de privacidad', value: avisoPrivacidad),
+              _ConsentRow(label: 'Datos biométricos', value: biometria),
+              _ConsentRow(
+                  label: 'Transferencia a talleres',
+                  value: transferenciaTalleres),
+            ],
+    );
+  }
+}
+
+class _MenuCard extends StatelessWidget {
+  const _MenuCard({required this.onVehiculos, required this.onConfiguracion});
+  final VoidCallback onVehiculos;
+  final VoidCallback onConfiguracion;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: Border.all(color: AppColors.borderLight),
       ),
-      child: Column(
-        children: menuItems.map((item) {
-          return ListTile(
-            leading: Icon(
-              item['icon'] as IconData,
-              color: AppColors.blueprint,
-            ),
-            title: Text(
-              item['title'] as String,
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w500,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        child: Material(
+          type: MaterialType.transparency,
+          child: Column(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.directions_car_outlined,
+                    color: AppColors.blueprint),
+                title: const Text('Vehículos registrados'),
+                trailing: const Icon(Icons.chevron_right,
+                    color: AppColors.textHint),
+                onTap: onVehiculos,
               ),
-            ),
-            trailing: Icon(
-              Icons.chevron_right,
-              color: AppColors.textHint,
-            ),
-            onTap: () {},
-          );
-        }).toList(),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.settings_outlined,
+                    color: AppColors.blueprint),
+                title: const Text('Configuración'),
+                trailing: const Icon(Icons.chevron_right,
+                    color: AppColors.textHint),
+                onTap: onConfiguracion,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-class LogoutButton extends StatelessWidget {
-  const LogoutButton({super.key});
+class _LogoutButton extends StatelessWidget {
+  const _LogoutButton({required this.onTap});
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -186,13 +330,98 @@ class LogoutButton extends StatelessWidget {
       width: double.infinity,
       height: 52,
       child: OutlinedButton.icon(
-        onPressed: () {},
-        icon: const Icon(Icons.logout_outlined),
+        onPressed: onTap,
+        icon: const Icon(Icons.logout),
         label: const Text('Cerrar sesión'),
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.alert,
-          side: BorderSide(color: AppColors.alert.withValues(alpha: 0.3)),
+          side: BorderSide(color: AppColors.alert.withValues(alpha: 0.4)),
         ),
+      ),
+    );
+  }
+}
+
+// ── Helpers de UI ──────────────────────────────────────────────────────────
+
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({required this.titulo, required this.children});
+  final String titulo;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(titulo, style: theme.textTheme.titleMedium?.copyWith(fontSize: 15)),
+          const Gap(AppSpacing.md),
+          ...children,
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.label, required this.value});
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(label,
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(color: AppColors.textSecondary)),
+          ),
+          const Gap(AppSpacing.md),
+          Expanded(
+            child: Text(value,
+                textAlign: TextAlign.right,
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ConsentRow extends StatelessWidget {
+  const _ConsentRow({required this.label, required this.value});
+  final String label;
+  final bool value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(child: Text(label, style: theme.textTheme.bodyMedium)),
+          Icon(
+            value ? Icons.check_circle : Icons.cancel_outlined,
+            size: 20,
+            color: value ? AppColors.success : AppColors.textHint,
+          ),
+        ],
       ),
     );
   }

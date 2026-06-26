@@ -23,6 +23,11 @@ abstract interface class AuthRepository {
   /// Recupera la sesión guardada en el dispositivo, o `null` si no hay ninguna.
   Future<AuthSession?> getStoredSession();
 
+  /// Verifica contra el backend si el token guardado sigue siendo válido.
+  /// Devuelve `true` si es válido, `false` si expiró/no es válido (401/403).
+  /// Ante un error de red devuelve `true` (no se cierra sesión sin certeza).
+  Future<bool> verifySession();
+
   /// Cierra sesión: borra el token y los datos sensibles del almacenamiento.
   Future<void> logout();
 }

@@ -24,4 +24,15 @@ enum UserRole {
 
   bool get isCliente => this == UserRole.cliente;
   bool get isAjustador => this == UserRole.ajustador;
+
+  /// Etiqueta legible para mostrar al usuario.
+  String get label {
+    return switch (this) {
+      UserRole.administradorGlobal => 'Administrador',
+      UserRole.operadorAseguradora => 'Aseguradora',
+      UserRole.ajustador => 'Ajustador',
+      UserRole.operadorTaller => 'Taller',
+      UserRole.cliente => 'Cliente',
+    };
+  }
 }

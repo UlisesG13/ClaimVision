@@ -22,9 +22,17 @@ class AuthController extends AsyncNotifier<AuthSession?> {
 
   @override
   Future<AuthSession?> build() async {
-    final getStored = ref.read(getStoredSessionProvider);
-    final session = await getStored();
+    final session = await ref.read(getStoredSessionProvider)();
     _bootstrapped = true;
+    if (session == null) return null;
+
+    // El JWT no tiene refresh y expira (~60 min). Validamos el token guardado
+    // contra el backend: si ya no es válido, arrancamos en el login.
+    final valido = await ref.read(verifySessionProvider)();
+    if (!valido) {
+      await ref.read(logoutUserProvider)();
+      return null;
+    }
     return session;
   }
 
@@ -57,6 +65,16 @@ class AuthController extends AsyncNotifier<AuthSession?> {
     final logoutUser = ref.read(logoutUserProvider);
     await logoutUser();
     state = const AsyncData(null);
+  }
+
+  /// Invocado por el interceptor de red cuando una llamada protegida devuelve
+  /// 401 (token expirado/ inválido). El almacenamiento ya fue limpiado por el
+  /// interceptor; aquí solo descartamos la sesión en memoria para que el router
+  /// redirija al login.
+  void handleUnauthorized() {
+    if (state.asData?.value != null || state.isLoading) {
+      state = const AsyncData(null);
+    }
   }
 }
 

@@ -17,6 +17,7 @@ import '../../features/auth/domain/usecases/logout_user.dart';
 import '../../features/auth/domain/usecases/register_user.dart';
 import '../../features/auth/domain/entities/auth_session.dart';
 import '../../features/auth/domain/usecases/send_consent.dart';
+import '../../features/auth/domain/usecases/verify_session.dart';
 import '../../features/auth/presentation/state/auth_controller.dart';
 import '../../features/incident/data/datasources/remote/siniestro_remote_datasource.dart';
 import '../../features/incident/data/repositories/siniestro_repository_impl.dart';
@@ -41,7 +42,14 @@ final secureStorageProvider = Provider<SecureStorageService>((ref) {
 });
 
 final dioProvider = Provider<Dio>((ref) {
-  return DioClient.create(ref.watch(secureStorageProvider));
+  return DioClient.create(
+    ref.watch(secureStorageProvider),
+    // Un 401 en una llamada protegida invalida la sesión en memoria; el router
+    // detecta que ya no hay sesión y manda al login.
+    onUnauthorized: () {
+      ref.read(authControllerProvider.notifier).handleUnauthorized();
+    },
+  );
 });
 
 final imagePickerServiceProvider = Provider<ImagePickerService>((ref) {
@@ -80,6 +88,10 @@ final registerUserProvider = Provider<RegisterUser>((ref) {
 
 final getStoredSessionProvider = Provider<GetStoredSession>((ref) {
   return GetStoredSession(ref.watch(authRepositoryProvider));
+});
+
+final verifySessionProvider = Provider<VerifySession>((ref) {
+  return VerifySession(ref.watch(authRepositoryProvider));
 });
 
 final logoutUserProvider = Provider<LogoutUser>((ref) {

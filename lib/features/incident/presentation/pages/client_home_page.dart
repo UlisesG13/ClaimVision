@@ -90,11 +90,18 @@ class ClientHomePage extends ConsumerWidget {
                       Text('Actividad Reciente',
                           style: theme.textTheme.titleLarge),
                       if (siniestros.isNotEmpty)
-                        Text('Ver todos',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.blueprint,
-                              fontWeight: FontWeight.w600,
-                            )),
+                        GestureDetector(
+                          onTap: () =>
+                              ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Historial — próximamente.')),
+                          ),
+                          child: Text('Ver todos',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: AppColors.blueprint,
+                                fontWeight: FontWeight.w600,
+                              )),
+                        ),
                     ],
                   ),
                   const Gap(AppSpacing.md),
