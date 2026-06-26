@@ -27,6 +27,11 @@ class ApiConstants {
   static const String onboardingOcr = '/cliente/onboarding/ocr';
   static const String onboardingConfirmar = '/cliente/onboarding/confirmar-datos';
 
+  // ── Siniestros (cliente) ──────────────────────────────────────────────
+  static const String siniestroInicializar = '/siniestros/inicializar';
+  static String siniestro(String id) => '/siniestros/$id';
+  static String siniestroImagenes(String id) => '/siniestros/$id/imagenes';
+
   // Tiempos de espera de la red.
   static const Duration connectTimeout = Duration(seconds: 20);
   static const Duration receiveTimeout = Duration(seconds: 30);

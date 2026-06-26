@@ -3,7 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../widgets/claim_vision_bottom_nav.dart';
+import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});

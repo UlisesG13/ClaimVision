@@ -15,9 +15,18 @@ import '../../features/auth/domain/usecases/get_stored_session.dart';
 import '../../features/auth/domain/usecases/login_user.dart';
 import '../../features/auth/domain/usecases/logout_user.dart';
 import '../../features/auth/domain/usecases/register_user.dart';
+import '../../features/auth/domain/entities/auth_session.dart';
 import '../../features/auth/domain/usecases/send_consent.dart';
+import '../../features/auth/presentation/state/auth_controller.dart';
+import '../../features/incident/data/datasources/remote/siniestro_remote_datasource.dart';
+import '../../features/incident/data/repositories/siniestro_repository_impl.dart';
+import '../../features/incident/domain/repositories/siniestro_repository.dart';
+import '../../features/incident/domain/usecases/actualizar_siniestro.dart';
+import '../../features/incident/domain/usecases/inicializar_siniestro.dart';
+import '../../features/incident/domain/usecases/subir_imagen_siniestro.dart';
 import '../network/dio_client.dart';
 import '../services/image_picker_service.dart';
+import '../services/location_service.dart';
 import '../services/secure_storage_service.dart';
 
 /// Contenedor de inyección de dependencias de la app (Riverpod).
@@ -37,6 +46,10 @@ final dioProvider = Provider<Dio>((ref) {
 
 final imagePickerServiceProvider = Provider<ImagePickerService>((ref) {
   return ImagePickerService();
+});
+
+final locationServiceProvider = Provider<LocationService>((ref) {
+  return const LocationService();
 });
 
 // ── Auth: datasources ──────────────────────────────────────────────────────
@@ -93,4 +106,32 @@ final sendConsentProvider = Provider<SendConsent>((ref) {
 
 final confirmOnboardingProvider = Provider<ConfirmOnboarding>((ref) {
   return ConfirmOnboarding(ref.watch(onboardingRepositoryProvider));
+});
+
+/// Sesión autenticada actual, expuesta desde el composition root para que
+/// cualquier feature la lea sin depender directamente del feature `auth`.
+final currentSessionProvider = Provider<AuthSession?>((ref) {
+  return ref.watch(authControllerProvider).asData?.value;
+});
+
+// ── Siniestros (incident): datasource, repositorio y casos de uso ──────────
+final siniestroRemoteDataSourceProvider =
+    Provider<SiniestroRemoteDataSource>((ref) {
+  return SiniestroRemoteDataSourceImpl(ref.watch(dioProvider));
+});
+
+final siniestroRepositoryProvider = Provider<SiniestroRepository>((ref) {
+  return SiniestroRepositoryImpl(ref.watch(siniestroRemoteDataSourceProvider));
+});
+
+final inicializarSiniestroProvider = Provider<InicializarSiniestro>((ref) {
+  return InicializarSiniestro(ref.watch(siniestroRepositoryProvider));
+});
+
+final actualizarSiniestroProvider = Provider<ActualizarSiniestro>((ref) {
+  return ActualizarSiniestro(ref.watch(siniestroRepositoryProvider));
+});
+
+final subirImagenSiniestroProvider = Provider<SubirImagenSiniestro>((ref) {
+  return SubirImagenSiniestro(ref.watch(siniestroRepositoryProvider));
 });

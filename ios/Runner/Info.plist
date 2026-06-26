@@ -9,6 +9,8 @@
 	<string>ClaimVision usa la cámara para fotografiar tu póliza, identificación y los daños del vehículo.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>ClaimVision necesita acceso a tus fotos para adjuntar tu póliza, identificación y evidencias del siniestro.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>ClaimVision usa tu ubicación para registrar el lugar del siniestro al reportarlo.</string>
 	<!-- Permite HTTP en claro SOLO hacia el backend desplegado (sin TLS).
 	     Quitar esta excepción cuando el backend tenga HTTPS. -->
 	<key>NSAppTransportSecurity</key>

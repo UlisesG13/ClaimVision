@@ -6,9 +6,13 @@ import '../../features/auth/domain/entities/auth_session.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/state/auth_controller.dart';
-import '../../features/auth/presentation/pages/home_page.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/profile_page.dart';
+import '../../features/incident/presentation/pages/client_home_page.dart';
+import '../../features/incident/presentation/pages/report_damage_page.dart';
+import '../../features/incident/presentation/pages/report_location_page.dart';
+import '../../features/incident/presentation/pages/report_narration_page.dart';
+import '../../features/incident/presentation/pages/report_vehicle_page.dart';
 import '../theme/app_colors.dart';
 import 'route_paths.dart';
 
@@ -72,7 +76,28 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: RoutePaths.inicio,
-        builder: (_, _) => const HomePage(),
+        builder: (_, _) => const ClientHomePage(),
+      ),
+      GoRoute(
+        path: RoutePaths.reportar,
+        builder: (_, _) => const ReportVehiclePage(),
+      ),
+      GoRoute(
+        path: RoutePaths.reportarUbicacion,
+        builder: (_, _) => const ReportLocationPage(),
+      ),
+      GoRoute(
+        path: RoutePaths.reportarNarracion,
+        builder: (_, _) => const ReportNarrationPage(),
+      ),
+      GoRoute(
+        path: RoutePaths.reportarDano,
+        builder: (_, _) => const ReportDamagePage(),
+      ),
+      GoRoute(
+        path: RoutePaths.reportarAnalisis,
+        builder: (_, _) =>
+            const _ComingSoonScreen(titulo: 'Análisis Preliminar'),
       ),
       GoRoute(
         path: RoutePaths.perfil,
@@ -105,6 +130,21 @@ class _SplashScreen extends StatelessWidget {
       body: Center(
         child: CircularProgressIndicator(color: AppColors.amber),
       ),
+    );
+  }
+}
+
+/// Placeholder temporal para pantallas del flujo del cliente que aún no se
+/// implementan (se reemplazan al construir cada una).
+class _ComingSoonScreen extends StatelessWidget {
+  const _ComingSoonScreen({required this.titulo});
+  final String titulo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(titulo)),
+      body: const Center(child: Text('En construcción')),
     );
   }
 }

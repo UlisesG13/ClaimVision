@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../core/theme/app_colors.dart';
 
+/// Barra de navegación inferior del cliente (Inicio / Historial / Perfil).
+/// Compartida entre pantallas del flujo del cliente.
 class ClaimVisionBottomNav extends StatelessWidget {
   final int currentIndex;
+  final ValueChanged<int>? onTap;
 
-  const ClaimVisionBottomNav({super.key, required this.currentIndex});
+  const ClaimVisionBottomNav({
+    super.key,
+    required this.currentIndex,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: currentIndex,
+      onTap: onTap,
       backgroundColor: AppColors.white,
       selectedItemColor: AppColors.amber,
       unselectedItemColor: AppColors.textHint,
@@ -26,7 +34,7 @@ class ClaimVisionBottomNav extends StatelessWidget {
           label: 'Historial',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.person_outlined),
+          icon: Icon(Icons.person_outline),
           activeIcon: Icon(Icons.person),
           label: 'Perfil',
         ),
