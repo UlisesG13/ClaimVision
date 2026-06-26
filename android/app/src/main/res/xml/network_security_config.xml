@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Permite tráfico HTTP en claro SOLO hacia el backend desplegado (sin TLS).
+  El resto de la app sigue exigiendo HTTPS. Cuando el backend tenga un dominio
+  con certificado, eliminar este dominio y quitar la referencia del manifest.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">3.95.226.241</domain>
+    </domain-config>
+</network-security-config>
