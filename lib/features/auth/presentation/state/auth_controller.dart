@@ -14,10 +14,18 @@ import '../../domain/entities/auth_session.dart';
 /// Al construirse, restaura la sesión guardada en el dispositivo para que el
 /// usuario no tenga que volver a iniciar sesión en cada arranque.
 class AuthController extends AsyncNotifier<AuthSession?> {
+  /// `false` solo durante la restauración inicial de la sesión al arrancar la
+  /// app. El router usa esto para mostrar el splash una única vez y no volver a
+  /// él durante un login/registro posterior.
+  bool _bootstrapped = false;
+  bool get isRestoring => !_bootstrapped;
+
   @override
   Future<AuthSession?> build() async {
     final getStored = ref.read(getStoredSessionProvider);
-    return getStored();
+    final session = await getStored();
+    _bootstrapped = true;
+    return session;
   }
 
   /// Sesión actual si está autenticado, o `null`.

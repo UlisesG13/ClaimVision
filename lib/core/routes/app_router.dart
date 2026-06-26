@@ -7,6 +7,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/state/auth_controller.dart';
 import '../../features/auth/presentation/pages/home_page.dart';
+import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/profile_page.dart';
 import '../theme/app_colors.dart';
 import 'route_paths.dart';
@@ -30,26 +31,24 @@ final routerProvider = Provider<GoRouter>((ref) {
       final auth = ref.read(authControllerProvider);
       final location = state.matchedLocation;
 
-      // Aún restaurando la sesión inicial → quedarse en el splash.
-      if (auth.isLoading && !auth.hasValue) {
+      // Aún restaurando la sesión inicial → quedarse en el splash (solo al
+      // arrancar; un login/registro posterior no vuelve a pasar por aquí).
+      if (ref.read(authControllerProvider.notifier).isRestoring) {
         return location == RoutePaths.splash ? null : RoutePaths.splash;
       }
 
       final AuthSession? session = auth.asData?.value;
       final isAuthed = session != null;
-      final onAuthScreens = location == RoutePaths.login ||
-          location == RoutePaths.register ||
-          location == RoutePaths.splash;
+      final authScreens = {RoutePaths.login, RoutePaths.register};
 
       if (!isAuthed) {
         // Sin sesión: solo se permiten las pantallas de acceso.
-        return onAuthScreens && location != RoutePaths.splash
-            ? null
-            : RoutePaths.login;
+        return authScreens.contains(location) ? null : RoutePaths.login;
       }
 
-      // Con sesión: si está en una pantalla de acceso, mandarlo a su inicio.
-      if (onAuthScreens) {
+      // Con sesión: salir del splash o de un login traspapelado hacia el inicio.
+      // El registro navega por su cuenta al onboarding, así que aquí se permite.
+      if (location == RoutePaths.splash || location == RoutePaths.login) {
         return _homeFor(session);
       }
       return null;
@@ -66,6 +65,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePaths.register,
         builder: (_, _) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: RoutePaths.onboarding,
+        builder: (_, _) => const OnboardingPage(),
       ),
       GoRoute(
         path: RoutePaths.inicio,

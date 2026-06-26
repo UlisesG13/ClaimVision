@@ -72,6 +72,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             SnackBar(content: Text(message), backgroundColor: AppColors.alert),
           );
       }
+      // Registro exitoso (nuevo usuario) → continuar al onboarding de póliza.
+      final authed = next.asData?.value != null;
+      final wasAuthed = previous?.asData?.value != null;
+      if (authed && !wasAuthed) {
+        context.go(RoutePaths.onboarding);
+      }
     });
 
     final isLoading = ref.watch(authControllerProvider).isLoading;

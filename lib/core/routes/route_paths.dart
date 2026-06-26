@@ -8,6 +8,7 @@ class RoutePaths {
   static const String register = '/registro';
 
   // Cliente
+  static const String onboarding = '/onboarding';
   static const String inicio = '/inicio';
   static const String perfil = '/perfil';
 }
