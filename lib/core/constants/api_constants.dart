@@ -1,11 +1,3 @@
-/// Configuración de red y endpoints del backend de ClaimVision.
-///
-/// La URL base se puede sobreescribir en tiempo de compilación con:
-///   flutter run --dart-define=API_BASE_URL=http://192.168.1.10:8000/api
-///
-/// Por defecto apunta a `10.0.2.2`, que en el emulador de Android resuelve al
-/// `localhost` de la máquina anfitriona donde corre el backend (FastAPI en el
-/// puerto 8000). En iOS Simulator usar `http://localhost:8000/api`.
 class ApiConstants {
   ApiConstants._();
 

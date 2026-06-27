@@ -14,6 +14,7 @@ import '../../features/incident/presentation/pages/report_damage_page.dart';
 import '../../features/incident/presentation/pages/report_location_page.dart';
 import '../../features/incident/presentation/pages/report_narration_page.dart';
 import '../../features/incident/presentation/pages/report_vehicle_page.dart';
+import '../../features/incident/presentation/pages/siniestro_detail_page.dart';
 import '../theme/app_colors.dart';
 import 'route_paths.dart';
 
@@ -102,6 +103,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePaths.perfil,
         builder: (_, _) => const ProfilePage(),
+      ),
+      GoRoute(
+        path: RoutePaths.detalleSiniestro,
+        builder: (_, state) => SiniestroDetailPage(
+          siniestroId: state.pathParameters['id'] ?? '',
+        ),
       ),
     ],
   );

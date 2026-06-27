@@ -110,7 +110,11 @@ class ClientHomePage extends ConsumerWidget {
                   else
                     ...siniestros.map((s) => Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                          child: _SiniestroCard(siniestro: s),
+                          child: _SiniestroCard(
+                            siniestro: s,
+                            onTap: () => context.push(
+                                RoutePaths.detalleSiniestroDe(s.id)),
+                          ),
                         )),
                 ],
               ),
@@ -337,39 +341,44 @@ class _StatBox extends StatelessWidget {
 }
 
 class _SiniestroCard extends StatelessWidget {
-  const _SiniestroCard({required this.siniestro});
+  const _SiniestroCard({required this.siniestro, required this.onTap});
   final Siniestro siniestro;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final fecha = DateFormatEs.fechaHora(siniestro.fechaSiniestro);
 
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Siniestro ${siniestro.folioCorto}',
-                  style: theme.textTheme.titleMedium?.copyWith(fontSize: 15)),
-              _EstatusChip(estatus: siniestro.estatus),
-            ],
-          ),
-          const Gap(AppSpacing.md),
-          _IconLine(
-              icon: Icons.directions_car_outlined,
-              text: siniestro.vehiculoResumen),
-          const Gap(AppSpacing.xs),
-          _IconLine(icon: Icons.schedule, text: fecha),
-        ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          border: Border.all(color: AppColors.borderLight),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Siniestro ${siniestro.folioCorto}',
+                    style: theme.textTheme.titleMedium?.copyWith(fontSize: 15)),
+                _EstatusChip(estatus: siniestro.estatus),
+              ],
+            ),
+            const Gap(AppSpacing.md),
+            _IconLine(
+                icon: Icons.directions_car_outlined,
+                text: siniestro.vehiculoResumen),
+            const Gap(AppSpacing.xs),
+            _IconLine(icon: Icons.schedule, text: fecha),
+          ],
+        ),
       ),
     );
   }
