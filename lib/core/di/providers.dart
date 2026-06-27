@@ -19,12 +19,18 @@ import '../../features/auth/domain/entities/auth_session.dart';
 import '../../features/auth/domain/usecases/send_consent.dart';
 import '../../features/auth/domain/usecases/verify_session.dart';
 import '../../features/auth/presentation/state/auth_controller.dart';
-import '../../features/incident/data/datasources/remote/siniestro_remote_datasource.dart';
-import '../../features/incident/data/repositories/siniestro_repository_impl.dart';
-import '../../features/incident/domain/repositories/siniestro_repository.dart';
-import '../../features/incident/domain/usecases/actualizar_siniestro.dart';
-import '../../features/incident/domain/usecases/inicializar_siniestro.dart';
-import '../../features/incident/domain/usecases/subir_imagen_siniestro.dart';
+import '../../features/cliente/data/datasources/remote/siniestro_remote_datasource.dart';
+import '../../features/cliente/data/repositories/siniestro_repository_impl.dart';
+import '../../features/cliente/domain/repositories/siniestro_repository.dart';
+import '../../features/cliente/domain/usecases/actualizar_siniestro.dart';
+import '../../features/cliente/domain/usecases/inicializar_siniestro.dart';
+import '../../features/cliente/domain/usecases/subir_imagen_siniestro.dart';
+import '../../features/ajustador/data/datasources/remote/peritaje_remote_datasource.dart';
+import '../../features/ajustador/data/repositories/peritaje_repository_impl.dart';
+import '../../features/ajustador/domain/repositories/peritaje_repository.dart';
+import '../../features/ajustador/domain/usecases/confirmar_peritaje.dart';
+import '../../features/ajustador/domain/usecases/get_casos_asignados.dart';
+import '../../features/ajustador/domain/usecases/guardar_peritaje.dart';
 import '../network/dio_client.dart';
 import '../services/image_picker_service.dart';
 import '../services/location_service.dart';
@@ -126,7 +132,7 @@ final currentSessionProvider = Provider<AuthSession?>((ref) {
   return ref.watch(authControllerProvider).asData?.value;
 });
 
-// ── Siniestros (incident): datasource, repositorio y casos de uso ──────────
+// ── Siniestros (cliente): datasource, repositorio y casos de uso ───────────
 final siniestroRemoteDataSourceProvider =
     Provider<SiniestroRemoteDataSource>((ref) {
   return SiniestroRemoteDataSourceImpl(ref.watch(dioProvider));
@@ -146,4 +152,26 @@ final actualizarSiniestroProvider = Provider<ActualizarSiniestro>((ref) {
 
 final subirImagenSiniestroProvider = Provider<SubirImagenSiniestro>((ref) {
   return SubirImagenSiniestro(ref.watch(siniestroRepositoryProvider));
+});
+
+// ── Peritaje (ajustador): datasource, repositorio y casos de uso ───────────
+final peritajeRemoteDataSourceProvider =
+    Provider<PeritajeRemoteDataSource>((ref) {
+  return PeritajeRemoteDataSourceImpl(ref.watch(dioProvider));
+});
+
+final peritajeRepositoryProvider = Provider<PeritajeRepository>((ref) {
+  return PeritajeRepositoryImpl(ref.watch(peritajeRemoteDataSourceProvider));
+});
+
+final getCasosAsignadosProvider = Provider<GetCasosAsignados>((ref) {
+  return GetCasosAsignados(ref.watch(peritajeRepositoryProvider));
+});
+
+final guardarPeritajeProvider = Provider<GuardarPeritaje>((ref) {
+  return GuardarPeritaje(ref.watch(peritajeRepositoryProvider));
+});
+
+final confirmarPeritajeProvider = Provider<ConfirmarPeritaje>((ref) {
+  return ConfirmarPeritaje(ref.watch(peritajeRepositoryProvider));
 });

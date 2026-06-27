@@ -7,6 +7,7 @@ import '../../../../core/di/providers.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/ajustador_bottom_nav.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 import '../state/auth_controller.dart';
 import '../state/onboarding_controller.dart';
@@ -29,6 +30,7 @@ class ProfilePage extends ConsumerWidget {
     final email = session?.email ?? '';
     final nombre = _nombreDesdeEmail(email);
     final rol = session?.rol.label ?? 'Cliente';
+    final esCliente = session?.rol.isCliente ?? true;
     final tienePoliza = onboarding.numeroPoliza.trim().isNotEmpty;
 
     return Scaffold(
@@ -40,43 +42,58 @@ class ProfilePage extends ConsumerWidget {
               fontWeight: FontWeight.bold,
             )),
       ),
-      bottomNavigationBar: ClaimVisionBottomNav(
-        currentIndex: 2,
-        onTap: (i) {
-          switch (i) {
-            case 0:
-              context.go(RoutePaths.inicio);
-            case 1:
-              context.go(RoutePaths.historial);
-          }
-        },
-      ),
+      bottomNavigationBar: esCliente
+          ? ClaimVisionBottomNav(
+              currentIndex: 2,
+              onTap: (i) {
+                switch (i) {
+                  case 0:
+                    context.go(RoutePaths.inicio);
+                  case 1:
+                    context.go(RoutePaths.historial);
+                }
+              },
+            )
+          : AjustadorBottomNav(
+              currentIndex: 2,
+              onTap: (i) {
+                switch (i) {
+                  case 0:
+                    context.go(RoutePaths.casos);
+                  case 1:
+                    context.go(RoutePaths.notificacionesAjustador);
+                }
+              },
+            ),
       body: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           _Header(nombre: nombre, email: email, rol: rol),
           const Gap(AppSpacing.lg),
-          if (tienePoliza)
-            _PolicyCard(
-              numeroPoliza: onboarding.numeroPoliza,
-              vigencia: onboarding.vigenciaPoliza,
-              curpRfc: onboarding.curpRfc,
-            )
-          else
-            _LinkPolicyCard(onTap: () => context.push(RoutePaths.onboarding)),
-          const Gap(AppSpacing.lg),
-          _ConsentCard(
-            avisoPrivacidad: onboarding.avisoPrivacidad,
-            biometria: onboarding.biometria,
-            transferenciaTalleres: onboarding.transferenciaTalleres,
-            sinDatos: !onboarding.hasDetected && !tienePoliza,
-          ),
-          const Gap(AppSpacing.lg),
-          _MenuCard(
-            onVehiculos: () => context.push(RoutePaths.vehiculos),
-            onConfiguracion: () => _proximamente(context, 'Configuración'),
-          ),
-          const Gap(AppSpacing.lg),
+          // Póliza, consentimientos y vehículos son del flujo del Cliente.
+          if (esCliente) ...[
+            if (tienePoliza)
+              _PolicyCard(
+                numeroPoliza: onboarding.numeroPoliza,
+                vigencia: onboarding.vigenciaPoliza,
+                curpRfc: onboarding.curpRfc,
+              )
+            else
+              _LinkPolicyCard(onTap: () => context.push(RoutePaths.onboarding)),
+            const Gap(AppSpacing.lg),
+            _ConsentCard(
+              avisoPrivacidad: onboarding.avisoPrivacidad,
+              biometria: onboarding.biometria,
+              transferenciaTalleres: onboarding.transferenciaTalleres,
+              sinDatos: !onboarding.hasDetected && !tienePoliza,
+            ),
+            const Gap(AppSpacing.lg),
+            _MenuCard(
+              onVehiculos: () => context.push(RoutePaths.vehiculos),
+              onConfiguracion: () => _proximamente(context, 'Configuración'),
+            ),
+            const Gap(AppSpacing.lg),
+          ],
           _LogoutButton(onTap: () => _confirmarLogout(context, ref)),
           const Gap(AppSpacing.md),
           Center(

@@ -25,4 +25,16 @@ class RoutePaths {
   /// Detalle de un siniestro. Usar [detalleSiniestroDe] para construir la ruta.
   static const String detalleSiniestro = '/siniestro/:id';
   static String detalleSiniestroDe(String id) => '/siniestro/$id';
+
+  // ── Ajustador ─────────────────────────────────────────────────────────
+  static const String casos = '/casos';
+  static const String casoDetalle = '/caso/:id';
+  static String casoDetalleDe(String id) => '/caso/$id';
+  static const String validacionPeritaje = '/caso/:id/validacion';
+  static String validacionPeritajeDe(String id) => '/caso/$id/validacion';
+  static const String firmaPeritaje = '/caso/:id/firma';
+  static String firmaPeritajeDe(String id) => '/caso/$id/firma';
+  static const String peritajeConfirmado = '/caso/:id/confirmado';
+  static String peritajeConfirmadoDe(String id) => '/caso/$id/confirmado';
+  static const String notificacionesAjustador = '/ajustador/notificaciones';
 }

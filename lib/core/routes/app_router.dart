@@ -3,21 +3,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/domain/entities/auth_session.dart';
+import '../../features/auth/domain/entities/user_role.dart';
+import '../../features/ajustador/presentation/pages/casos_asignados_page.dart';
+import '../../features/ajustador/presentation/pages/caso_detalle_page.dart';
+import '../../features/ajustador/presentation/pages/firma_peritaje_page.dart';
+import '../../features/ajustador/presentation/pages/notificaciones_ajustador_page.dart';
+import '../../features/ajustador/presentation/pages/peritaje_confirmado_page.dart';
+import '../../features/ajustador/presentation/pages/validacion_peritaje_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/state/auth_controller.dart';
 import '../../features/auth/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/profile_page.dart';
-import '../../features/incident/presentation/pages/client_home_page.dart';
-import '../../features/incident/presentation/pages/report_analysis_page.dart';
-import '../../features/incident/presentation/pages/report_damage_page.dart';
-import '../../features/incident/presentation/pages/report_location_page.dart';
-import '../../features/incident/presentation/pages/report_narration_page.dart';
-import '../../features/incident/presentation/pages/historial_page.dart';
-import '../../features/incident/presentation/pages/notificaciones_page.dart';
-import '../../features/incident/presentation/pages/report_vehicle_page.dart';
-import '../../features/incident/presentation/pages/siniestro_detail_page.dart';
-import '../../features/incident/presentation/pages/vehiculos_page.dart';
+import '../../features/cliente/presentation/pages/client_home_page.dart';
+import '../../features/cliente/presentation/pages/report_analysis_page.dart';
+import '../../features/cliente/presentation/pages/report_damage_page.dart';
+import '../../features/cliente/presentation/pages/report_location_page.dart';
+import '../../features/cliente/presentation/pages/report_narration_page.dart';
+import '../../features/cliente/presentation/pages/historial_page.dart';
+import '../../features/cliente/presentation/pages/notificaciones_page.dart';
+import '../../features/cliente/presentation/pages/report_vehicle_page.dart';
+import '../../features/cliente/presentation/pages/siniestro_detail_page.dart';
+import '../../features/cliente/presentation/pages/vehiculos_page.dart';
 import '../theme/app_colors.dart';
 import 'route_paths.dart';
 
@@ -125,15 +132,46 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: RoutePaths.notificaciones,
         builder: (_, _) => const NotificacionesPage(),
       ),
+
+      // ── Ajustador ──────────────────────────────────────────────────────
+      GoRoute(
+        path: RoutePaths.casos,
+        builder: (_, _) => const CasosAsignadosPage(),
+      ),
+      GoRoute(
+        path: RoutePaths.casoDetalle,
+        builder: (_, state) =>
+            CasoDetallePage(siniestroId: state.pathParameters['id'] ?? ''),
+      ),
+      GoRoute(
+        path: RoutePaths.validacionPeritaje,
+        builder: (_, state) => ValidacionPeritajePage(
+            siniestroId: state.pathParameters['id'] ?? ''),
+      ),
+      GoRoute(
+        path: RoutePaths.firmaPeritaje,
+        builder: (_, state) =>
+            FirmaPeritajePage(siniestroId: state.pathParameters['id'] ?? ''),
+      ),
+      GoRoute(
+        path: RoutePaths.peritajeConfirmado,
+        builder: (_, state) => PeritajeConfirmadoPage(
+            siniestroId: state.pathParameters['id'] ?? ''),
+      ),
+      GoRoute(
+        path: RoutePaths.notificacionesAjustador,
+        builder: (_, _) => const NotificacionesAjustadorPage(),
+      ),
     ],
   );
 });
 
 /// Devuelve la ruta de inicio según el rol del usuario.
 String _homeFor(AuthSession session) {
-  // Por ahora el flujo móvil del Cliente entra a su inicio. Otros roles se
-  // enrutarán a su propio dashboard cuando se implementen.
-  return RoutePaths.inicio;
+  return switch (session.rol) {
+    UserRole.ajustador => RoutePaths.casos,
+    _ => RoutePaths.inicio,
+  };
 }
 
 /// ChangeNotifier mínimo para refrescar el router ante cambios de auth.

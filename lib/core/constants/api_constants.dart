@@ -24,6 +24,11 @@ class ApiConstants {
   static String siniestro(String id) => '/siniestros/$id';
   static String siniestroImagenes(String id) => '/siniestros/$id/imagenes';
 
+  // ── Peritaje (ajustador) ──────────────────────────────────────────────
+  static const String siniestrosAsignados = '/siniestros/asignados';
+  static String siniestroPeritaje(String id) => '/siniestros/$id/peritaje';
+  static String siniestroConfirmar(String id) => '/siniestros/$id/confirmar';
+
   // Tiempos de espera de la red.
   static const Duration connectTimeout = Duration(seconds: 20);
   static const Duration receiveTimeout = Duration(seconds: 30);
