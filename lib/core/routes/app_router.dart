@@ -13,8 +13,11 @@ import '../../features/incident/presentation/pages/report_analysis_page.dart';
 import '../../features/incident/presentation/pages/report_damage_page.dart';
 import '../../features/incident/presentation/pages/report_location_page.dart';
 import '../../features/incident/presentation/pages/report_narration_page.dart';
+import '../../features/incident/presentation/pages/historial_page.dart';
+import '../../features/incident/presentation/pages/notificaciones_page.dart';
 import '../../features/incident/presentation/pages/report_vehicle_page.dart';
 import '../../features/incident/presentation/pages/siniestro_detail_page.dart';
+import '../../features/incident/presentation/pages/vehiculos_page.dart';
 import '../theme/app_colors.dart';
 import 'route_paths.dart';
 
@@ -81,6 +84,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const ClientHomePage(),
       ),
       GoRoute(
+        path: RoutePaths.historial,
+        builder: (_, _) => const HistorialPage(),
+      ),
+      GoRoute(
+        path: RoutePaths.vehiculos,
+        builder: (_, _) => const VehiculosPage(),
+      ),
+      GoRoute(
         path: RoutePaths.reportar,
         builder: (_, _) => const ReportVehiclePage(),
       ),
@@ -109,6 +120,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) => SiniestroDetailPage(
           siniestroId: state.pathParameters['id'] ?? '',
         ),
+      ),
+      GoRoute(
+        path: RoutePaths.notificaciones,
+        builder: (_, _) => const NotificacionesPage(),
       ),
     ],
   );

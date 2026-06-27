@@ -10,6 +10,8 @@ class RoutePaths {
   // Cliente
   static const String onboarding = '/onboarding';
   static const String inicio = '/inicio';
+  static const String historial = '/historial';
+  static const String vehiculos = '/vehiculos';
   static const String perfil = '/perfil';
   // Wizard de reporte de siniestro (#5–#9)
   static const String reportar = '/reportar'; // #5 Vehículo

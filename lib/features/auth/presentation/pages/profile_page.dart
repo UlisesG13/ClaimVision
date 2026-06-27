@@ -47,9 +47,7 @@ class ProfilePage extends ConsumerWidget {
             case 0:
               context.go(RoutePaths.inicio);
             case 1:
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Historial — próximamente.')),
-              );
+              context.go(RoutePaths.historial);
           }
         },
       ),
@@ -75,7 +73,7 @@ class ProfilePage extends ConsumerWidget {
           ),
           const Gap(AppSpacing.lg),
           _MenuCard(
-            onVehiculos: () => _proximamente(context, 'Vehículos registrados'),
+            onVehiculos: () => context.push(RoutePaths.vehiculos),
             onConfiguracion: () => _proximamente(context, 'Configuración'),
           ),
           const Gap(AppSpacing.lg),

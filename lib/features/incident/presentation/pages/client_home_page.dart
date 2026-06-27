@@ -7,14 +7,13 @@ import '../../../../core/di/providers.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/utils/date_format.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 import '../../../auth/presentation/state/auth_controller.dart';
 import '../../../auth/presentation/state/onboarding_controller.dart';
-import '../../domain/entities/siniestro.dart';
-import '../../domain/entities/siniestro_estatus.dart';
 import '../state/mis_siniestros_provider.dart';
+import '../state/notificaciones_provider.dart';
 import '../state/report_controller.dart';
+import '../widgets/siniestro_card.dart';
 
 /// Inicio del Cliente (Figma node 70:344).
 ///
@@ -44,12 +43,10 @@ class ClientHomePage extends ConsumerWidget {
         currentIndex: 0,
         onTap: (index) {
           switch (index) {
+            case 1:
+              context.go(RoutePaths.historial);
             case 2:
               context.go(RoutePaths.perfil);
-            case 1:
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Historial — próximamente.')),
-              );
           }
         },
       ),
@@ -60,10 +57,9 @@ class ClientHomePage extends ConsumerWidget {
             _Header(
               nombre: nombre,
               poliza: poliza,
+              noLeidas: ref.watch(notificacionesNoLeidasProvider),
               onLogout: () => _confirmLogout(context, ref),
-              onBell: () => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Notificaciones — próximamente.')),
-              ),
+              onBell: () => context.push(RoutePaths.notificaciones),
             ),
             Padding(
               padding: const EdgeInsets.all(AppSpacing.xl),
@@ -91,11 +87,7 @@ class ClientHomePage extends ConsumerWidget {
                           style: theme.textTheme.titleLarge),
                       if (siniestros.isNotEmpty)
                         GestureDetector(
-                          onTap: () =>
-                              ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Historial — próximamente.')),
-                          ),
+                          onTap: () => context.go(RoutePaths.historial),
                           child: Text('Ver todos',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: AppColors.blueprint,
@@ -110,7 +102,7 @@ class ClientHomePage extends ConsumerWidget {
                   else
                     ...siniestros.map((s) => Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                          child: _SiniestroCard(
+                          child: SiniestroCard(
                             siniestro: s,
                             onTap: () => context.push(
                                 RoutePaths.detalleSiniestroDe(s.id)),
@@ -173,12 +165,14 @@ class _Header extends StatelessWidget {
   const _Header({
     required this.nombre,
     required this.poliza,
+    required this.noLeidas,
     required this.onLogout,
     required this.onBell,
   });
 
   final String nombre;
   final String poliza;
+  final int noLeidas;
   final VoidCallback onLogout;
   final VoidCallback onBell;
 
@@ -226,9 +220,35 @@ class _Header extends StatelessWidget {
               ],
             ),
           ),
-          IconButton(
-            onPressed: onBell,
-            icon: const Icon(Icons.notifications_none, color: AppColors.blueprint),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              IconButton(
+                onPressed: onBell,
+                icon: const Icon(Icons.notifications_none,
+                    color: AppColors.blueprint),
+              ),
+              if (noLeidas > 0)
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    constraints:
+                        const BoxConstraints(minWidth: 16, minHeight: 16),
+                    decoration: const BoxDecoration(
+                        color: AppColors.alert, shape: BoxShape.circle),
+                    child: Text(
+                      noLeidas > 9 ? '9+' : '$noLeidas',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          color: AppColors.white,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),
@@ -335,101 +355,6 @@ class _StatBox extends StatelessWidget {
               style: theme.textTheme.displayMedium?.copyWith(fontSize: 32)),
           Text(label, style: theme.textTheme.bodySmall),
         ],
-      ),
-    );
-  }
-}
-
-class _SiniestroCard extends StatelessWidget {
-  const _SiniestroCard({required this.siniestro, required this.onTap});
-  final Siniestro siniestro;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final fecha = DateFormatEs.fechaHora(siniestro.fechaSiniestro);
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          border: Border.all(color: AppColors.borderLight),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Siniestro ${siniestro.folioCorto}',
-                    style: theme.textTheme.titleMedium?.copyWith(fontSize: 15)),
-                _EstatusChip(estatus: siniestro.estatus),
-              ],
-            ),
-            const Gap(AppSpacing.md),
-            _IconLine(
-                icon: Icons.directions_car_outlined,
-                text: siniestro.vehiculoResumen),
-            const Gap(AppSpacing.xs),
-            _IconLine(icon: Icons.schedule, text: fecha),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _IconLine extends StatelessWidget {
-  const _IconLine({required this.icon, required this.text});
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: AppColors.textSecondary),
-        const Gap(AppSpacing.sm),
-        Expanded(
-          child: Text(text,
-              style: theme.textTheme.bodyMedium, overflow: TextOverflow.ellipsis),
-        ),
-      ],
-    );
-  }
-}
-
-class _EstatusChip extends StatelessWidget {
-  const _EstatusChip({required this.estatus});
-  final SiniestroEstatus estatus;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = switch (estatus.tono) {
-      SiniestroEstatusTono.neutro => AppColors.textSecondary,
-      SiniestroEstatusTono.proceso => AppColors.amber,
-      SiniestroEstatusTono.info => AppColors.blueprint,
-      SiniestroEstatusTono.exito => AppColors.success,
-    };
-    return Container(
-      padding:
-          const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-      ),
-      child: Text(
-        estatus.label,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w600,
-            ),
       ),
     );
   }
