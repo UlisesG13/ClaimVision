@@ -9,6 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/validators.dart';
 import '../../../../shared/widgets/app_text_field.dart';
+import '../../../../shared/widgets/feedback/app_snackbar.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../state/auth_controller.dart';
 
@@ -46,9 +47,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   void _comingSoon(String mensaje) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(mensaje)));
+    AppSnackbar.show(context, mensaje);
   }
 
   @override
@@ -62,14 +61,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         final message = error is Failure
             ? error.message
             : 'No se pudo iniciar sesión. Inténtalo de nuevo.';
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(
-              content: Text(message),
-              backgroundColor: AppColors.alert,
-            ),
-          );
+        AppSnackbar.error(context, message);
       }
     });
 

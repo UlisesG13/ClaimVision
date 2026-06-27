@@ -9,6 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/ajustador_bottom_nav.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
+import '../../../../shared/widgets/feedback/app_dialog.dart';
 import '../state/auth_controller.dart';
 import '../state/onboarding_controller.dart';
 
@@ -122,25 +123,15 @@ class ProfilePage extends ConsumerWidget {
   }
 
   Future<void> _confirmarLogout(BuildContext context, WidgetRef ref) async {
-    final salir = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Cerrar sesión'),
-        content: const Text('¿Seguro que quieres cerrar tu sesión?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.alert),
-            child: const Text('Cerrar sesión'),
-          ),
-        ],
-      ),
+    final salir = await AppDialog.confirm(
+      context,
+      title: 'Cerrar sesión',
+      message:
+          '¿Seguro que deseas salir de tu cuenta? Deberás iniciar sesión nuevamente.',
+      confirmLabel: 'Cerrar sesión',
+      danger: true,
     );
-    if (salir == true) {
+    if (salir) {
       // El router detecta la sesión nula y redirige al login automáticamente.
       await ref.read(authControllerProvider.notifier).logout();
     }

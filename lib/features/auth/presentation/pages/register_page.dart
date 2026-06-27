@@ -9,6 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/validators.dart';
 import '../../../../shared/widgets/app_text_field.dart';
+import '../../../../shared/widgets/feedback/app_snackbar.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../state/auth_controller.dart';
 
@@ -66,11 +67,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
         final message = error is Failure
             ? error.message
             : 'No se pudo crear la cuenta. Inténtalo de nuevo.';
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(content: Text(message), backgroundColor: AppColors.alert),
-          );
+        AppSnackbar.error(context, message);
       }
       // Registro exitoso (nuevo usuario) → continuar al onboarding de póliza.
       final authed = next.asData?.value != null;

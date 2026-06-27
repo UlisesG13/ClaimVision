@@ -7,6 +7,7 @@ import '../../../../core/di/providers.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/feedback/app_snackbar.dart';
 import '../state/casos_asignados_provider.dart';
 import '../state/peritaje_editor_provider.dart';
 import '../widgets/signature_pad.dart';
@@ -35,9 +36,11 @@ class _FirmaPeritajePageState extends ConsumerState<FirmaPeritajePage> {
   }
 
   void _snack(String msg, {Color? color}) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
+    if (color == AppColors.alert) {
+      AppSnackbar.error(context, msg);
+    } else {
+      AppSnackbar.warning(context, msg);
+    }
   }
 
   Future<void> _confirmar() async {

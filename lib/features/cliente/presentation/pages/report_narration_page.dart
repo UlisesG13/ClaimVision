@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/feedback/app_snackbar.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../state/report_controller.dart';
 import '../widgets/report_step_header.dart';
@@ -40,9 +41,11 @@ class _ReportNarrationPageState extends ConsumerState<ReportNarrationPage> {
   }
 
   void _snack(String msg, {Color? color}) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
+    if (color == AppColors.alert) {
+      AppSnackbar.error(context, msg);
+    } else {
+      AppSnackbar.show(context, msg);
+    }
   }
 
   Future<void> _continuar() async {

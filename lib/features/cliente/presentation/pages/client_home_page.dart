@@ -8,6 +8,7 @@ import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
+import '../../../../shared/widgets/feedback/app_dialog.dart';
 import '../../../auth/presentation/state/auth_controller.dart';
 import '../../../auth/presentation/state/onboarding_controller.dart';
 import '../state/mis_siniestros_provider.dart';
@@ -128,34 +129,15 @@ class ClientHomePage extends ConsumerWidget {
   }
 
   Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
-    final salir = await showModalBottomSheet<bool>(
-      context: context,
-      backgroundColor: AppColors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLg)),
-      ),
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Gap(AppSpacing.sm),
-            ListTile(
-              leading: const Icon(Icons.logout, color: AppColors.alert),
-              title: const Text('Cerrar sesión'),
-              onTap: () => Navigator.pop(context, true),
-            ),
-            ListTile(
-              leading: const Icon(Icons.close),
-              title: const Text('Cancelar'),
-              onTap: () => Navigator.pop(context, false),
-            ),
-            const Gap(AppSpacing.sm),
-          ],
-        ),
-      ),
+    final salir = await AppDialog.confirm(
+      context,
+      title: 'Cerrar sesión',
+      message:
+          '¿Seguro que deseas salir de tu cuenta? Deberás iniciar sesión nuevamente.',
+      confirmLabel: 'Cerrar sesión',
+      danger: true,
     );
-    if (salir == true) {
+    if (salir) {
       await ref.read(authControllerProvider.notifier).logout();
     }
   }

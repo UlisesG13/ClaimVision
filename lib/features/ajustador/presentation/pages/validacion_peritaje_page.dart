@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/feedback/app_snackbar.dart';
+import '../../../../shared/widgets/feedback/app_toast.dart';
 import '../../domain/entities/dano_ajustado.dart';
 import '../../domain/entities/dano_severidad.dart';
 import '../../domain/entities/dano_tipo.dart';
@@ -83,14 +85,26 @@ class ValidacionPeritajePage extends ConsumerWidget {
                     final editado = await _editarDano(context, state.danos[i]);
                     if (editado != null) controller.actualizarDano(i, editado);
                   },
-                  onQuitar: () => controller.quitarDano(i),
+                  onQuitar: () {
+                    final eliminado = state.danos[i];
+                    controller.quitarDano(i);
+                    AppSnackbar.show(
+                      context,
+                      'Daño eliminado',
+                      actionLabel: 'DESHACER',
+                      onAction: () => controller.agregarDano(eliminado),
+                    );
+                  },
                 ),
               ),
           const Gap(AppSpacing.sm),
           OutlinedButton.icon(
             onPressed: () async {
               final nuevo = await _editarDano(context, null);
-              if (nuevo != null) controller.agregarDano(nuevo);
+              if (nuevo != null && context.mounted) {
+                controller.agregarDano(nuevo);
+                AppToast.success(context, 'Daño agregado');
+              }
             },
             icon: const Icon(Icons.add),
             label: const Text('Agregar daño'),

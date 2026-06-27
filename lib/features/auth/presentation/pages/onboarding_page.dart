@@ -9,6 +9,8 @@ import '../../../../core/di/providers.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/feedback/app_snackbar.dart';
+import '../../../../shared/widgets/feedback/inline_banner.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../state/onboarding_controller.dart';
 
@@ -88,11 +90,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       onboardingControllerProvider.select((s) => s.errorMessage),
       (prev, message) {
         if (message != null && message.isNotEmpty) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(content: Text(message), backgroundColor: AppColors.alert),
-            );
+          AppSnackbar.error(context, message);
         }
       },
     );
@@ -102,14 +100,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
       onboardingControllerProvider.select((s) => s.completed),
       (prev, completed) {
         if (completed == true && prev != true) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(
-                content: Text('Póliza vinculada correctamente.'),
-                backgroundColor: AppColors.success,
-              ),
-            );
+          AppSnackbar.success(context, 'Póliza vinculada correctamente.');
           context.go(RoutePaths.inicio);
         }
       },
@@ -165,6 +156,12 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                         onNumero: controller.editNumeroPoliza,
                         onVigencia: controller.editVigencia,
                         onCurp: controller.editCurpRfc,
+                      ),
+                      const Gap(AppSpacing.lg),
+                      const InlineBanner(
+                        kind: InlineBannerKind.security,
+                        title: 'Datos cifrados',
+                        message: 'Tu información se protege con AES-256-GCM.',
                       ),
                       const Gap(AppSpacing.lg),
                       Text(

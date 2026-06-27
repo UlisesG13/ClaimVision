@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/validators.dart';
 import '../../../../shared/widgets/app_text_field.dart';
+import '../../../../shared/widgets/feedback/app_dialog.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../state/report_controller.dart';
 import '../widgets/report_step_header.dart';
@@ -76,21 +77,53 @@ class _ReportVehiclePageState extends ConsumerState<ReportVehiclePage> {
     return null;
   }
 
+  bool get _hayProgreso =>
+      _marca.text.isNotEmpty ||
+      _modelo.text.isNotEmpty ||
+      _anio.text.isNotEmpty ||
+      _placas.text.isNotEmpty ||
+      _vin.text.isNotEmpty;
+
+  /// Pide confirmación para descartar el reporte si hay datos capturados.
+  Future<void> _intentarSalir() async {
+    if (!_hayProgreso) {
+      if (context.canPop()) context.pop();
+      return;
+    }
+    final descartar = await AppDialog.confirm(
+      context,
+      title: '¿Descartar reporte?',
+      message:
+          'Perderás la información capturada del siniestro. Esta acción no se puede deshacer.',
+      confirmLabel: 'Descartar',
+      danger: true,
+    );
+    if (descartar && mounted) {
+      ref.read(reportControllerProvider.notifier).reset();
+      if (context.canPop()) context.pop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ReportStepHeader(
-              subtitulo: 'Vehículo',
-              pasoActual: 1,
-              totalPasos: 4,
-              onBack: () => context.canPop() ? context.pop() : null,
-            ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _intentarSalir();
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ReportStepHeader(
+                subtitulo: 'Vehículo',
+                pasoActual: 1,
+                totalPasos: 4,
+                onBack: _intentarSalir,
+              ),
             Expanded(
               child: Form(
                 key: _formKey,
@@ -165,6 +198,7 @@ class _ReportVehiclePageState extends ConsumerState<ReportVehiclePage> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
