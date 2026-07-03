@@ -1,4 +1,4 @@
-# ClaimVision — Guía del proyecto para el agente (opencode)
+# ClaimVision — 
 
 > **Propósito de este archivo.** Este README es la fuente de verdad para que el agente de IA (opencode) entienda el proyecto y genere código que respete la arquitectura, el flujo de negocio y las convenciones definidas. **No es documentación de presentación.** Antes de implementar cualquier cosa, el agente debe leer este archivo completo y ajustarse a estas reglas. Si una petición contradice estas reglas, el agente debe señalarlo en lugar de romper la arquitectura.
 
