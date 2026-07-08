@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 
 import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/network/api_error_mapper.dart';
+import '../../dtos/ajustador_response_dto.dart';
 import '../../dtos/peritaje_response_dto.dart';
 import '../../dtos/peritaje_upsert_dto.dart';
 
@@ -12,6 +13,7 @@ abstract interface class PeritajeRemoteDataSource {
   Future<List<SiniestroResponseDto>> getAsignados();
   Future<PeritajeResponseDto> guardarPeritaje(String id, PeritajeUpsertDto body);
   Future<SiniestroResponseDto> confirmar(String id);
+  Future<AjustadorResponseDto> obtenerPerfil();
 }
 
 class PeritajeRemoteDataSourceImpl implements PeritajeRemoteDataSource {
@@ -22,7 +24,7 @@ class PeritajeRemoteDataSourceImpl implements PeritajeRemoteDataSource {
   @override
   Future<List<SiniestroResponseDto>> getAsignados() async {
     try {
-      final response = await _dio.get(ApiConstants.siniestrosAsignados);
+      final response = await _dio.get(ApiConstants.ajustadorAsignaciones);
       _ensureSuccess(response);
       final data = (response.data as List?) ?? const [];
       return data
@@ -38,7 +40,7 @@ class PeritajeRemoteDataSourceImpl implements PeritajeRemoteDataSource {
       String id, PeritajeUpsertDto body) async {
     try {
       final response = await _dio.put(
-        ApiConstants.siniestroPeritaje(id),
+        ApiConstants.ajustadorPeritaje(id),
         data: body.toJson(),
       );
       _ensureSuccess(response);
@@ -51,9 +53,21 @@ class PeritajeRemoteDataSourceImpl implements PeritajeRemoteDataSource {
   @override
   Future<SiniestroResponseDto> confirmar(String id) async {
     try {
-      final response = await _dio.post(ApiConstants.siniestroConfirmar(id));
+      final response = await _dio.post(ApiConstants.ajustadorConfirmar(id));
       _ensureSuccess(response);
       return SiniestroResponseDto.fromJson(
+          response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiErrorMapper.fromDioException(e);
+    }
+  }
+
+  @override
+  Future<AjustadorResponseDto> obtenerPerfil() async {
+    try {
+      final response = await _dio.get(ApiConstants.ajustadorPerfil);
+      _ensureSuccess(response);
+      return AjustadorResponseDto.fromJson(
           response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiErrorMapper.fromDioException(e);

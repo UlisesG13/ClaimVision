@@ -18,14 +18,7 @@ class VehiculosPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final siniestros = ref.watch(misSiniestrosProvider);
-
-    // Vehículos únicos por placas (el más reciente gana).
-    final porPlacas = <String, Siniestro>{};
-    for (final s in siniestros) {
-      porPlacas.putIfAbsent(s.vehiculoPlacas.toUpperCase(), () => s);
-    }
-    final vehiculos = porPlacas.values.toList();
+    final siniestrosAsync = ref.watch(misSiniestrosProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -37,14 +30,25 @@ class VehiculosPage extends ConsumerWidget {
         ),
         title: Text('Vehículos registrados', style: theme.textTheme.titleLarge),
       ),
-      body: vehiculos.isEmpty
-          ? const _Empty()
-          : ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.xl),
-              itemCount: vehiculos.length,
-              separatorBuilder: (_, _) => const Gap(AppSpacing.md),
-              itemBuilder: (context, i) => _VehiculoCard(siniestro: vehiculos[i]),
-            ),
+      body: siniestrosAsync.when(
+        data: (siniestros) {
+          final porPlacas = <String, Siniestro>{};
+          for (final s in siniestros) {
+            porPlacas.putIfAbsent(s.vehiculoPlacas.toUpperCase(), () => s);
+          }
+          final vehiculos = porPlacas.values.toList();
+
+          if (vehiculos.isEmpty) return const _Empty();
+          return ListView.separated(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            itemCount: vehiculos.length,
+            separatorBuilder: (_, _) => const Gap(AppSpacing.md),
+            itemBuilder: (context, i) => _VehiculoCard(siniestro: vehiculos[i]),
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) => const _Empty(),
+      ),
     );
   }
 }

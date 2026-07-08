@@ -43,14 +43,14 @@ final notificacionesLeidasProvider =
     NotifierProvider<NotificacionesLeidas, Set<String>>(
         NotificacionesLeidas.new);
 
-/// Notificaciones del cliente derivadas de SUS siniestros de la sesión.
+/// Notificaciones del cliente derivadas de SUS siniestros.
 ///
-/// El backend no expone un listado de notificaciones (solo push para órdenes de
-/// entrega). Mientras tanto, generamos notificaciones reales a partir de los
-/// siniestros reportados en la sesión ([misSiniestrosProvider]); cuando exista
-/// un endpoint, este provider se reemplaza por uno que lo consuma.
+/// Se alimenta de [misSiniestrosProvider] (que obtiene la lista desde la API).
+/// Mientras el backend no exponga un endpoint de notificaciones, generamos
+/// notificaciones reales a partir de los siniestros del cliente.
 final notificacionesProvider = Provider<List<Notificacion>>((ref) {
-  final siniestros = ref.watch(misSiniestrosProvider);
+  final siniestrosAsync = ref.watch(misSiniestrosProvider);
+  final siniestros = siniestrosAsync.asData?.value ?? const [];
   final leidas = ref.watch(notificacionesLeidasProvider);
 
   final lista = <Notificacion>[

@@ -243,7 +243,7 @@ class ReportController extends Notifier<ReportState> {
         narracionTexto:
             state.narracionTexto.trim().isEmpty ? null : state.narracionTexto.trim(),
       );
-      ref.read(misSiniestrosProvider.notifier).agregar(siniestro);
+      ref.read(misSiniestrosProvider.notifier).refrescar();
       state = state.copyWith(submitting: false, siniestro: siniestro);
       return true;
     } on Failure catch (f) {
@@ -264,7 +264,7 @@ class ReportController extends Notifier<ReportState> {
             state.narracionTexto.trim().isEmpty ? null : state.narracionTexto.trim(),
         indicacionesDanoInterno: state.danoInterno,
       );
-      ref.read(misSiniestrosProvider.notifier).actualizar(actualizado);
+      ref.read(misSiniestrosProvider.notifier).refrescar();
       state = state.copyWith(submitting: false, siniestro: actualizado);
       return true;
     } on Failure catch (f) {

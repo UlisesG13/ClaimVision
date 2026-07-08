@@ -87,6 +87,26 @@ class SiniestroRepositoryImpl implements SiniestroRepository {
     }
   }
 
+  @override
+  Future<List<Siniestro>> listar() async {
+    try {
+      final dtos = await _remote.listar();
+      return dtos.map(SiniestroMapper.toEntity).toList();
+    } on AppException catch (e) {
+      throw _toFailure(e);
+    }
+  }
+
+  @override
+  Future<Siniestro> obtener(String id) async {
+    try {
+      final dto = await _remote.obtener(id);
+      return SiniestroMapper.toEntity(dto);
+    } on AppException catch (e) {
+      throw _toFailure(e);
+    }
+  }
+
   Failure _toFailure(AppException e) {
     return switch (e) {
       UnauthorizedException() => AuthFailure(e.message),

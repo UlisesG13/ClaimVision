@@ -30,7 +30,7 @@ class ClientHomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final session = ref.watch(currentSessionProvider);
-    final siniestros = ref.watch(misSiniestrosProvider);
+    final siniestrosAsync = ref.watch(misSiniestrosProvider);
     final store = ref.read(misSiniestrosProvider.notifier);
     final poliza = ref.watch(
       onboardingControllerProvider.select((s) => s.numeroPoliza),
@@ -69,7 +69,6 @@ class ClientHomePage extends ConsumerWidget {
                 children: [
                   _ReportCard(
                     onTap: () {
-                      // Nuevo reporte: limpia el borrador previo.
                       ref.read(reportControllerProvider.notifier).reset();
                       context.push(RoutePaths.reportar);
                     },
@@ -86,7 +85,7 @@ class ClientHomePage extends ConsumerWidget {
                     children: [
                       Text('Actividad Reciente',
                           style: theme.textTheme.titleLarge),
-                      if (siniestros.isNotEmpty)
+                      if (siniestrosAsync.hasValue && (siniestrosAsync.value?.isNotEmpty == true))
                         GestureDetector(
                           onTap: () => context.go(RoutePaths.historial),
                           child: Text('Ver todos',
@@ -98,17 +97,28 @@ class ClientHomePage extends ConsumerWidget {
                     ],
                   ),
                   const Gap(AppSpacing.md),
-                  if (siniestros.isEmpty)
-                    const _EmptyActivity()
-                  else
-                    ...siniestros.map((s) => Padding(
+                  siniestrosAsync.when(
+                    data: (siniestros) {
+                      if (siniestros.isEmpty) return const _EmptyActivity();
+                      return Column(
+                        children: siniestros.map((s) => Padding(
                           padding: const EdgeInsets.only(bottom: AppSpacing.md),
                           child: SiniestroCard(
                             siniestro: s,
                             onTap: () => context.push(
                                 RoutePaths.detalleSiniestroDe(s.id)),
                           ),
-                        )),
+                        )).toList(),
+                      );
+                    },
+                    loading: () => const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(AppSpacing.xl),
+                        child: CircularProgressIndicator(),
+                      ),
+                    ),
+                    error: (_, _) => const _EmptyActivity(),
+                  ),
                 ],
               ),
             ),

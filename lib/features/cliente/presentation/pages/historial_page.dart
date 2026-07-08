@@ -21,7 +21,7 @@ class HistorialPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final siniestros = ref.watch(misSiniestrosProvider);
+    final siniestrosAsync = ref.watch(misSiniestrosProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -41,21 +41,26 @@ class HistorialPage extends ConsumerWidget {
           }
         },
       ),
-      body: siniestros.isEmpty
-          ? const _Empty()
-          : ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.xl),
-              itemCount: siniestros.length,
-              separatorBuilder: (_, _) => const Gap(AppSpacing.md),
-              itemBuilder: (context, i) {
-                final s = siniestros[i];
-                return SiniestroCard(
-                  siniestro: s,
-                  onTap: () =>
-                      context.push(RoutePaths.detalleSiniestroDe(s.id)),
-                );
-              },
-            ),
+      body: siniestrosAsync.when(
+        data: (siniestros) {
+          if (siniestros.isEmpty) return const _Empty();
+          return ListView.separated(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            itemCount: siniestros.length,
+            separatorBuilder: (_, _) => const Gap(AppSpacing.md),
+            itemBuilder: (context, i) {
+              final s = siniestros[i];
+              return SiniestroCard(
+                siniestro: s,
+                onTap: () =>
+                    context.push(RoutePaths.detalleSiniestroDe(s.id)),
+              );
+            },
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, _) => const _Empty(),
+      ),
     );
   }
 }

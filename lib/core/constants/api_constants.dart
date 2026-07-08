@@ -7,13 +7,13 @@ class ApiConstants {
   );
 
   // ── Auth ──────────────────────────────────────────────────────────────
-  static const String register = '/auth/register';
-  static const String login = '/auth/login';
-  static const String me = '/auth/me';
-  static const String recoveryRequest = '/auth/recovery/request';
-  static const String recoveryVerify = '/auth/recovery/verify';
-  static const String recoveryReset = '/auth/recovery/reset';
-  static const String consentimiento = '/auth/consentimiento';
+  static const String register = '/v1/auth/register';
+  static const String login = '/v1/auth/login';
+  static const String me = '/v1/auth/me';
+  static const String recoveryRequest = '/v1/auth/recovery/request';
+  static const String recoveryVerify = '/v1/auth/recovery/verify';
+  static const String recoveryReset = '/v1/auth/recovery/reset';
+  static const String consentimiento = '/v1/auth/consentimiento';
 
   // ── Onboarding del cliente ────────────────────────────────────────────
   static const String onboardingOcr = '/cliente/onboarding/ocr';
@@ -24,10 +24,16 @@ class ApiConstants {
   static String siniestro(String id) => '/siniestros/$id';
   static String siniestroImagenes(String id) => '/siniestros/$id/imagenes';
 
-  // ── Peritaje (ajustador) ──────────────────────────────────────────────
-  static const String siniestrosAsignados = '/siniestros/asignados';
-  static String siniestroPeritaje(String id) => '/siniestros/$id/peritaje';
-  static String siniestroConfirmar(String id) => '/siniestros/$id/confirmar';
+  // ── Cliente v1 ────────────────────────────────────────────────────────
+  static const String clientePerfil = '/v1/cliente/perfil';
+  static const String clienteSiniestros = '/v1/cliente/siniestros';
+  static String clienteSiniestro(String id) => '/v1/cliente/siniestros/$id';
+
+  // ── Ajustador v1 ─────────────────────────────────────────────────────
+  static const String ajustadorPerfil = '/v1/ajustador/perfil';
+  static const String ajustadorAsignaciones = '/v1/ajustador/asignaciones';
+  static String ajustadorPeritaje(String id) => '/v1/ajustador/peritaje/$id';
+  static String ajustadorConfirmar(String id) => '/v1/ajustador/peritaje/$id/confirmar';
 
   // Tiempos de espera de la red.
   static const Duration connectTimeout = Duration(seconds: 20);

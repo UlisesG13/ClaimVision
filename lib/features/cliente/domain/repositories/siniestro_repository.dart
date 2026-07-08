@@ -29,4 +29,10 @@ abstract interface class SiniestroRepository {
     required String id,
     required File imagen,
   });
+
+  /// Lista los siniestros del cliente autenticado.
+  Future<List<Siniestro>> listar();
+
+  /// Obtiene el detalle de un siniestro por su id.
+  Future<Siniestro> obtener(String id);
 }

@@ -24,9 +24,10 @@ class SiniestroDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final siniestros = ref.watch(misSiniestrosProvider);
-    final siniestro =
-        siniestros.where((s) => s.id == siniestroId).firstOrNull;
+    final siniestrosAsync = ref.watch(misSiniestrosProvider);
+    final siniestro = siniestrosAsync.asData?.value
+        .where((s) => s.id == siniestroId)
+        .firstOrNull;
 
     return Scaffold(
       backgroundColor: AppColors.background,

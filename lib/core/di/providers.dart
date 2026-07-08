@@ -19,10 +19,16 @@ import '../../features/auth/domain/entities/auth_session.dart';
 import '../../features/auth/domain/usecases/send_consent.dart';
 import '../../features/auth/domain/usecases/verify_session.dart';
 import '../../features/auth/presentation/state/auth_controller.dart';
+import '../../features/cliente/data/datasources/remote/cliente_remote_datasource.dart';
 import '../../features/cliente/data/datasources/remote/siniestro_remote_datasource.dart';
+import '../../features/cliente/data/repositories/cliente_repository_impl.dart';
 import '../../features/cliente/data/repositories/siniestro_repository_impl.dart';
+import '../../features/cliente/domain/repositories/cliente_repository.dart';
 import '../../features/cliente/domain/repositories/siniestro_repository.dart';
 import '../../features/cliente/domain/usecases/actualizar_siniestro.dart';
+import '../../features/cliente/domain/usecases/get_perfil_cliente.dart';
+import '../../features/cliente/domain/usecases/get_siniestro_detalle.dart';
+import '../../features/cliente/domain/usecases/get_siniestros_cliente.dart';
 import '../../features/cliente/domain/usecases/inicializar_siniestro.dart';
 import '../../features/cliente/domain/usecases/subir_imagen_siniestro.dart';
 import '../../features/ajustador/data/datasources/remote/peritaje_remote_datasource.dart';
@@ -30,6 +36,7 @@ import '../../features/ajustador/data/repositories/peritaje_repository_impl.dart
 import '../../features/ajustador/domain/repositories/peritaje_repository.dart';
 import '../../features/ajustador/domain/usecases/confirmar_peritaje.dart';
 import '../../features/ajustador/domain/usecases/get_casos_asignados.dart';
+import '../../features/ajustador/domain/usecases/get_perfil_ajustador.dart';
 import '../../features/ajustador/domain/usecases/guardar_peritaje.dart';
 import '../network/dio_client.dart';
 import '../services/image_picker_service.dart';
@@ -174,4 +181,30 @@ final guardarPeritajeProvider = Provider<GuardarPeritaje>((ref) {
 
 final confirmarPeritajeProvider = Provider<ConfirmarPeritaje>((ref) {
   return ConfirmarPeritaje(ref.watch(peritajeRepositoryProvider));
+});
+
+final getPerfilAjustadorProvider = Provider<GetPerfilAjustador>((ref) {
+  return GetPerfilAjustador(ref.watch(peritajeRepositoryProvider));
+});
+
+// ── Cliente v1: perfil ─────────────────────────────────────────────────────
+final clienteRemoteDataSourceProvider = Provider<ClienteRemoteDataSource>((ref) {
+  return ClienteRemoteDataSourceImpl(ref.watch(dioProvider));
+});
+
+final clienteRepositoryProvider = Provider<ClienteRepository>((ref) {
+  return ClienteRepositoryImpl(ref.watch(clienteRemoteDataSourceProvider));
+});
+
+final getPerfilClienteProvider = Provider<GetPerfilCliente>((ref) {
+  return GetPerfilCliente(ref.watch(clienteRepositoryProvider));
+});
+
+// ── Cliente v1: listar / detalle siniestros ────────────────────────────────
+final getSiniestrosClienteProvider = Provider<GetSiniestrosCliente>((ref) {
+  return GetSiniestrosCliente(ref.watch(siniestroRepositoryProvider));
+});
+
+final getSiniestroDetalleProvider = Provider<GetSiniestroDetalle>((ref) {
+  return GetSiniestroDetalle(ref.watch(siniestroRepositoryProvider));
 });

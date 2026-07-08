@@ -15,6 +15,8 @@ abstract interface class SiniestroRemoteDataSource {
   Future<SiniestroResponseDto> inicializar(SiniestroInicializarDto body);
   Future<SiniestroResponseDto> actualizar(String id, SiniestroUpdateDto body);
   Future<ImagenSiniestroResponseDto> subirImagen(String id, File imagen);
+  Future<List<SiniestroResponseDto>> listar();
+  Future<SiniestroResponseDto> obtener(String id);
 }
 
 class SiniestroRemoteDataSourceImpl implements SiniestroRemoteDataSource {
@@ -68,6 +70,31 @@ class SiniestroRemoteDataSourceImpl implements SiniestroRemoteDataSource {
       _ensureSuccess(response);
       return ImagenSiniestroResponseDto.fromJson(
           response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiErrorMapper.fromDioException(e);
+    }
+  }
+
+  @override
+  Future<List<SiniestroResponseDto>> listar() async {
+    try {
+      final response = await _dio.get(ApiConstants.clienteSiniestros);
+      _ensureSuccess(response);
+      final data = (response.data as List?) ?? const [];
+      return data
+          .map((e) => SiniestroResponseDto.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      throw ApiErrorMapper.fromDioException(e);
+    }
+  }
+
+  @override
+  Future<SiniestroResponseDto> obtener(String id) async {
+    try {
+      final response = await _dio.get(ApiConstants.clienteSiniestro(id));
+      _ensureSuccess(response);
+      return SiniestroResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiErrorMapper.fromDioException(e);
     }

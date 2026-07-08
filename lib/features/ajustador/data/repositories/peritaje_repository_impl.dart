@@ -4,6 +4,7 @@ import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/dano_ajustado.dart';
+import '../../domain/entities/perfil_ajustador.dart';
 import '../../domain/entities/peritaje.dart';
 import '../../domain/repositories/peritaje_repository.dart';
 import '../datasources/remote/peritaje_remote_datasource.dart';
@@ -56,6 +57,26 @@ class PeritajeRepositoryImpl implements PeritajeRepository {
     try {
       final dto = await _remote.confirmar(siniestroId);
       return SiniestroMapper.toEntity(dto);
+    } on AppException catch (e) {
+      throw _toFailure(e);
+    }
+  }
+
+  @override
+  Future<PerfilAjustador> obtenerPerfil() async {
+    try {
+      final dto = await _remote.obtenerPerfil();
+      return PerfilAjustador(
+        id: dto.id,
+        usuarioId: dto.usuarioId,
+        cedulaProfesional: dto.cedulaProfesional,
+        geolocalizacionActual: dto.geolocalizacionActual,
+        activoParaServicio: dto.activoParaServicio,
+        version: dto.version,
+        createdAt: dto.createdAt,
+        updatedAt: dto.updatedAt,
+        deletedAt: dto.deletedAt,
+      );
     } on AppException catch (e) {
       throw _toFailure(e);
     }

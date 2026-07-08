@@ -1,6 +1,7 @@
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 
 import '../entities/dano_ajustado.dart';
+import '../entities/perfil_ajustador.dart';
 import '../entities/peritaje.dart';
 
 /// Contrato del flujo del ajustador (peritaje). Lanza `Failure` ante error.
@@ -19,4 +20,7 @@ abstract interface class PeritajeRepository {
 
   /// Confirma y bloquea el peritaje (pasa a `Peritaje_Validado`).
   Future<Siniestro> confirmarPeritaje(String siniestroId);
+
+  /// Obtiene el perfil del ajustador autenticado.
+  Future<PerfilAjustador> obtenerPerfil();
 }
