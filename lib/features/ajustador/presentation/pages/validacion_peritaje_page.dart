@@ -12,13 +12,13 @@ import '../../../../shared/widgets/feedback/app_toast.dart';
 import '../../domain/entities/dano_ajustado.dart';
 import '../../domain/entities/dano_severidad.dart';
 import '../../domain/entities/dano_tipo.dart';
-import '../state/peritaje_editor_provider.dart';
+import '../state/peritaje_editor_controller.dart';
 
 /// Validación de Peritaje (Figma node 76:4615).
 ///
 /// El ajustador registra y ajusta los daños (zona, tipo, severidad, costo) y
 /// observaciones. El costo definitivo se autosuma (editable). Continúa a la
-/// firma. Todo se guarda en el borrador [peritajeEditorProvider].
+/// firma. Todo se guarda en el borrador [peritajeEditorControllerProvider].
 class ValidacionPeritajePage extends ConsumerWidget {
   const ValidacionPeritajePage({super.key, required this.siniestroId});
 
@@ -27,8 +27,8 @@ class ValidacionPeritajePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final state = ref.watch(peritajeEditorProvider);
-    final controller = ref.read(peritajeEditorProvider.notifier);
+    final state = ref.watch(peritajeEditorControllerProvider);
+    final controller = ref.read(peritajeEditorControllerProvider.notifier);
 
     return Scaffold(
       backgroundColor: AppColors.background,

@@ -10,7 +10,7 @@ import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/ajustador_bottom_nav.dart';
-import '../state/casos_asignados_provider.dart';
+import '../state/casos_asignados_controller.dart';
 import '../widgets/caso_card.dart';
 
 /// Mis Casos Asignados — bandeja del ajustador (Figma node 72:980).
@@ -40,7 +40,7 @@ class _CasosAsignadosPageState extends ConsumerState<CasosAsignadosPage> {
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(currentSessionProvider);
-    final casosAsync = ref.watch(casosAsignadosProvider);
+    final casosAsync = ref.watch(casosAsignadosControllerProvider);
     final nombre = _nombre(session?.email);
 
     return Scaffold(
@@ -77,7 +77,7 @@ class _CasosAsignadosPageState extends ConsumerState<CasosAsignadosPage> {
                       ? e.message
                       : 'No se pudieron cargar tus casos.',
                   onReintentar: () => ref
-                      .read(casosAsignadosProvider.notifier)
+                      .read(casosAsignadosControllerProvider.notifier)
                       .refrescar(),
                 ),
                 data: (casos) {
@@ -85,7 +85,7 @@ class _CasosAsignadosPageState extends ConsumerState<CasosAsignadosPage> {
                   if (casos.isEmpty) return const _EmptyState();
                   return RefreshIndicator(
                     onRefresh: () =>
-                        ref.read(casosAsignadosProvider.notifier).refrescar(),
+                        ref.read(casosAsignadosControllerProvider.notifier).refrescar(),
                     child: ListView(
                       padding: const EdgeInsets.all(AppSpacing.xl),
                       children: [

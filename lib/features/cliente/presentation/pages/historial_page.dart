@@ -7,12 +7,12 @@ import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
-import '../state/mis_siniestros_provider.dart';
+import '../state/mis_siniestros_controller.dart';
 import '../widgets/siniestro_card.dart';
 
 /// Historial de siniestros del cliente.
 ///
-/// Lista todos los siniestros reportados en la sesión ([misSiniestrosProvider]).
+/// Lista todos los siniestros reportados en la sesión ([misSiniestrosControllerProvider]).
 /// El backend aún no expone un listado del cliente, por lo que se alimenta del
 /// store de sesión; tappear una tarjeta abre su detalle.
 class HistorialPage extends ConsumerWidget {
@@ -21,7 +21,7 @@ class HistorialPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final siniestrosAsync = ref.watch(misSiniestrosProvider);
+    final siniestrosAsync = ref.watch(misSiniestrosControllerProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,

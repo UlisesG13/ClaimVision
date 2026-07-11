@@ -1,18 +1,20 @@
+import 'package:claimvision/shared/data/dtos/page_dto.dart';
 import 'package:claimvision/shared/data/dtos/siniestro_response_dto.dart';
 import 'package:dio/dio.dart';
 
 import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/network/api_error_mapper.dart';
 import '../../dtos/ajustador_response_dto.dart';
+import '../../dtos/dano_ajustado_dto.dart';
 import '../../dtos/peritaje_response_dto.dart';
 import '../../dtos/peritaje_upsert_dto.dart';
 
-/// Llamadas REST del flujo del ajustador (tag Peritaje). El token Bearer lo
-/// añade el interceptor del Dio. Lanza [AppException] tipadas ante error.
 abstract interface class PeritajeRemoteDataSource {
-  Future<List<SiniestroResponseDto>> getAsignados();
-  Future<PeritajeResponseDto> guardarPeritaje(String id, PeritajeUpsertDto body);
-  Future<SiniestroResponseDto> confirmar(String id);
+  Future<PageDto<SiniestroResponseDto>> getAsignados({int page = 1, int pageSize = 20, String? estatus});
+  Future<SiniestroResponseDto> obtenerDetalleSiniestro(String id);
+  Future<PeritajeResponseDto> registrarPeritaje(String siniestroId, PeritajeUpsertDto body);
+  Future<PeritajeResponseDto> editarPeritaje(String peritajeId, Map<String, dynamic> body);
+  Future<PeritajeResponseDto> agregarDano(String peritajeId, DanoAjustadoDto dano);
   Future<AjustadorResponseDto> obtenerPerfil();
 }
 
@@ -22,25 +24,45 @@ class PeritajeRemoteDataSourceImpl implements PeritajeRemoteDataSource {
   final Dio _dio;
 
   @override
-  Future<List<SiniestroResponseDto>> getAsignados() async {
+  Future<PageDto<SiniestroResponseDto>> getAsignados({
+    int page = 1,
+    int pageSize = 20,
+    String? estatus,
+  }) async {
     try {
-      final response = await _dio.get(ApiConstants.ajustadorAsignaciones);
+      final params = <String, dynamic>{'page': page, 'page_size': pageSize};
+      if (estatus != null) params['estatus'] = estatus;
+      final response = await _dio.get(
+        ApiConstants.ajustadorAsignaciones,
+        queryParameters: params,
+      );
       _ensureSuccess(response);
-      final data = (response.data as List?) ?? const [];
-      return data
-          .map((e) => SiniestroResponseDto.fromJson(e as Map<String, dynamic>))
-          .toList();
+      return PageDto.fromJson(
+        response.data as Map<String, dynamic>,
+        SiniestroResponseDto.fromJson,
+      );
     } on DioException catch (e) {
       throw ApiErrorMapper.fromDioException(e);
     }
   }
 
   @override
-  Future<PeritajeResponseDto> guardarPeritaje(
-      String id, PeritajeUpsertDto body) async {
+  Future<SiniestroResponseDto> obtenerDetalleSiniestro(String id) async {
     try {
-      final response = await _dio.put(
-        ApiConstants.ajustadorPeritaje(id),
+      final response = await _dio.get(ApiConstants.ajustadorSiniestro(id));
+      _ensureSuccess(response);
+      return SiniestroResponseDto.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiErrorMapper.fromDioException(e);
+    }
+  }
+
+  @override
+  Future<PeritajeResponseDto> registrarPeritaje(
+      String siniestroId, PeritajeUpsertDto body) async {
+    try {
+      final response = await _dio.post(
+        ApiConstants.ajustadorRegistrarPeritaje(siniestroId),
         data: body.toJson(),
       );
       _ensureSuccess(response);
@@ -51,12 +73,30 @@ class PeritajeRemoteDataSourceImpl implements PeritajeRemoteDataSource {
   }
 
   @override
-  Future<SiniestroResponseDto> confirmar(String id) async {
+  Future<PeritajeResponseDto> editarPeritaje(
+      String peritajeId, Map<String, dynamic> body) async {
     try {
-      final response = await _dio.post(ApiConstants.ajustadorConfirmar(id));
+      final response = await _dio.patch(
+        ApiConstants.ajustadorEditarPeritaje(peritajeId),
+        data: body,
+      );
       _ensureSuccess(response);
-      return SiniestroResponseDto.fromJson(
-          response.data as Map<String, dynamic>);
+      return PeritajeResponseDto.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiErrorMapper.fromDioException(e);
+    }
+  }
+
+  @override
+  Future<PeritajeResponseDto> agregarDano(
+      String peritajeId, DanoAjustadoDto dano) async {
+    try {
+      final response = await _dio.post(
+        ApiConstants.ajustadorPeritajeDanos(peritajeId),
+        data: dano.toJson(),
+      );
+      _ensureSuccess(response);
+      return PeritajeResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiErrorMapper.fromDioException(e);
     }

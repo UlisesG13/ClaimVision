@@ -11,25 +11,23 @@ import '../datasources/remote/peritaje_remote_datasource.dart';
 import '../dtos/peritaje_upsert_dto.dart';
 import '../mappers/peritaje_mapper.dart';
 
-/// Implementación del flujo del ajustador: llama al backend, mapea DTO→Entity y
-/// traduce las excepciones técnicas a `Failure`.
 class PeritajeRepositoryImpl implements PeritajeRepository {
   PeritajeRepositoryImpl(this._remote);
 
   final PeritajeRemoteDataSource _remote;
 
   @override
-  Future<List<Siniestro>> getCasosAsignados() async {
+  Future<List<Siniestro>> getCasosAsignados({int page = 1, int pageSize = 20, String? estatus}) async {
     try {
-      final dtos = await _remote.getAsignados();
-      return dtos.map(SiniestroMapper.toEntity).toList();
+      final pageDto = await _remote.getAsignados(page: page, pageSize: pageSize, estatus: estatus);
+      return pageDto.data.map(SiniestroMapper.toEntity).toList();
     } on AppException catch (e) {
       throw _toFailure(e);
     }
   }
 
   @override
-  Future<Peritaje> guardarPeritaje({
+  Future<Peritaje> registrarPeritaje({
     required String siniestroId,
     required double costoDefinitivo,
     required String firmaDigitalBase64,
@@ -37,7 +35,7 @@ class PeritajeRepositoryImpl implements PeritajeRepository {
     String? observacionesCampo,
   }) async {
     try {
-      final dto = await _remote.guardarPeritaje(
+      final dto = await _remote.registrarPeritaje(
         siniestroId,
         PeritajeUpsertDto(
           costoDefinitivoAjustador: costoDefinitivo,
@@ -53,9 +51,9 @@ class PeritajeRepositoryImpl implements PeritajeRepository {
   }
 
   @override
-  Future<Siniestro> confirmarPeritaje(String siniestroId) async {
+  Future<Siniestro> obtenerDetalleSiniestro(String id) async {
     try {
-      final dto = await _remote.confirmar(siniestroId);
+      final dto = await _remote.obtenerDetalleSiniestro(id);
       return SiniestroMapper.toEntity(dto);
     } on AppException catch (e) {
       throw _toFailure(e);

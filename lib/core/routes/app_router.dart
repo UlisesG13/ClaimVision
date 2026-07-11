@@ -4,38 +4,22 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/domain/entities/auth_session.dart';
 import '../../features/auth/domain/entities/user_role.dart';
-import '../../features/ajustador/presentation/pages/casos_asignados_page.dart';
-import '../../features/ajustador/presentation/pages/caso_detalle_page.dart';
-import '../../features/ajustador/presentation/pages/firma_peritaje_page.dart';
-import '../../features/ajustador/presentation/pages/notificaciones_ajustador_page.dart';
-import '../../features/ajustador/presentation/pages/peritaje_confirmado_page.dart';
-import '../../features/ajustador/presentation/pages/validacion_peritaje_page.dart';
-import '../../features/auth/presentation/pages/login_page.dart';
-import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/state/auth_controller.dart';
-import '../../features/auth/presentation/pages/onboarding_page.dart';
-import '../../features/auth/presentation/pages/profile_page.dart';
-import '../../features/cliente/presentation/pages/client_home_page.dart';
-import '../../features/cliente/presentation/pages/report_analysis_page.dart';
-import '../../features/cliente/presentation/pages/report_damage_page.dart';
-import '../../features/cliente/presentation/pages/report_location_page.dart';
-import '../../features/cliente/presentation/pages/report_narration_page.dart';
-import '../../features/cliente/presentation/pages/historial_page.dart';
-import '../../features/cliente/presentation/pages/notificaciones_page.dart';
-import '../../features/cliente/presentation/pages/report_vehicle_page.dart';
-import '../../features/cliente/presentation/pages/siniestro_detail_page.dart';
-import '../../features/cliente/presentation/pages/vehiculos_page.dart';
+import '../../features/ajustador/presentation/routes/ajustador_routes.dart';
+import '../../features/auth/presentation/routes/auth_routes.dart';
+import '../../features/cliente/presentation/routes/cliente_routes.dart';
 import '../theme/app_colors.dart';
 import 'route_paths.dart';
 
 /// Router de la app con guard de acceso por sesión.
 ///
-/// Observa `authControllerProvider`: redirige según haya o no sesión, y manda
-/// a cada rol a su inicio. Mientras se restaura la sesión guardada, muestra un
-/// splash para no parpadear hacia el login.
+/// Las rutas de cada feature se registran en archivos separados:
+///   - [authRoutes] — login, registro, onboarding, perfil
+///   - [clienteRoutes] — inicio, historial, reporte, detalle
+///   - [ajustadorRoutes] — casos, peritaje, firmas
+///
+/// El redirect centralizado en este router decide a dónde va cada rol.
 final routerProvider = Provider<GoRouter>((ref) {
-  // Notificador que fuerza al GoRouter a reevaluar `redirect` cada vez que
-  // cambia el estado de autenticación.
   final refresh = _AuthRefreshNotifier();
   ref.onDispose(refresh.dispose);
   ref.listen(authControllerProvider, (_, _) => refresh.bump());
@@ -47,8 +31,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       final auth = ref.read(authControllerProvider);
       final location = state.matchedLocation;
 
-      // Aún restaurando la sesión inicial → quedarse en el splash (solo al
-      // arrancar; un login/registro posterior no vuelve a pasar por aquí).
       if (ref.read(authControllerProvider.notifier).isRestoring) {
         return location == RoutePaths.splash ? null : RoutePaths.splash;
       }
@@ -58,12 +40,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       final authScreens = {RoutePaths.login, RoutePaths.register};
 
       if (!isAuthed) {
-        // Sin sesión: solo se permiten las pantallas de acceso.
         return authScreens.contains(location) ? null : RoutePaths.login;
       }
 
-      // Con sesión: salir del splash o de un login traspapelado hacia el inicio.
-      // El registro navega por su cuenta al onboarding, así que aquí se permite.
       if (location == RoutePaths.splash || location == RoutePaths.login) {
         return _homeFor(session);
       }
@@ -74,99 +53,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: RoutePaths.splash,
         builder: (_, _) => const _SplashScreen(),
       ),
-      GoRoute(
-        path: RoutePaths.login,
-        builder: (_, _) => const LoginPage(),
-      ),
-      GoRoute(
-        path: RoutePaths.register,
-        builder: (_, _) => const RegisterPage(),
-      ),
-      GoRoute(
-        path: RoutePaths.onboarding,
-        builder: (_, _) => const OnboardingPage(),
-      ),
-      GoRoute(
-        path: RoutePaths.inicio,
-        builder: (_, _) => const ClientHomePage(),
-      ),
-      GoRoute(
-        path: RoutePaths.historial,
-        builder: (_, _) => const HistorialPage(),
-      ),
-      GoRoute(
-        path: RoutePaths.vehiculos,
-        builder: (_, _) => const VehiculosPage(),
-      ),
-      GoRoute(
-        path: RoutePaths.reportar,
-        builder: (_, _) => const ReportVehiclePage(),
-      ),
-      GoRoute(
-        path: RoutePaths.reportarUbicacion,
-        builder: (_, _) => const ReportLocationPage(),
-      ),
-      GoRoute(
-        path: RoutePaths.reportarNarracion,
-        builder: (_, _) => const ReportNarrationPage(),
-      ),
-      GoRoute(
-        path: RoutePaths.reportarDano,
-        builder: (_, _) => const ReportDamagePage(),
-      ),
-      GoRoute(
-        path: RoutePaths.reportarAnalisis,
-        builder: (_, _) => const ReportAnalysisPage(),
-      ),
-      GoRoute(
-        path: RoutePaths.perfil,
-        builder: (_, _) => const ProfilePage(),
-      ),
-      GoRoute(
-        path: RoutePaths.detalleSiniestro,
-        builder: (_, state) => SiniestroDetailPage(
-          siniestroId: state.pathParameters['id'] ?? '',
-        ),
-      ),
-      GoRoute(
-        path: RoutePaths.notificaciones,
-        builder: (_, _) => const NotificacionesPage(),
-      ),
-
-      // ── Ajustador ──────────────────────────────────────────────────────
-      GoRoute(
-        path: RoutePaths.casos,
-        builder: (_, _) => const CasosAsignadosPage(),
-      ),
-      GoRoute(
-        path: RoutePaths.casoDetalle,
-        builder: (_, state) =>
-            CasoDetallePage(siniestroId: state.pathParameters['id'] ?? ''),
-      ),
-      GoRoute(
-        path: RoutePaths.validacionPeritaje,
-        builder: (_, state) => ValidacionPeritajePage(
-            siniestroId: state.pathParameters['id'] ?? ''),
-      ),
-      GoRoute(
-        path: RoutePaths.firmaPeritaje,
-        builder: (_, state) =>
-            FirmaPeritajePage(siniestroId: state.pathParameters['id'] ?? ''),
-      ),
-      GoRoute(
-        path: RoutePaths.peritajeConfirmado,
-        builder: (_, state) => PeritajeConfirmadoPage(
-            siniestroId: state.pathParameters['id'] ?? ''),
-      ),
-      GoRoute(
-        path: RoutePaths.notificacionesAjustador,
-        builder: (_, _) => const NotificacionesAjustadorPage(),
-      ),
+      ...authRoutes,
+      ...clienteRoutes,
+      ...ajustadorRoutes,
     ],
   );
 });
 
-/// Devuelve la ruta de inicio según el rol del usuario.
 String _homeFor(AuthSession session) {
   return switch (session.rol) {
     UserRole.ajustador => RoutePaths.casos,
@@ -174,12 +67,10 @@ String _homeFor(AuthSession session) {
   };
 }
 
-/// ChangeNotifier mínimo para refrescar el router ante cambios de auth.
 class _AuthRefreshNotifier extends ChangeNotifier {
   void bump() => notifyListeners();
 }
 
-/// Splash mostrado mientras se restaura la sesión persistida.
 class _SplashScreen extends StatelessWidget {
   const _SplashScreen();
 

@@ -16,24 +16,22 @@ class ApiConstants {
   static const String consentimiento = '/v1/auth/consentimiento';
 
   // ── Onboarding del cliente ────────────────────────────────────────────
-  static const String onboardingOcr = '/cliente/onboarding/ocr';
-  static const String onboardingConfirmar = '/cliente/onboarding/confirmar-datos';
-
-  // ── Siniestros (cliente) ──────────────────────────────────────────────
-  static const String siniestroInicializar = '/siniestros/inicializar';
-  static String siniestro(String id) => '/siniestros/$id';
-  static String siniestroImagenes(String id) => '/siniestros/$id/imagenes';
+  static const String onboardingOcr = '/v1/cliente/onboarding/ocr';
+  static const String onboardingConfirmar = '/v1/cliente/onboarding/confirmar-datos';
 
   // ── Cliente v1 ────────────────────────────────────────────────────────
   static const String clientePerfil = '/v1/cliente/perfil';
   static const String clienteSiniestros = '/v1/cliente/siniestros';
   static String clienteSiniestro(String id) => '/v1/cliente/siniestros/$id';
+  static String clienteSiniestroImagenes(String id) => '/v1/cliente/siniestros/$id/imagenes';
 
   // ── Ajustador v1 ─────────────────────────────────────────────────────
   static const String ajustadorPerfil = '/v1/ajustador/perfil';
   static const String ajustadorAsignaciones = '/v1/ajustador/asignaciones';
-  static String ajustadorPeritaje(String id) => '/v1/ajustador/peritaje/$id';
-  static String ajustadorConfirmar(String id) => '/v1/ajustador/peritaje/$id/confirmar';
+  static String ajustadorSiniestro(String id) => '/v1/ajustador/siniestros/$id';
+  static String ajustadorRegistrarPeritaje(String id) => '/v1/ajustador/siniestros/$id/peritaje';
+  static String ajustadorEditarPeritaje(String id) => '/v1/ajustador/peritajes/$id';
+  static String ajustadorPeritajeDanos(String id) => '/v1/ajustador/peritajes/$id/danos';
 
   // Tiempos de espera de la red.
   static const Duration connectTimeout = Duration(seconds: 20);

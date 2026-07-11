@@ -9,8 +9,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/date_format.dart';
 import '../../../cliente/presentation/widgets/siniestro_card.dart';
-import '../state/casos_asignados_provider.dart';
-import '../state/peritaje_editor_provider.dart';
+import '../state/casos_asignados_controller.dart';
+import '../state/peritaje_editor_controller.dart';
 
 /// Detalle del Caso - Ajustador (Figma node 73:1073).
 ///
@@ -24,7 +24,7 @@ class CasoDetallePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final casosAsync = ref.watch(casosAsignadosProvider);
+    final casosAsync = ref.watch(casosAsignadosControllerProvider);
     final Siniestro? siniestro = casosAsync.asData?.value
         .where((s) => s.id == siniestroId)
         .firstOrNull;
@@ -59,7 +59,7 @@ class CasoDetallePage extends ConsumerWidget {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     ref
-                        .read(peritajeEditorProvider.notifier)
+                        .read(peritajeEditorControllerProvider.notifier)
                         .iniciar(siniestro.id);
                     context.push(RoutePaths.validacionPeritajeDe(siniestro.id));
                   },

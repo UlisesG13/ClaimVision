@@ -9,7 +9,7 @@ import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/date_format.dart';
-import '../state/peritaje_editor_provider.dart';
+import '../state/peritaje_editor_controller.dart';
 
 /// Peritaje Confirmado (Figma node 73:1285).
 ///
@@ -23,7 +23,7 @@ class PeritajeConfirmadoPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final state = ref.watch(peritajeEditorProvider);
+    final state = ref.watch(peritajeEditorControllerProvider);
     final Siniestro? siniestro = state.resultado;
     final session = ref.watch(currentSessionProvider);
     final ajustador = _nombre(session?.email);

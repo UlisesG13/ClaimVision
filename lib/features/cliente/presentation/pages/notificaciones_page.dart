@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../state/notificaciones_provider.dart';
+import '../state/notificaciones_controller.dart';
 
 /// Notificaciones - Cliente (Figma node 79:5167).
 ///
@@ -34,7 +34,7 @@ class NotificacionesPage extends ConsumerWidget {
           if (hayNoLeidas)
             TextButton.icon(
               onPressed: () => ref
-                  .read(notificacionesLeidasProvider.notifier)
+                  .read(notificacionesControllerProvider.notifier)
                   .marcarLeidas(notificaciones.map((n) => n.id)),
               icon: const Icon(Icons.done_all, size: 18),
               label: const Text('Leer todo'),
@@ -92,7 +92,7 @@ class NotificacionesPage extends ConsumerWidget {
           child: _NotificacionTile(
             notificacion: n,
             onTap: () =>
-                ref.read(notificacionesLeidasProvider.notifier).marcarLeida(n.id),
+                ref.read(notificacionesControllerProvider.notifier).marcarLeida(n.id),
           ),
         ));
       }

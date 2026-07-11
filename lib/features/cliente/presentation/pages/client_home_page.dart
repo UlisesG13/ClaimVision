@@ -11,8 +11,8 @@ import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 import '../../../../shared/widgets/feedback/app_dialog.dart';
 import '../../../auth/presentation/state/auth_controller.dart';
 import '../../../auth/presentation/state/onboarding_controller.dart';
-import '../state/mis_siniestros_provider.dart';
-import '../state/notificaciones_provider.dart';
+import '../state/mis_siniestros_controller.dart';
+import '../state/notificaciones_controller.dart';
 import '../state/report_controller.dart';
 import '../widgets/siniestro_card.dart';
 
@@ -21,7 +21,7 @@ import '../widgets/siniestro_card.dart';
 /// Saluda al usuario autenticado, ofrece reportar un incidente y muestra la
 /// actividad reciente de SUS siniestros. Como el backend aún no expone un
 /// listado de siniestros del cliente, la actividad se alimenta de los creados
-/// en la sesión ([misSiniestrosProvider]); si no hay, se muestra un estado
+/// en la sesión ([misSiniestrosControllerProvider]); si no hay, se muestra un estado
 /// vacío honesto.
 class ClientHomePage extends ConsumerWidget {
   const ClientHomePage({super.key});
@@ -30,8 +30,8 @@ class ClientHomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final session = ref.watch(currentSessionProvider);
-    final siniestrosAsync = ref.watch(misSiniestrosProvider);
-    final store = ref.read(misSiniestrosProvider.notifier);
+    final siniestrosAsync = ref.watch(misSiniestrosControllerProvider);
+    final store = ref.read(misSiniestrosControllerProvider.notifier);
     final poliza = ref.watch(
       onboardingControllerProvider.select((s) => s.numeroPoliza),
     );

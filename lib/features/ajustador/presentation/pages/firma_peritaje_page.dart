@@ -8,15 +8,15 @@ import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/feedback/app_snackbar.dart';
-import '../state/casos_asignados_provider.dart';
-import '../state/peritaje_editor_provider.dart';
+import '../state/casos_asignados_controller.dart';
+import '../state/peritaje_editor_controller.dart';
 import '../widgets/signature_pad.dart';
 
 /// Firma del Peritaje (Figma node 73:1235).
 ///
 /// Muestra el resumen del peritaje y captura la firma del ajustador (lienzo
-/// nativo → base64). Al confirmar, guarda el peritaje (`PUT`) y lo confirma
-/// (`POST`), y avanza a la pantalla de confirmación.
+/// nativo → base64). Al confirmar, registra el peritaje (`POST`), y avanza a la
+/// pantalla de confirmación.
 class FirmaPeritajePage extends ConsumerStatefulWidget {
   const FirmaPeritajePage({super.key, required this.siniestroId});
 
@@ -53,12 +53,12 @@ class _FirmaPeritajePageState extends ConsumerState<FirmaPeritajePage> {
       _snack('No se pudo capturar la firma. Inténtalo de nuevo.');
       return;
     }
-    final controller = ref.read(peritajeEditorProvider.notifier);
+    final controller = ref.read(peritajeEditorControllerProvider.notifier);
     controller.setFirma(base64);
-    final ok = await controller.guardarYConfirmar();
+    final ok = await controller.registrarYConfirmar();
     if (ok && mounted) {
       // Refresca la bandeja para reflejar el nuevo estatus del caso.
-      ref.invalidate(casosAsignadosProvider);
+      ref.invalidate(casosAsignadosControllerProvider);
       context.go(RoutePaths.peritajeConfirmadoDe(widget.siniestroId));
     }
   }
@@ -66,11 +66,11 @@ class _FirmaPeritajePageState extends ConsumerState<FirmaPeritajePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final state = ref.watch(peritajeEditorProvider);
+    final state = ref.watch(peritajeEditorControllerProvider);
     final session = ref.watch(currentSessionProvider);
     final ajustador = _nombre(session?.email);
 
-    ref.listen(peritajeEditorProvider.select((s) => s.errorMessage),
+    ref.listen(peritajeEditorControllerProvider.select((s) => s.errorMessage),
         (prev, msg) {
       if (msg != null && msg.isNotEmpty) _snack(msg, color: AppColors.alert);
     });

@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
-import '../state/mis_siniestros_provider.dart';
+import '../state/mis_siniestros_controller.dart';
 
 /// Vehículos registrados por el cliente.
 ///
@@ -18,7 +18,7 @@ class VehiculosPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final siniestrosAsync = ref.watch(misSiniestrosProvider);
+    final siniestrosAsync = ref.watch(misSiniestrosControllerProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,

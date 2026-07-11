@@ -3,10 +3,8 @@ import 'dart:io';
 import '../entities/imagen_siniestro.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 
-/// Contrato del reporte de siniestros del cliente. Lanza `Failure` ante error.
 abstract interface class SiniestroRepository {
-  /// Crea el siniestro preliminar (requiere vehículo + ubicación).
-  Future<Siniestro> inicializar({
+  Future<Siniestro> crear({
     required String vehiculoMarca,
     required String vehiculoModelo,
     required int vehiculoAnio,
@@ -15,24 +13,17 @@ abstract interface class SiniestroRepository {
     required double longitud,
     String? vehiculoVin,
     String? narracionTexto,
-  });
-
-  /// Actualiza campos del siniestro (narración, daño interno, etc.).
-  Future<Siniestro> actualizar({
-    required String id,
-    String? narracionTexto,
+    String? narracionAudioUrl,
     bool? indicacionesDanoInterno,
+    DateTime? fechaSiniestro,
   });
 
-  /// Sube una imagen del daño al siniestro.
   Future<ImagenSiniestro> subirImagen({
     required String id,
     required File imagen,
   });
 
-  /// Lista los siniestros del cliente autenticado.
-  Future<List<Siniestro>> listar();
+  Future<List<Siniestro>> listar({int page = 1, int pageSize = 20, String? estatus});
 
-  /// Obtiene el detalle de un siniestro por su id.
   Future<Siniestro> obtener(String id);
 }

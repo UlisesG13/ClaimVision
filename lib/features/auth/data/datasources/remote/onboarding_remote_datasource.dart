@@ -8,8 +8,6 @@ import '../../dtos/confirm_data_request_dto.dart';
 import '../../dtos/consent_request_dto.dart';
 import '../../dtos/ocr_response_dto.dart';
 
-/// Llamadas REST del onboarding del cliente (OCR, consentimiento, confirmar).
-/// El token Bearer lo inyecta el interceptor del Dio.
 abstract interface class OnboardingRemoteDataSource {
   Future<OcrResponseDto> extractOcr({required File cedula, required File poliza});
   Future<void> sendConsent(ConsentRequestDto body);

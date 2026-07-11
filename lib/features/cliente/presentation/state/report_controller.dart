@@ -5,10 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/errors/failures.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
-import 'mis_siniestros_provider.dart';
+import 'mis_siniestros_controller.dart';
 
-/// Una foto del daño en el paso de Captura (#8): el archivo local más el
-/// estado de su subida al backend y el resultado de la validación de calidad.
 class Evidencia {
   const Evidencia({
     required this.file,
@@ -20,9 +18,6 @@ class Evidencia {
 
   final File file;
   final bool subiendo;
-
-  /// `true`/`false` tras subir (de `es_calidad_valida`); `null` si aún no sube
-  /// o si falló.
   final bool? calidadValida;
   final String? error;
   final String? imagenId;
@@ -44,13 +39,6 @@ class Evidencia {
   }
 }
 
-/// Borrador del reporte de siniestro a lo largo del wizard (pasos #5–#9).
-///
-/// Flujo de red:
-///  - Paso Vehículo (#5) + Ubicación (#6) → `crearSiniestro()` llama a
-///    `POST /siniestros/inicializar` (necesita vehículo + ubicación juntos).
-///  - Narración (#7) → `guardarNarracion()` (`PUT /siniestros/{id}`).
-///  - Captura (#8) → `subirImagenes()` (`POST /siniestros/{id}/imagenes`).
 class ReportState {
   const ReportState({
     this.marca = '',
@@ -68,27 +56,17 @@ class ReportState {
     this.errorMessage,
   });
 
-  // Vehículo (#5)
   final String marca;
   final String modelo;
   final String anio;
   final String placas;
   final String vin;
-
-  // Ubicación (#6)
   final double? latitud;
   final double? longitud;
-
-  // Narración (#7)
   final String narracionTexto;
   final bool danoInterno;
-
-  // Captura (#8)
   final List<Evidencia> evidencias;
-
-  /// Siniestro ya creado en el backend (tras `crearSiniestro`).
   final Siniestro? siniestro;
-
   final bool submitting;
   final String? errorMessage;
 
@@ -105,8 +83,6 @@ class ReportState {
       evidencias.where((e) => e.calidadValida == true).length;
   bool get subiendoAlguna => evidencias.any((e) => e.subiendo);
 
-  /// Se puede enviar el reporte cuando el siniestro existe, hay al menos una
-  /// foto con calidad válida y ninguna sigue subiendo.
   bool get puedeEnviar =>
       yaCreado && evidenciasValidas > 0 && !subiendoAlguna;
 
@@ -148,7 +124,6 @@ class ReportController extends Notifier<ReportState> {
   @override
   ReportState build() => const ReportState();
 
-  /// Reinicia el borrador al iniciar un nuevo reporte.
   void reset() => state = const ReportState();
 
   void setVehiculo({
@@ -176,8 +151,6 @@ class ReportController extends Notifier<ReportState> {
   void setNarracion(String texto) => state = state.copyWith(narracionTexto: texto);
   void setDanoInterno(bool value) => state = state.copyWith(danoInterno: value);
 
-  /// Agrega una foto y la sube de inmediato; el backend devuelve si la calidad
-  /// es válida (`es_calidad_valida`), que mostramos por miniatura.
   Future<void> subirEvidencia(File file) async {
     final siniestro = state.siniestro;
     if (siniestro == null) {
@@ -222,7 +195,6 @@ class ReportController extends Notifier<ReportState> {
     );
   }
 
-  /// Crea el siniestro preliminar (vehículo + ubicación). Devuelve `true` si ok.
   Future<bool> crearSiniestro() async {
     if (state.yaCreado) return true;
     if (!state.vehiculoCompleto || !state.ubicacionLista) {
@@ -242,8 +214,9 @@ class ReportController extends Notifier<ReportState> {
         vehiculoVin: state.vin.trim().isEmpty ? null : state.vin.trim(),
         narracionTexto:
             state.narracionTexto.trim().isEmpty ? null : state.narracionTexto.trim(),
+        indicacionesDanoInterno: state.danoInterno,
       );
-      ref.read(misSiniestrosProvider.notifier).refrescar();
+      ref.read(misSiniestrosControllerProvider.notifier).refrescar();
       state = state.copyWith(submitting: false, siniestro: siniestro);
       return true;
     } on Failure catch (f) {
@@ -252,27 +225,35 @@ class ReportController extends Notifier<ReportState> {
     }
   }
 
-  /// Guarda la narración y el indicador de daño interno (`PUT`).
   Future<bool> guardarNarracion() async {
     final siniestro = state.siniestro;
     if (siniestro == null) return false;
-    state = state.copyWith(submitting: true, clearError: true);
-    try {
-      final actualizado = await ref.read(actualizarSiniestroProvider)(
-        id: siniestro.id,
-        narracionTexto:
-            state.narracionTexto.trim().isEmpty ? null : state.narracionTexto.trim(),
-        indicacionesDanoInterno: state.danoInterno,
-      );
-      ref.read(misSiniestrosProvider.notifier).refrescar();
-      state = state.copyWith(submitting: false, siniestro: actualizado);
-      return true;
-    } on Failure catch (f) {
-      state = state.copyWith(submitting: false, errorMessage: f.message);
-      return false;
-    }
-  }
 
+    if (state.yaCreado) {
+      state = state.copyWith(submitting: true, clearError: true);
+      try {
+        final actualizado = await ref.read(inicializarSiniestroProvider)(
+          vehiculoMarca: siniestro.vehiculoMarca,
+          vehiculoModelo: siniestro.vehiculoModelo,
+          vehiculoAnio: siniestro.vehiculoAnio,
+          vehiculoPlacas: siniestro.vehiculoPlacas,
+          latitud: siniestro.latitud,
+          longitud: siniestro.longitud,
+          vehiculoVin: siniestro.vehiculoVin,
+          narracionTexto:
+              state.narracionTexto.trim().isEmpty ? null : state.narracionTexto.trim(),
+          indicacionesDanoInterno: state.danoInterno,
+        );
+        ref.read(misSiniestrosControllerProvider.notifier).refrescar();
+        state = state.copyWith(submitting: false, siniestro: actualizado);
+        return true;
+      } on Failure catch (f) {
+        state = state.copyWith(submitting: false, errorMessage: f.message);
+        return false;
+      }
+    }
+    return true;
+  }
 }
 
 final reportControllerProvider =

@@ -25,7 +25,6 @@ import '../../features/cliente/data/repositories/cliente_repository_impl.dart';
 import '../../features/cliente/data/repositories/siniestro_repository_impl.dart';
 import '../../features/cliente/domain/repositories/cliente_repository.dart';
 import '../../features/cliente/domain/repositories/siniestro_repository.dart';
-import '../../features/cliente/domain/usecases/actualizar_siniestro.dart';
 import '../../features/cliente/domain/usecases/get_perfil_cliente.dart';
 import '../../features/cliente/domain/usecases/get_siniestro_detalle.dart';
 import '../../features/cliente/domain/usecases/get_siniestros_cliente.dart';
@@ -34,22 +33,15 @@ import '../../features/cliente/domain/usecases/subir_imagen_siniestro.dart';
 import '../../features/ajustador/data/datasources/remote/peritaje_remote_datasource.dart';
 import '../../features/ajustador/data/repositories/peritaje_repository_impl.dart';
 import '../../features/ajustador/domain/repositories/peritaje_repository.dart';
-import '../../features/ajustador/domain/usecases/confirmar_peritaje.dart';
 import '../../features/ajustador/domain/usecases/get_casos_asignados.dart';
 import '../../features/ajustador/domain/usecases/get_perfil_ajustador.dart';
-import '../../features/ajustador/domain/usecases/guardar_peritaje.dart';
+import '../../features/ajustador/domain/usecases/registrar_peritaje.dart';
+import '../../features/ajustador/domain/usecases/get_detalle_ajustador.dart';
 import '../network/dio_client.dart';
 import '../services/image_picker_service.dart';
 import '../services/location_service.dart';
 import '../services/secure_storage_service.dart';
 
-/// Contenedor de inyección de dependencias de la app (Riverpod).
-///
-/// Aquí se registran, de abajo hacia arriba, las dependencias de
-/// infraestructura, datasources, repositorios y casos de uso. Las pantallas y
-/// notifiers consumen los casos de uso, nunca instancian datasources a mano.
-
-// ── Infraestructura ──────────────────────────────────────────────────────
 final secureStorageProvider = Provider<SecureStorageService>((ref) {
   return SecureStorageService(const FlutterSecureStorage());
 });
@@ -57,8 +49,6 @@ final secureStorageProvider = Provider<SecureStorageService>((ref) {
 final dioProvider = Provider<Dio>((ref) {
   return DioClient.create(
     ref.watch(secureStorageProvider),
-    // Un 401 en una llamada protegida invalida la sesión en memoria; el router
-    // detecta que ya no hay sesión y manda al login.
     onUnauthorized: () {
       ref.read(authControllerProvider.notifier).handleUnauthorized();
     },
@@ -133,8 +123,6 @@ final confirmOnboardingProvider = Provider<ConfirmOnboarding>((ref) {
   return ConfirmOnboarding(ref.watch(onboardingRepositoryProvider));
 });
 
-/// Sesión autenticada actual, expuesta desde el composition root para que
-/// cualquier feature la lea sin depender directamente del feature `auth`.
 final currentSessionProvider = Provider<AuthSession?>((ref) {
   return ref.watch(authControllerProvider).asData?.value;
 });
@@ -151,10 +139,6 @@ final siniestroRepositoryProvider = Provider<SiniestroRepository>((ref) {
 
 final inicializarSiniestroProvider = Provider<InicializarSiniestro>((ref) {
   return InicializarSiniestro(ref.watch(siniestroRepositoryProvider));
-});
-
-final actualizarSiniestroProvider = Provider<ActualizarSiniestro>((ref) {
-  return ActualizarSiniestro(ref.watch(siniestroRepositoryProvider));
 });
 
 final subirImagenSiniestroProvider = Provider<SubirImagenSiniestro>((ref) {
@@ -175,12 +159,12 @@ final getCasosAsignadosProvider = Provider<GetCasosAsignados>((ref) {
   return GetCasosAsignados(ref.watch(peritajeRepositoryProvider));
 });
 
-final guardarPeritajeProvider = Provider<GuardarPeritaje>((ref) {
-  return GuardarPeritaje(ref.watch(peritajeRepositoryProvider));
+final registrarPeritajeProvider = Provider<RegistrarPeritaje>((ref) {
+  return RegistrarPeritaje(ref.watch(peritajeRepositoryProvider));
 });
 
-final confirmarPeritajeProvider = Provider<ConfirmarPeritaje>((ref) {
-  return ConfirmarPeritaje(ref.watch(peritajeRepositoryProvider));
+final getDetalleAjustadorProvider = Provider<GetDetalleAjustador>((ref) {
+  return GetDetalleAjustador(ref.watch(peritajeRepositoryProvider));
 });
 
 final getPerfilAjustadorProvider = Provider<GetPerfilAjustador>((ref) {

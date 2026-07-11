@@ -9,17 +9,14 @@ import '../../domain/entities/imagen_siniestro.dart';
 import '../../domain/repositories/siniestro_repository.dart';
 import '../datasources/remote/siniestro_remote_datasource.dart';
 import '../dtos/siniestro_inicializar_dto.dart';
-import '../dtos/siniestro_update_dto.dart';
 
-/// Implementación del reporte de siniestros: llama al backend, mapea DTO→Entity
-/// y traduce las excepciones técnicas a `Failure`.
 class SiniestroRepositoryImpl implements SiniestroRepository {
   SiniestroRepositoryImpl(this._remote);
 
   final SiniestroRemoteDataSource _remote;
 
   @override
-  Future<Siniestro> inicializar({
+  Future<Siniestro> crear({
     required String vehiculoMarca,
     required String vehiculoModelo,
     required int vehiculoAnio,
@@ -28,9 +25,12 @@ class SiniestroRepositoryImpl implements SiniestroRepository {
     required double longitud,
     String? vehiculoVin,
     String? narracionTexto,
+    String? narracionAudioUrl,
+    bool? indicacionesDanoInterno,
+    DateTime? fechaSiniestro,
   }) async {
     try {
-      final dto = await _remote.inicializar(
+      final dto = await _remote.crear(
         SiniestroInicializarDto(
           vehiculoMarca: vehiculoMarca,
           vehiculoModelo: vehiculoModelo,
@@ -40,26 +40,9 @@ class SiniestroRepositoryImpl implements SiniestroRepository {
           longitud: longitud,
           vehiculoVin: vehiculoVin,
           narracionTexto: narracionTexto,
-        ),
-      );
-      return SiniestroMapper.toEntity(dto);
-    } on AppException catch (e) {
-      throw _toFailure(e);
-    }
-  }
-
-  @override
-  Future<Siniestro> actualizar({
-    required String id,
-    String? narracionTexto,
-    bool? indicacionesDanoInterno,
-  }) async {
-    try {
-      final dto = await _remote.actualizar(
-        id,
-        SiniestroUpdateDto(
-          narracionTexto: narracionTexto,
+          narracionAudioUrl: narracionAudioUrl,
           indicacionesDanoInterno: indicacionesDanoInterno,
+          fechaSiniestro: fechaSiniestro,
         ),
       );
       return SiniestroMapper.toEntity(dto);
@@ -88,10 +71,10 @@ class SiniestroRepositoryImpl implements SiniestroRepository {
   }
 
   @override
-  Future<List<Siniestro>> listar() async {
+  Future<List<Siniestro>> listar({int page = 1, int pageSize = 20, String? estatus}) async {
     try {
-      final dtos = await _remote.listar();
-      return dtos.map(SiniestroMapper.toEntity).toList();
+      final pageDto = await _remote.listar(page: page, pageSize: pageSize, estatus: estatus);
+      return pageDto.data.map(SiniestroMapper.toEntity).toList();
     } on AppException catch (e) {
       throw _toFailure(e);
     }

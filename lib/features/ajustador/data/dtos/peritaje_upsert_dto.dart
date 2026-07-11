@@ -1,6 +1,6 @@
 import 'dano_ajustado_dto.dart';
 
-/// Cuerpo de `PUT /api/siniestros/{id}/peritaje` (`PeritajeUpsertRequestDTO`).
+/// Cuerpo de `POST /api/v1/ajustador/siniestros/{id}/peritaje` (`PeritajeUpsertRequestDTO`).
 /// Campos verbatim del backend.
 class PeritajeUpsertDto {
   const PeritajeUpsertDto({

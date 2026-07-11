@@ -8,13 +8,13 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/date_format.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import 'package:claimvision/shared/domain/entities/siniestro_estatus.dart';
-import '../state/mis_siniestros_provider.dart';
+import '../state/mis_siniestros_controller.dart';
 
 /// Detalle del Siniestro (Figma node 70:734).
 ///
 /// Muestra el estado actual y el seguimiento (máquina de estados) de un
 /// siniestro. El backend no expone un GET de un siniestro individual para el
-/// cliente, así que se lee del store de sesión ([misSiniestrosProvider]); si no
+/// cliente, así que se lee del store de sesión ([misSiniestrosControllerProvider]); si no
 /// está (p. ej. tras reiniciar la app), se muestra un estado vacío honesto.
 class SiniestroDetailPage extends ConsumerWidget {
   const SiniestroDetailPage({super.key, required this.siniestroId});
@@ -24,7 +24,7 @@ class SiniestroDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final siniestrosAsync = ref.watch(misSiniestrosProvider);
+    final siniestrosAsync = ref.watch(misSiniestrosControllerProvider);
     final siniestro = siniestrosAsync.asData?.value
         .where((s) => s.id == siniestroId)
         .firstOrNull;

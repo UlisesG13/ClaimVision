@@ -4,13 +4,10 @@ import '../entities/dano_ajustado.dart';
 import '../entities/perfil_ajustador.dart';
 import '../entities/peritaje.dart';
 
-/// Contrato del flujo del ajustador (peritaje). Lanza `Failure` ante error.
 abstract interface class PeritajeRepository {
-  /// Casos (siniestros) asignados al ajustador autenticado.
-  Future<List<Siniestro>> getCasosAsignados();
+  Future<List<Siniestro>> getCasosAsignados({int page = 1, int pageSize = 20, String? estatus});
 
-  /// Guarda/actualiza el peritaje del siniestro (daños, costo, firma).
-  Future<Peritaje> guardarPeritaje({
+  Future<Peritaje> registrarPeritaje({
     required String siniestroId,
     required double costoDefinitivo,
     required String firmaDigitalBase64,
@@ -18,9 +15,7 @@ abstract interface class PeritajeRepository {
     String? observacionesCampo,
   });
 
-  /// Confirma y bloquea el peritaje (pasa a `Peritaje_Validado`).
-  Future<Siniestro> confirmarPeritaje(String siniestroId);
+  Future<Siniestro> obtenerDetalleSiniestro(String id);
 
-  /// Obtiene el perfil del ajustador autenticado.
   Future<PerfilAjustador> obtenerPerfil();
 }

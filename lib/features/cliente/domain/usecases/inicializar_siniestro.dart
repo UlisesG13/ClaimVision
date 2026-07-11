@@ -1,7 +1,6 @@
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import '../repositories/siniestro_repository.dart';
 
-/// Caso de uso: crear el siniestro preliminar con vehículo + ubicación.
 class InicializarSiniestro {
   const InicializarSiniestro(this._repository);
 
@@ -16,8 +15,11 @@ class InicializarSiniestro {
     required double longitud,
     String? vehiculoVin,
     String? narracionTexto,
+    String? narracionAudioUrl,
+    bool? indicacionesDanoInterno,
+    DateTime? fechaSiniestro,
   }) {
-    return _repository.inicializar(
+    return _repository.crear(
       vehiculoMarca: vehiculoMarca,
       vehiculoModelo: vehiculoModelo,
       vehiculoAnio: vehiculoAnio,
@@ -26,6 +28,9 @@ class InicializarSiniestro {
       longitud: longitud,
       vehiculoVin: vehiculoVin,
       narracionTexto: narracionTexto,
+      narracionAudioUrl: narracionAudioUrl,
+      indicacionesDanoInterno: indicacionesDanoInterno,
+      fechaSiniestro: fechaSiniestro,
     );
   }
 }

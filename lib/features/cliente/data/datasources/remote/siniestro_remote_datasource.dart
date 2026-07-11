@@ -4,18 +4,15 @@ import 'package:dio/dio.dart';
 
 import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/network/api_error_mapper.dart';
+import '../../../../../shared/data/dtos/page_dto.dart';
+import '../../../../../shared/data/dtos/siniestro_response_dto.dart';
 import '../../dtos/imagen_siniestro_response_dto.dart';
 import '../../dtos/siniestro_inicializar_dto.dart';
-import 'package:claimvision/shared/data/dtos/siniestro_response_dto.dart';
-import '../../dtos/siniestro_update_dto.dart';
 
-/// Llamadas REST de siniestros del cliente. El token Bearer lo añade el
-/// interceptor del Dio. Lanza [AppException] tipadas ante error.
 abstract interface class SiniestroRemoteDataSource {
-  Future<SiniestroResponseDto> inicializar(SiniestroInicializarDto body);
-  Future<SiniestroResponseDto> actualizar(String id, SiniestroUpdateDto body);
+  Future<SiniestroResponseDto> crear(SiniestroInicializarDto body);
   Future<ImagenSiniestroResponseDto> subirImagen(String id, File imagen);
-  Future<List<SiniestroResponseDto>> listar();
+  Future<PageDto<SiniestroResponseDto>> listar({int page = 1, int pageSize = 20, String? estatus});
   Future<SiniestroResponseDto> obtener(String id);
 }
 
@@ -25,25 +22,10 @@ class SiniestroRemoteDataSourceImpl implements SiniestroRemoteDataSource {
   final Dio _dio;
 
   @override
-  Future<SiniestroResponseDto> inicializar(SiniestroInicializarDto body) async {
+  Future<SiniestroResponseDto> crear(SiniestroInicializarDto body) async {
     try {
       final response = await _dio.post(
-        ApiConstants.siniestroInicializar,
-        data: body.toJson(),
-      );
-      _ensureSuccess(response);
-      return SiniestroResponseDto.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw ApiErrorMapper.fromDioException(e);
-    }
-  }
-
-  @override
-  Future<SiniestroResponseDto> actualizar(
-      String id, SiniestroUpdateDto body) async {
-    try {
-      final response = await _dio.put(
-        ApiConstants.siniestro(id),
+        ApiConstants.clienteSiniestros,
         data: body.toJson(),
       );
       _ensureSuccess(response);
@@ -63,7 +45,7 @@ class SiniestroRemoteDataSourceImpl implements SiniestroRemoteDataSource {
         ),
       });
       final response = await _dio.post(
-        ApiConstants.siniestroImagenes(id),
+        ApiConstants.clienteSiniestroImagenes(id),
         data: formData,
         options: Options(contentType: 'multipart/form-data'),
       );
@@ -76,14 +58,26 @@ class SiniestroRemoteDataSourceImpl implements SiniestroRemoteDataSource {
   }
 
   @override
-  Future<List<SiniestroResponseDto>> listar() async {
+  Future<PageDto<SiniestroResponseDto>> listar({
+    int page = 1,
+    int pageSize = 20,
+    String? estatus,
+  }) async {
     try {
-      final response = await _dio.get(ApiConstants.clienteSiniestros);
+      final params = <String, dynamic>{
+        'page': page,
+        'page_size': pageSize,
+      };
+      if (estatus != null) params['estatus'] = estatus;
+      final response = await _dio.get(
+        ApiConstants.clienteSiniestros,
+        queryParameters: params,
+      );
       _ensureSuccess(response);
-      final data = (response.data as List?) ?? const [];
-      return data
-          .map((e) => SiniestroResponseDto.fromJson(e as Map<String, dynamic>))
-          .toList();
+      return PageDto.fromJson(
+        response.data as Map<String, dynamic>,
+        SiniestroResponseDto.fromJson,
+      );
     } on DioException catch (e) {
       throw ApiErrorMapper.fromDioException(e);
     }
