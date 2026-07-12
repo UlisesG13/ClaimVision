@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import '../entities/imagen_siniestro.dart';
+import '../entities/vehiculo_cliente.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 
 abstract interface class SiniestroRepository {
   Future<Siniestro> crear({
+    required String vehiculoId,
     required String vehiculoMarca,
     required String vehiculoModelo,
     required int vehiculoAnio,
@@ -26,4 +28,6 @@ abstract interface class SiniestroRepository {
   Future<List<Siniestro>> listar({int page = 1, int pageSize = 20, String? estatus});
 
   Future<Siniestro> obtener(String id);
+
+  Future<List<VehiculoCliente>> obtenerVehiculos();
 }

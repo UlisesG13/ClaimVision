@@ -1,5 +1,6 @@
 class SiniestroInicializarDto {
   const SiniestroInicializarDto({
+    required this.vehiculoId,
     required this.vehiculoMarca,
     required this.vehiculoModelo,
     required this.vehiculoAnio,
@@ -13,6 +14,7 @@ class SiniestroInicializarDto {
     this.fechaSiniestro,
   });
 
+  final String vehiculoId;
   final String vehiculoMarca;
   final String vehiculoModelo;
   final int vehiculoAnio;
@@ -26,6 +28,7 @@ class SiniestroInicializarDto {
   final DateTime? fechaSiniestro;
 
   Map<String, dynamic> toJson() => {
+        'vehiculo_id': vehiculoId,
         'vehiculo_marca': vehiculoMarca,
         'vehiculo_modelo': vehiculoModelo,
         'vehiculo_anio': vehiculoAnio,

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/errors/failures.dart';
+import '../../domain/entities/vehiculo_cliente.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import 'mis_siniestros_controller.dart';
 
@@ -41,11 +42,13 @@ class Evidencia {
 
 class ReportState {
   const ReportState({
+    this.vehiculoId = '',
     this.marca = '',
     this.modelo = '',
     this.anio = '',
     this.placas = '',
     this.vin = '',
+    this.vehiculoSeleccionado,
     this.latitud,
     this.longitud,
     this.narracionTexto = '',
@@ -56,11 +59,13 @@ class ReportState {
     this.errorMessage,
   });
 
+  final String vehiculoId;
   final String marca;
   final String modelo;
   final String anio;
   final String placas;
   final String vin;
+  final VehiculoCliente? vehiculoSeleccionado;
   final double? latitud;
   final double? longitud;
   final String narracionTexto;
@@ -71,6 +76,7 @@ class ReportState {
   final String? errorMessage;
 
   bool get vehiculoCompleto =>
+      vehiculoId.isNotEmpty &&
       marca.trim().isNotEmpty &&
       modelo.trim().isNotEmpty &&
       placas.trim().isNotEmpty &&
@@ -87,11 +93,13 @@ class ReportState {
       yaCreado && evidenciasValidas > 0 && !subiendoAlguna;
 
   ReportState copyWith({
+    String? vehiculoId,
     String? marca,
     String? modelo,
     String? anio,
     String? placas,
     String? vin,
+    VehiculoCliente? vehiculoSeleccionado,
     double? latitud,
     double? longitud,
     String? narracionTexto,
@@ -103,11 +111,13 @@ class ReportState {
     bool clearError = false,
   }) {
     return ReportState(
+      vehiculoId: vehiculoId ?? this.vehiculoId,
       marca: marca ?? this.marca,
       modelo: modelo ?? this.modelo,
       anio: anio ?? this.anio,
       placas: placas ?? this.placas,
       vin: vin ?? this.vin,
+      vehiculoSeleccionado: vehiculoSeleccionado ?? this.vehiculoSeleccionado,
       latitud: latitud ?? this.latitud,
       longitud: longitud ?? this.longitud,
       narracionTexto: narracionTexto ?? this.narracionTexto,
@@ -127,18 +137,22 @@ class ReportController extends Notifier<ReportState> {
   void reset() => state = const ReportState();
 
   void setVehiculo({
+    required String vehiculoId,
     required String marca,
     required String modelo,
-    required String anio,
+    required int anio,
     required String placas,
-    required String vin,
+    String? vin,
+    VehiculoCliente? vehiculoSeleccionado,
   }) {
     state = state.copyWith(
+      vehiculoId: vehiculoId,
       marca: marca,
       modelo: modelo,
-      anio: anio,
+      anio: anio.toString(),
       placas: placas,
-      vin: vin,
+      vin: vin ?? '',
+      vehiculoSeleccionado: vehiculoSeleccionado,
       clearError: true,
     );
   }
@@ -205,6 +219,7 @@ class ReportController extends Notifier<ReportState> {
     state = state.copyWith(submitting: true, clearError: true);
     try {
       final siniestro = await ref.read(inicializarSiniestroProvider)(
+        vehiculoId: state.vehiculoId,
         vehiculoMarca: state.marca.trim(),
         vehiculoModelo: state.modelo.trim(),
         vehiculoAnio: int.parse(state.anio.trim()),
@@ -233,6 +248,7 @@ class ReportController extends Notifier<ReportState> {
       state = state.copyWith(submitting: true, clearError: true);
       try {
         final actualizado = await ref.read(inicializarSiniestroProvider)(
+          vehiculoId: state.vehiculoId,
           vehiculoMarca: siniestro.vehiculoMarca,
           vehiculoModelo: siniestro.vehiculoModelo,
           vehiculoAnio: siniestro.vehiculoAnio,

@@ -7,6 +7,7 @@ class InicializarSiniestro {
   final SiniestroRepository _repository;
 
   Future<Siniestro> call({
+    required String vehiculoId,
     required String vehiculoMarca,
     required String vehiculoModelo,
     required int vehiculoAnio,
@@ -20,6 +21,7 @@ class InicializarSiniestro {
     DateTime? fechaSiniestro,
   }) {
     return _repository.crear(
+      vehiculoId: vehiculoId,
       vehiculoMarca: vehiculoMarca,
       vehiculoModelo: vehiculoModelo,
       vehiculoAnio: vehiculoAnio,

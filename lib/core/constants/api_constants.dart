@@ -24,6 +24,8 @@ class ApiConstants {
   static const String clienteSiniestros = '/v1/cliente/siniestros';
   static String clienteSiniestro(String id) => '/v1/cliente/siniestros/$id';
   static String clienteSiniestroImagenes(String id) => '/v1/cliente/siniestros/$id/imagenes';
+  static const String clienteVehiculos = '/v1/cliente/vehiculos';
+  static const String clienteConsentimientos = '/v1/cliente/consentimientos';
 
   // ── Ajustador v1 ─────────────────────────────────────────────────────
   static const String ajustadorPerfil = '/v1/ajustador/perfil';

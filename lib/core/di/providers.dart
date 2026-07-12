@@ -24,6 +24,7 @@ import '../../features/cliente/data/datasources/remote/siniestro_remote_datasour
 import '../../features/cliente/data/repositories/cliente_repository_impl.dart';
 import '../../features/cliente/data/repositories/siniestro_repository_impl.dart';
 import '../../features/cliente/domain/repositories/cliente_repository.dart';
+import '../../features/cliente/domain/entities/vehiculo_cliente.dart';
 import '../../features/cliente/domain/repositories/siniestro_repository.dart';
 import '../../features/cliente/domain/usecases/get_perfil_cliente.dart';
 import '../../features/cliente/domain/usecases/get_siniestro_detalle.dart';
@@ -191,4 +192,9 @@ final getSiniestrosClienteProvider = Provider<GetSiniestrosCliente>((ref) {
 
 final getSiniestroDetalleProvider = Provider<GetSiniestroDetalle>((ref) {
   return GetSiniestroDetalle(ref.watch(siniestroRepositoryProvider));
+});
+
+// ── Cliente v1: vehículos ────────────────────────────────────────────────────
+final vehiculosClienteProvider = FutureProvider<List<VehiculoCliente>>((ref) {
+  return ref.watch(siniestroRepositoryProvider).obtenerVehiculos();
 });

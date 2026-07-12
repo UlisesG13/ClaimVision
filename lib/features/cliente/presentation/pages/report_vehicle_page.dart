@@ -3,21 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/di/providers.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/utils/validators.dart';
-import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/feedback/app_dialog.dart';
 import '../../../../shared/widgets/primary_button.dart';
+import '../../domain/entities/vehiculo_cliente.dart';
 import '../state/report_controller.dart';
 import '../widgets/report_step_header.dart';
 
-/// Reportar — Paso 1: Datos del Vehículo (Figma node 70:435).
+/// Reportar — Paso 1: Selección del Vehículo Asegurado.
 ///
-/// Captura los datos del vehículo asegurado y los guarda en el borrador del
-/// reporte ([reportControllerProvider]); el siniestro se crea en el backend
-/// hasta el paso de Ubicación (#6), que es cuando se tienen vehículo + GPS.
+/// Muestra los vehículos registrados por la aseguradora en un combobox.
+/// El cliente solo selecciona; la información del vehículo se hereda del backend.
 class ReportVehiclePage extends ConsumerStatefulWidget {
   const ReportVehiclePage({super.key});
 
@@ -26,65 +25,25 @@ class ReportVehiclePage extends ConsumerStatefulWidget {
 }
 
 class _ReportVehiclePageState extends ConsumerState<ReportVehiclePage> {
-  final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _marca;
-  late final TextEditingController _modelo;
-  late final TextEditingController _anio;
-  late final TextEditingController _placas;
-  late final TextEditingController _vin;
-
-  @override
-  void initState() {
-    super.initState();
-    // Reabrir el paso conserva lo ya capturado en el borrador.
-    final s = ref.read(reportControllerProvider);
-    _marca = TextEditingController(text: s.marca);
-    _modelo = TextEditingController(text: s.modelo);
-    _anio = TextEditingController(text: s.anio);
-    _placas = TextEditingController(text: s.placas);
-    _vin = TextEditingController(text: s.vin);
-  }
-
-  @override
-  void dispose() {
-    _marca.dispose();
-    _modelo.dispose();
-    _anio.dispose();
-    _placas.dispose();
-    _vin.dispose();
-    super.dispose();
-  }
+  VehiculoCliente? _seleccionado;
 
   void _continuar() {
-    FocusScope.of(context).unfocus();
-    if (!_formKey.currentState!.validate()) return;
+    if (_seleccionado == null) return;
+    final v = _seleccionado!;
     ref.read(reportControllerProvider.notifier).setVehiculo(
-          marca: _marca.text,
-          modelo: _modelo.text,
-          anio: _anio.text,
-          placas: _placas.text,
-          vin: _vin.text,
+          vehiculoId: v.id,
+          marca: v.marca,
+          modelo: v.modelo,
+          anio: v.anio,
+          placas: v.placas,
+          vin: v.vin,
+          vehiculoSeleccionado: v,
         );
     context.push(RoutePaths.reportarUbicacion);
   }
 
-  String? _anioValidator(String? value) {
-    if (value == null || value.trim().isEmpty) return 'Ingresa el año.';
-    final anio = int.tryParse(value.trim());
-    final actual = DateTime.now().year;
-    if (anio == null) return 'Año inválido.';
-    if (anio < 1950 || anio > actual + 1) return 'Año fuera de rango.';
-    return null;
-  }
+  bool get _hayProgreso => _seleccionado != null;
 
-  bool get _hayProgreso =>
-      _marca.text.isNotEmpty ||
-      _modelo.text.isNotEmpty ||
-      _anio.text.isNotEmpty ||
-      _placas.text.isNotEmpty ||
-      _vin.text.isNotEmpty;
-
-  /// Pide confirmación para descartar el reporte si hay datos capturados.
   Future<void> _intentarSalir() async {
     if (!_hayProgreso) {
       if (context.canPop()) context.pop();
@@ -107,6 +66,8 @@ class _ReportVehiclePageState extends ConsumerState<ReportVehiclePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final vehiculosAsync = ref.watch(vehiculosClienteProvider);
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -124,81 +85,161 @@ class _ReportVehiclePageState extends ConsumerState<ReportVehiclePage> {
                 totalPasos: 4,
                 onBack: _intentarSalir,
               ),
-            Expanded(
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  children: [
-                    Text('Datos del vehículo asegurado',
-                        style: theme.textTheme.titleMedium?.copyWith(fontSize: 14)),
-                    const Gap(AppSpacing.lg),
-                    AppTextField(
-                      controller: _marca,
-                      label: 'Marca',
-                      hintText: 'Ej. Toyota',
-                      prefixIcon: Icons.directions_car_outlined,
-                      textInputAction: TextInputAction.next,
-                      validator: (v) =>
-                          Validators.requiredField(v, campo: 'La marca'),
+              Expanded(
+                child: vehiculosAsync.when(
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (err, _) => Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.xl),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.error_outline,
+                              size: 48, color: AppColors.alert),
+                          const Gap(AppSpacing.md),
+                          Text('No se pudieron cargar tus vehículos.',
+                              style: theme.textTheme.titleMedium),
+                          const Gap(AppSpacing.xs),
+                          Text('$err',
+                              style: theme.textTheme.bodySmall
+                                  ?.copyWith(color: AppColors.textSecondary)),
+                          const Gap(AppSpacing.lg),
+                          PrimaryButton(
+                            label: 'Reintentar',
+                            onPressed: () =>
+                                ref.invalidate(vehiculosClienteProvider),
+                          ),
+                        ],
+                      ),
                     ),
-                    const Gap(AppSpacing.md),
-                    AppTextField(
-                      controller: _modelo,
-                      label: 'Modelo',
-                      hintText: 'Ej. RAV4',
-                      textInputAction: TextInputAction.next,
-                      validator: (v) =>
-                          Validators.requiredField(v, campo: 'El modelo'),
-                    ),
-                    const Gap(AppSpacing.md),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  ),
+                  data: (vehiculos) {
+                    if (vehiculos.isEmpty) {
+                      return Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpacing.xl),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.directions_car_outlined,
+                                  size: 48, color: AppColors.textHint),
+                              const Gap(AppSpacing.md),
+                              Text('Sin vehículos registrados',
+                                  style: theme.textTheme.titleMedium),
+                              const Gap(AppSpacing.xs),
+                              Text(
+                                'No tienes vehículos asociados a tu póliza. '
+                                'Contacta a tu aseguradora.',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodySmall
+                                    ?.copyWith(color: AppColors.textSecondary),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+
+                    return ListView(
+                      padding: const EdgeInsets.all(AppSpacing.xl),
                       children: [
-                        Expanded(
-                          child: AppTextField(
-                            controller: _anio,
-                            label: 'Año',
-                            hintText: '2023',
-                            keyboardType: TextInputType.number,
-                            textInputAction: TextInputAction.next,
-                            validator: _anioValidator,
-                          ),
-                        ),
-                        const Gap(AppSpacing.md),
-                        Expanded(
-                          child: AppTextField(
-                            controller: _placas,
-                            label: 'Placas',
-                            hintText: 'GTX-441',
-                            textInputAction: TextInputAction.next,
-                            validator: (v) =>
-                                Validators.requiredField(v, campo: 'Las placas'),
-                          ),
-                        ),
+                        Text('Selecciona tu vehículo asegurado',
+                            style: theme.textTheme.titleMedium
+                                ?.copyWith(fontSize: 14)),
+                        const Gap(AppSpacing.lg),
+                        ...vehiculos.map((v) => Padding(
+                              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                              child: _VehiculoTile(
+                                vehiculo: v,
+                                seleccionado: _seleccionado?.id == v.id,
+                                onTap: () =>
+                                    setState(() => _seleccionado = v),
+                              ),
+                            )),
                       ],
-                    ),
-                    const Gap(AppSpacing.md),
-                    AppTextField(
-                      controller: _vin,
-                      label: 'VIN (opcional)',
-                      hintText: '1HGCM82633A004352',
-                      textInputAction: TextInputAction.done,
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.xl),
+                child: PrimaryButton(
+                  label: 'Continuar',
+                  icon: Icons.arrow_forward,
+                  onPressed: _seleccionado != null ? _continuar : null,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _VehiculoTile extends StatelessWidget {
+  const _VehiculoTile({
+    required this.vehiculo,
+    required this.seleccionado,
+    required this.onTap,
+  });
+
+  final VehiculoCliente vehiculo;
+  final bool seleccionado;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final vin = vehiculo.vin;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: seleccionado ? AppColors.blueprint.withValues(alpha: 0.06) : AppColors.white,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          border: Border.all(
+            color: seleccionado ? AppColors.blueprint : AppColors.borderLight,
+            width: seleccionado ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.blueprint.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              ),
+              child: Icon(
+                seleccionado ? Icons.check_circle : Icons.directions_car,
+                color: seleccionado ? AppColors.blueprint : AppColors.textHint,
+              ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.xl),
-              child: PrimaryButton(
-                label: 'Continuar',
-                icon: Icons.arrow_forward,
-                onPressed: _continuar,
+            const Gap(AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${vehiculo.marca} ${vehiculo.modelo} ${vehiculo.anio}',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: seleccionado ? FontWeight.w600 : null,
+                    ),
+                  ),
+                  const Gap(2),
+                  Text('Placas: ${vehiculo.placas}',
+                      style: theme.textTheme.bodyMedium
+                          ?.copyWith(color: AppColors.textSecondary)),
+                  if (vin != null && vin.isNotEmpty)
+                    Text('VIN: $vin',
+                        style: theme.textTheme.bodySmall),
+                ],
               ),
             ),
           ],
-        ),
         ),
       ),
     );

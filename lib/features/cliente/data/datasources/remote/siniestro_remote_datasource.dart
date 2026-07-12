@@ -8,12 +8,14 @@ import '../../../../../shared/data/dtos/page_dto.dart';
 import '../../../../../shared/data/dtos/siniestro_response_dto.dart';
 import '../../dtos/imagen_siniestro_response_dto.dart';
 import '../../dtos/siniestro_inicializar_dto.dart';
+import '../../dtos/vehiculo_response_dto.dart';
 
 abstract interface class SiniestroRemoteDataSource {
   Future<SiniestroResponseDto> crear(SiniestroInicializarDto body);
   Future<ImagenSiniestroResponseDto> subirImagen(String id, File imagen);
   Future<PageDto<SiniestroResponseDto>> listar({int page = 1, int pageSize = 20, String? estatus});
   Future<SiniestroResponseDto> obtener(String id);
+  Future<List<VehiculoResponseDto>> obtenerVehiculos();
 }
 
 class SiniestroRemoteDataSourceImpl implements SiniestroRemoteDataSource {
@@ -89,6 +91,21 @@ class SiniestroRemoteDataSourceImpl implements SiniestroRemoteDataSource {
       final response = await _dio.get(ApiConstants.clienteSiniestro(id));
       _ensureSuccess(response);
       return SiniestroResponseDto.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiErrorMapper.fromDioException(e);
+    }
+  }
+
+  @override
+  Future<List<VehiculoResponseDto>> obtenerVehiculos() async {
+    try {
+      final response = await _dio.get(ApiConstants.clienteVehiculos);
+      _ensureSuccess(response);
+      final page = PageDto.fromJson(
+        response.data as Map<String, dynamic>,
+        VehiculoResponseDto.fromJson,
+      );
+      return page.data;
     } on DioException catch (e) {
       throw ApiErrorMapper.fromDioException(e);
     }

@@ -6,6 +6,7 @@ import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/imagen_siniestro.dart';
+import '../../domain/entities/vehiculo_cliente.dart';
 import '../../domain/repositories/siniestro_repository.dart';
 import '../datasources/remote/siniestro_remote_datasource.dart';
 import '../dtos/siniestro_inicializar_dto.dart';
@@ -17,6 +18,7 @@ class SiniestroRepositoryImpl implements SiniestroRepository {
 
   @override
   Future<Siniestro> crear({
+    required String vehiculoId,
     required String vehiculoMarca,
     required String vehiculoModelo,
     required int vehiculoAnio,
@@ -32,6 +34,7 @@ class SiniestroRepositoryImpl implements SiniestroRepository {
     try {
       final dto = await _remote.crear(
         SiniestroInicializarDto(
+          vehiculoId: vehiculoId,
           vehiculoMarca: vehiculoMarca,
           vehiculoModelo: vehiculoModelo,
           vehiculoAnio: vehiculoAnio,
@@ -85,6 +88,25 @@ class SiniestroRepositoryImpl implements SiniestroRepository {
     try {
       final dto = await _remote.obtener(id);
       return SiniestroMapper.toEntity(dto);
+    } on AppException catch (e) {
+      throw _toFailure(e);
+    }
+  }
+
+  @override
+  Future<List<VehiculoCliente>> obtenerVehiculos() async {
+    try {
+      final dtos = await _remote.obtenerVehiculos();
+      return dtos
+          .map((d) => VehiculoCliente(
+                id: d.id,
+                marca: d.marca,
+                modelo: d.modelo,
+                anio: d.anio,
+                placas: d.placas,
+                vin: d.vin,
+              ))
+          .toList();
     } on AppException catch (e) {
       throw _toFailure(e);
     }
