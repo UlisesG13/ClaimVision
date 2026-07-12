@@ -196,5 +196,6 @@ final getSiniestroDetalleProvider = Provider<GetSiniestroDetalle>((ref) {
 
 // ── Cliente v1: vehículos ────────────────────────────────────────────────────
 final vehiculosClienteProvider = FutureProvider<List<VehiculoCliente>>((ref) {
+  ref.watch(currentSessionProvider);
   return ref.watch(siniestroRepositoryProvider).obtenerVehiculos();
 });

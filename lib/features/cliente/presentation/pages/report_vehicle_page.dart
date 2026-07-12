@@ -27,6 +27,14 @@ class ReportVehiclePage extends ConsumerStatefulWidget {
 class _ReportVehiclePageState extends ConsumerState<ReportVehiclePage> {
   VehiculoCliente? _seleccionado;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(vehiculosClienteProvider);
+    });
+  }
+
   void _continuar() {
     if (_seleccionado == null) return;
     final v = _seleccionado!;

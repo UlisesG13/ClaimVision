@@ -44,18 +44,24 @@ class HistorialPage extends ConsumerWidget {
       body: siniestrosAsync.when(
         data: (siniestros) {
           if (siniestros.isEmpty) return const _Empty();
-          return ListView.separated(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            itemCount: siniestros.length,
-            separatorBuilder: (_, _) => const Gap(AppSpacing.md),
-            itemBuilder: (context, i) {
-              final s = siniestros[i];
-              return SiniestroCard(
-                siniestro: s,
-                onTap: () =>
-                    context.push(RoutePaths.detalleSiniestroDe(s.id)),
-              );
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(misSiniestrosControllerProvider);
+              await ref.read(misSiniestrosControllerProvider.future);
             },
+            child: ListView.separated(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              itemCount: siniestros.length,
+              separatorBuilder: (_, _) => const Gap(AppSpacing.md),
+              itemBuilder: (context, i) {
+                final s = siniestros[i];
+                return SiniestroCard(
+                  siniestro: s,
+                  onTap: () =>
+                      context.push(RoutePaths.detalleSiniestroDe(s.id)),
+                );
+              },
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),

@@ -17,17 +17,24 @@ import '../state/report_controller.dart';
 import '../widgets/siniestro_card.dart';
 
 /// Inicio del Cliente (Figma node 70:344).
-///
-/// Saluda al usuario autenticado, ofrece reportar un incidente y muestra la
-/// actividad reciente de SUS siniestros. Como el backend aún no expone un
-/// listado de siniestros del cliente, la actividad se alimenta de los creados
-/// en la sesión ([misSiniestrosControllerProvider]); si no hay, se muestra un estado
-/// vacío honesto.
-class ClientHomePage extends ConsumerWidget {
+class ClientHomePage extends ConsumerStatefulWidget {
   const ClientHomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ClientHomePage> createState() => _ClientHomePageState();
+}
+
+class _ClientHomePageState extends ConsumerState<ClientHomePage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(misSiniestrosControllerProvider);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final session = ref.watch(currentSessionProvider);
     final siniestrosAsync = ref.watch(misSiniestrosControllerProvider);
@@ -52,77 +59,83 @@ class ClientHomePage extends ConsumerWidget {
         },
       ),
       body: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            _Header(
-              nombre: nombre,
-              poliza: poliza,
-              noLeidas: ref.watch(notificacionesNoLeidasProvider),
-              onLogout: () => _confirmLogout(context, ref),
-              onBell: () => context.push(RoutePaths.notificaciones),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(AppSpacing.xl),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _ReportCard(
-                    onTap: () {
-                      ref.read(reportControllerProvider.notifier).reset();
-                      context.push(RoutePaths.reportar);
-                    },
-                  ),
-                  const Gap(AppSpacing.lg),
-                  _StatsRow(
-                    activos: store.activos,
-                    total: store.total,
-                  ),
-                  const Gap(AppSpacing.xl),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text('Actividad Reciente',
-                          style: theme.textTheme.titleLarge),
-                      if (siniestrosAsync.hasValue && (siniestrosAsync.value?.isNotEmpty == true))
-                        GestureDetector(
-                          onTap: () => context.go(RoutePaths.historial),
-                          child: Text('Ver todos',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppColors.blueprint,
-                                fontWeight: FontWeight.w600,
-                              )),
-                        ),
-                    ],
-                  ),
-                  const Gap(AppSpacing.md),
-                  siniestrosAsync.when(
-                    data: (siniestros) {
-                      if (siniestros.isEmpty) return const _EmptyActivity();
-                      return Column(
-                        children: siniestros.map((s) => Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                          child: SiniestroCard(
-                            siniestro: s,
-                            onTap: () => context.push(
-                                RoutePaths.detalleSiniestroDe(s.id)),
-                          ),
-                        )).toList(),
-                      );
-                    },
-                    loading: () => const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(AppSpacing.xl),
-                        child: CircularProgressIndicator(),
-                      ),
-                    ),
-                    error: (_, _) => const _EmptyActivity(),
-                  ),
-                ],
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(misSiniestrosControllerProvider);
+            await ref.read(misSiniestrosControllerProvider.future);
+          },
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              _Header(
+                nombre: nombre,
+                poliza: poliza,
+                noLeidas: ref.watch(notificacionesNoLeidasProvider),
+                onLogout: () => _confirmLogout(context, ref),
+                onBell: () => context.push(RoutePaths.notificaciones),
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.xl),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _ReportCard(
+                      onTap: () {
+                        ref.read(reportControllerProvider.notifier).reset();
+                        context.push(RoutePaths.reportar);
+                      },
+                    ),
+                    const Gap(AppSpacing.lg),
+                    _StatsRow(
+                      activos: store.activos,
+                      total: store.total,
+                    ),
+                    const Gap(AppSpacing.xl),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text('Actividad Reciente',
+                            style: theme.textTheme.titleLarge),
+                        if (siniestrosAsync.hasValue && (siniestrosAsync.value?.isNotEmpty == true))
+                          GestureDetector(
+                            onTap: () => context.go(RoutePaths.historial),
+                            child: Text('Ver todos',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: AppColors.blueprint,
+                                  fontWeight: FontWeight.w600,
+                                )),
+                          ),
+                      ],
+                    ),
+                    const Gap(AppSpacing.md),
+                    siniestrosAsync.when(
+                      data: (siniestros) {
+                        if (siniestros.isEmpty) return const _EmptyActivity();
+                        return Column(
+                          children: siniestros.map((s) => Padding(
+                            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                            child: SiniestroCard(
+                              siniestro: s,
+                              onTap: () => context.push(
+                                  RoutePaths.detalleSiniestroDe(s.id)),
+                            ),
+                          )).toList(),
+                        );
+                      },
+                      loading: () => const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(AppSpacing.xl),
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                      error: (_, _) => const _EmptyActivity(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
