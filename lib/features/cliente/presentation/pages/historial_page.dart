@@ -24,9 +24,9 @@ class HistorialPage extends ConsumerWidget {
     final siniestrosAsync = ref.watch(misSiniestrosControllerProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: context.surfaceColor,
         automaticallyImplyLeading: false,
         title: Text('Historial', style: theme.textTheme.titleLarge),
       ),
@@ -83,7 +83,7 @@ class _Empty extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.history, size: 48, color: AppColors.textHint),
+            Icon(Icons.history, size: 48, color: context.textHintColor),
             const Gap(AppSpacing.md),
             Text('Sin siniestros todavía', style: theme.textTheme.titleMedium),
             const Gap(AppSpacing.xs),

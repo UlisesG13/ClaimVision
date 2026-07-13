@@ -76,11 +76,11 @@ class _FirmaPeritajePageState extends ConsumerState<FirmaPeritajePage> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: context.surfaceColor,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: context.textPrimaryColor),
           onPressed: () => context.canPop() ? context.pop() : null,
         ),
         title: Text('Firma del Peritaje', style: theme.textTheme.titleLarge),
@@ -190,24 +190,24 @@ class _Resumen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Resumen', style: theme.textTheme.titleMedium?.copyWith(fontSize: 15)),
           const Gap(AppSpacing.md),
-          _fila(theme, 'Daños validados', '$danos'),
-          _fila(theme, 'Costo definitivo', _money(costo)),
-          _fila(theme, 'Ajustador', ajustador),
+          _fila(context, theme, 'Daños validados', '$danos'),
+          _fila(context, theme, 'Costo definitivo', _money(costo)),
+          _fila(context, theme, 'Ajustador', ajustador),
         ],
       ),
     );
   }
 
-  Widget _fila(ThemeData theme, String label, String value) {
+  Widget _fila(BuildContext context, ThemeData theme, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
@@ -215,7 +215,7 @@ class _Resumen extends StatelessWidget {
           Expanded(
             child: Text(label,
                 style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: AppColors.textSecondary)),
+                    ?.copyWith(color: context.textSecondaryColor)),
           ),
           Text(value,
               style:

@@ -52,7 +52,7 @@ class _CasosAsignadosPageState extends ConsumerState<CasosAsignadosPage> {
     final nombre = _nombre(session?.email);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       bottomNavigationBar: AjustadorBottomNav(
         currentIndex: 0,
         onTap: (i) {
@@ -157,7 +157,7 @@ class _Header extends StatelessWidget {
         ? 'AJ'
         : nombre.trim().split(' ').take(2).map((w) => w[0]).join().toUpperCase();
     return Container(
-      color: AppColors.white,
+      color: context.surfaceColor,
       padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.md),
       child: Row(
@@ -203,9 +203,9 @@ class _SearchBar extends StatelessWidget {
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
         hintText: 'Buscar por folio, placa o vehículo',
-        prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+        prefixIcon: Icon(Icons.search, color: context.textSecondaryColor),
         filled: true,
-        fillColor: AppColors.white,
+        fillColor: context.surfaceColor,
         contentPadding:
             const EdgeInsets.symmetric(vertical: 0, horizontal: AppSpacing.md),
         border: OutlineInputBorder(
@@ -233,8 +233,8 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.assignment_turned_in_outlined,
-                size: 48, color: AppColors.textHint),
+            Icon(Icons.assignment_turned_in_outlined,
+                size: 48, color: context.textHintColor),
             const Gap(AppSpacing.md),
             Text('Sin casos asignados', style: theme.textTheme.titleMedium),
             const Gap(AppSpacing.xs),
@@ -261,7 +261,7 @@ class _ErrorState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cloud_off, size: 48, color: AppColors.textHint),
+            Icon(Icons.cloud_off, size: 48, color: context.textHintColor),
             const Gap(AppSpacing.md),
             Text(mensaje,
                 textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),

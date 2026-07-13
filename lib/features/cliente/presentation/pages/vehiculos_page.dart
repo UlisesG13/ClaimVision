@@ -21,11 +21,11 @@ class VehiculosPage extends ConsumerWidget {
     final siniestrosAsync = ref.watch(misSiniestrosControllerProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: context.surfaceColor,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: context.textPrimaryColor),
           onPressed: () => context.canPop() ? context.pop() : null,
         ),
         title: Text('Vehículos registrados', style: theme.textTheme.titleLarge),
@@ -64,9 +64,9 @@ class _VehiculoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Row(
         children: [
@@ -91,7 +91,7 @@ class _VehiculoCard extends StatelessWidget {
                 const Gap(2),
                 Text('Placas: ${siniestro.vehiculoPlacas}',
                     style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: AppColors.textSecondary)),
+                        ?.copyWith(color: context.textSecondaryColor)),
                 if (vin != null && vin.isNotEmpty)
                   Text('VIN: $vin',
                       style: theme.textTheme.bodySmall),
@@ -116,8 +116,8 @@ class _Empty extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.directions_car_outlined,
-                size: 48, color: AppColors.textHint),
+            Icon(Icons.directions_car_outlined,
+                size: 48, color: context.textHintColor),
             const Gap(AppSpacing.md),
             Text('Sin vehículos registrados', style: theme.textTheme.titleMedium),
             const Gap(AppSpacing.xs),

@@ -72,7 +72,7 @@ class _ReportNarrationPageState extends ConsumerState<ReportNarrationPage> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -93,7 +93,7 @@ class _ReportNarrationPageState extends ConsumerState<ReportNarrationPage> {
                   Text('Narración de los hechos',
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
+                        color: context.textPrimaryColor,
                       )),
                   const Gap(AppSpacing.sm),
                   TextField(
@@ -107,9 +107,9 @@ class _ReportNarrationPageState extends ConsumerState<ReportNarrationPage> {
                       hintText:
                           'Ej. Estaba detenido en el semáforo cuando otro vehículo impactó por detrás…',
                       hintStyle: theme.textTheme.bodyMedium
-                          ?.copyWith(color: AppColors.textHint),
+                          ?.copyWith(color: context.textHintColor),
                       filled: true,
-                      fillColor: AppColors.white,
+                      fillColor: context.surfaceColor,
                       contentPadding: const EdgeInsets.all(AppSpacing.md),
                       border: OutlineInputBorder(
                         borderRadius:
@@ -170,9 +170,9 @@ class _VoiceNote extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.cardColor,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          border: Border.all(color: AppColors.borderLight),
+          border: Border.all(color: context.borderColor),
         ),
         child: Row(
           children: [
@@ -197,7 +197,7 @@ class _VoiceNote extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textHint),
+            Icon(Icons.chevron_right, color: context.textHintColor),
           ],
         ),
       ),
@@ -216,9 +216,9 @@ class _DanoInternoTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Row(
         children: [

@@ -24,7 +24,7 @@ class ReportDamagePage extends ConsumerWidget {
   Future<void> _capturar(BuildContext context, WidgetRef ref) async {
     final source = await showModalBottomSheet<bool>(
       context: context,
-      backgroundColor: AppColors.white,
+      backgroundColor: context.surfaceColor,
       shape: const RoundedRectangleBorder(
         borderRadius:
             BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLg)),
@@ -72,7 +72,7 @@ class ReportDamagePage extends ConsumerWidget {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -155,7 +155,7 @@ class _CaptureCard extends StatelessWidget {
       child: Container(
         height: 170,
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.cardColor,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           border: Border.all(
             color: AppColors.blueprint.withValues(alpha: 0.2),
@@ -279,11 +279,11 @@ class _AddTile extends StatelessWidget {
         width: 90,
         height: 90,
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.cardColor,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          border: Border.all(color: AppColors.borderLight),
+          border: Border.all(color: context.borderColor),
         ),
-        child: const Icon(Icons.add, color: AppColors.textSecondary),
+        child: Icon(Icons.add, color: context.textSecondaryColor),
       ),
     );
   }

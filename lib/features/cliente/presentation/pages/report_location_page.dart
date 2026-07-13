@@ -79,7 +79,7 @@ class _ReportLocationPageState extends ConsumerState<ReportLocationPage> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -172,7 +172,7 @@ class _MapCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.blueprint.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          border: Border.all(color: AppColors.borderLight),
+          border: Border.all(color: context.borderColor),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -198,7 +198,7 @@ class _MapCard extends StatelessWidget {
                       : 'Toca para usar mi ubicación actual',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
+                color: context.textSecondaryColor,
               ),
             ),
           ],
@@ -223,21 +223,21 @@ class _ReadField extends StatelessWidget {
         Text(label,
             style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
+              color: context.textPrimaryColor,
             )),
         const Gap(AppSpacing.sm),
         Container(
           height: 46,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: context.surfaceColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
             border: Border.all(color: const Color(0xFFC4C6CE)),
           ),
           child: Row(
             children: [
               if (icon != null) ...[
-                Icon(icon, size: 18, color: AppColors.textSecondary),
+                Icon(icon, size: 18, color: context.textSecondaryColor),
                 const Gap(AppSpacing.sm),
               ],
               Expanded(

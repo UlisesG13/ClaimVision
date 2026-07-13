@@ -30,11 +30,11 @@ class CasoDetallePage extends ConsumerWidget {
         .firstOrNull;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: context.surfaceColor,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: context.textPrimaryColor),
           onPressed: () => context.canPop() ? context.pop() : null,
         ),
         title: siniestro == null
@@ -131,9 +131,9 @@ class _Section extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,7 +150,7 @@ class _Section extends StatelessWidget {
                     width: 150,
                     child: Text(label,
                         style: theme.textTheme.bodyMedium
-                            ?.copyWith(color: AppColors.textSecondary)),
+                            ?.copyWith(color: context.textSecondaryColor)),
                   ),
                   Expanded(
                     child: Text(value,
@@ -178,9 +178,9 @@ class _NarracionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

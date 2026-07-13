@@ -20,9 +20,9 @@ class CasoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,7 +84,7 @@ class _Line extends StatelessWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        Icon(icon, size: 16, color: color ?? AppColors.textSecondary),
+        Icon(icon, size: 16, color: color ?? context.textSecondaryColor),
         const Gap(AppSpacing.sm),
         Expanded(
           child: Text(text,

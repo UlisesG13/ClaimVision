@@ -18,9 +18,9 @@ class AjustadorBottomNav extends StatelessWidget {
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onTap,
-      backgroundColor: AppColors.white,
+      backgroundColor: context.cardColor,
       selectedItemColor: AppColors.amber,
-      unselectedItemColor: AppColors.textHint,
+      unselectedItemColor: context.textHintColor,
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.assignment_outlined),

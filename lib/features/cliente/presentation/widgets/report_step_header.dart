@@ -24,7 +24,7 @@ class ReportStepHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      color: AppColors.white,
+      color: context.surfaceColor,
       padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.md),
       child: Row(
@@ -36,11 +36,11 @@ class ReportStepHeader extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: AppColors.background,
+                color: context.scaffoldBgColor,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
-              child: const Icon(Icons.arrow_back,
-                  size: 20, color: AppColors.textPrimary),
+              child: Icon(Icons.arrow_back,
+                  size: 20, color: context.textPrimaryColor),
             ),
           ),
           const Gap(AppSpacing.md),
@@ -62,7 +62,7 @@ class ReportStepHeader extends StatelessWidget {
                 height: 5,
                 margin: const EdgeInsets.only(left: 4),
                 decoration: BoxDecoration(
-                  color: activo ? AppColors.amber : AppColors.borderLight,
+                  color: activo ? AppColors.amber : context.borderColor,
                   borderRadius: BorderRadius.circular(3),
                 ),
               );

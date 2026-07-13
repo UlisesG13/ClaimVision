@@ -116,7 +116,7 @@ class _ToastWidgetState extends State<_ToastWidget>
                   padding: const EdgeInsets.symmetric(
                       horizontal: AppSpacing.lg, vertical: AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: AppColors.white,
+                    color: context.cardColor,
                     borderRadius: BorderRadius.circular(999),
                     boxShadow: [
                       BoxShadow(

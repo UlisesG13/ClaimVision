@@ -22,11 +22,11 @@ class NotificacionesPage extends ConsumerWidget {
     final hayNoLeidas = notificaciones.any((n) => !n.leida);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: context.surfaceColor,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: context.textPrimaryColor),
           onPressed: () => context.canPop() ? context.pop() : null,
         ),
         title: Text('Notificaciones', style: theme.textTheme.titleLarge),
@@ -83,7 +83,7 @@ class NotificacionesPage extends ConsumerWidget {
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1,
-                  color: AppColors.textSecondary,
+                  color: context.textSecondaryColor,
                 )),
       ));
       for (final n in items) {
@@ -126,10 +126,10 @@ class _NotificacionTile extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: notificacion.leida
-              ? AppColors.white
+              ? context.cardColor
               : AppColors.blueprint.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          border: Border.all(color: AppColors.borderLight),
+          border: Border.all(color: context.borderColor),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,7 +160,7 @@ class _NotificacionTile extends StatelessWidget {
                   const Gap(2),
                   Text(notificacion.cuerpo,
                       style: theme.textTheme.bodyMedium
-                          ?.copyWith(color: AppColors.textSecondary)),
+                          ?.copyWith(color: context.textSecondaryColor)),
                 ],
               ),
             ),
@@ -196,8 +196,8 @@ class _Empty extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.notifications_none,
-                size: 48, color: AppColors.textHint),
+            Icon(Icons.notifications_none,
+                size: 48, color: context.textHintColor),
             const Gap(AppSpacing.md),
             Text('Sin notificaciones', style: theme.textTheme.titleMedium),
             const Gap(AppSpacing.xs),

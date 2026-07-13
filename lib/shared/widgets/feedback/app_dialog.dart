@@ -148,7 +148,7 @@ class AppDialog {
       builder: (ctx) => PopScope(
         canPop: false,
         child: Dialog(
-          backgroundColor: AppColors.white,
+          backgroundColor: ctx.surfaceColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           ),

@@ -48,8 +48,8 @@ class _AppTextFieldState extends State<AppTextField> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const fillColor = AppColors.background;
-    const borderColor = Color(0xFFC4C6CE);
+    final fillColor = context.surfaceColor;
+    final borderColor = context.borderColor;
 
     OutlineInputBorder border(Color color, [double width = 1]) {
       return OutlineInputBorder(
@@ -67,7 +67,7 @@ class _AppTextFieldState extends State<AppTextField> {
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
+              color: context.textPrimaryColor,
             ),
           ),
           const Gap(AppSpacing.sm),
@@ -85,12 +85,12 @@ class _AppTextFieldState extends State<AppTextField> {
           decoration: InputDecoration(
             hintText: widget.hintText,
             hintStyle: theme.textTheme.bodyLarge?.copyWith(
-              color: AppColors.textHint,
+              color: context.textHintColor,
             ),
             filled: true,
             fillColor: fillColor,
             prefixIcon: widget.prefixIcon != null
-                ? Icon(widget.prefixIcon, size: 20, color: AppColors.textSecondary)
+                ? Icon(widget.prefixIcon, size: 20, color: context.textSecondaryColor)
                 : null,
             suffixIcon: widget.obscure
                 ? IconButton(
@@ -99,7 +99,7 @@ class _AppTextFieldState extends State<AppTextField> {
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
                       size: 20,
-                      color: AppColors.textSecondary,
+                      color: context.textSecondaryColor,
                     ),
                     tooltip: _obscured ? 'Mostrar contraseña' : 'Ocultar contraseña',
                     onPressed: () => setState(() => _obscured = !_obscured),

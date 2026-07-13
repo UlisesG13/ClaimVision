@@ -72,11 +72,11 @@ class InlineBanner extends StatelessWidget {
                   children: [
                     Text(title,
                         style: theme.textTheme.labelLarge
-                            ?.copyWith(color: AppColors.textPrimary)),
+                            ?.copyWith(color: context.textPrimaryColor)),
                     const Gap(2),
                     Text(message,
                         style: theme.textTheme.bodySmall
-                            ?.copyWith(color: AppColors.textSecondary)),
+                            ?.copyWith(color: context.textSecondaryColor)),
                   ],
                 ),
               ),

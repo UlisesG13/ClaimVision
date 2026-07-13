@@ -28,9 +28,9 @@ class NotificacionesAjustadorPage extends ConsumerWidget {
     final hayNoLeidas = casos.any((c) => !leidas.contains('caso_${c.id}'));
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: context.surfaceColor,
         automaticallyImplyLeading: false,
         title: Text('Notificaciones', style: theme.textTheme.titleLarge),
         actions: [
@@ -103,10 +103,10 @@ class _Tile extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: leida
-              ? AppColors.white
+              ? context.cardColor
               : AppColors.blueprint.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          border: Border.all(color: AppColors.borderLight),
+          border: Border.all(color: context.borderColor),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,7 +140,7 @@ class _Tile extends StatelessWidget {
                   Text(
                     'Tienes el caso ${siniestro.folioCorto} (${siniestro.vehiculoResumen}) para validar.',
                     style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: AppColors.textSecondary),
+                        ?.copyWith(color: context.textSecondaryColor),
                   ),
                 ],
               ),
@@ -172,8 +172,8 @@ class _Empty extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.notifications_none,
-                size: 48, color: AppColors.textHint),
+            Icon(Icons.notifications_none,
+                size: 48, color: context.textHintColor),
             const Gap(AppSpacing.md),
             Text('Sin notificaciones', style: theme.textTheme.titleMedium),
             const Gap(AppSpacing.xs),

@@ -80,7 +80,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final isLoading = ref.watch(authControllerProvider).isLoading;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -112,7 +112,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       Text(
                         '¿Ya tienes cuenta? ',
                         style: theme.textTheme.bodyLarge?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.textSecondaryColor,
                         ),
                       ),
                       GestureDetector(
@@ -167,7 +167,7 @@ class _Header extends StatelessWidget {
           'Configure su acceso seguro a la plataforma pericial.',
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyLarge?.copyWith(
-            color: AppColors.textSecondary,
+            color: context.textSecondaryColor,
           ),
         ),
       ],
@@ -202,7 +202,7 @@ class _RegisterCard extends StatelessWidget {
         AppSpacing.xl,
       ),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
         border: Border.all(color: const Color(0xFFC4C6CE)),
         boxShadow: [

@@ -30,11 +30,11 @@ class SiniestroDetailPage extends ConsumerWidget {
         .firstOrNull;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: context.surfaceColor,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: context.textPrimaryColor),
           onPressed: () => context.canPop() ? context.pop() : null,
         ),
         title: siniestro == null
@@ -88,9 +88,9 @@ class _CurrentStateCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,8 +105,8 @@ class _CurrentStateCard extends StatelessWidget {
           const Gap(AppSpacing.md),
           Row(
             children: [
-              const Icon(Icons.directions_car_outlined,
-                  size: 18, color: AppColors.textSecondary),
+              Icon(Icons.directions_car_outlined,
+                  size: 18, color: context.textSecondaryColor),
               const Gap(AppSpacing.sm),
               Expanded(
                 child: Text(detalle,
@@ -118,7 +118,7 @@ class _CurrentStateCard extends StatelessWidget {
           const Gap(AppSpacing.xs),
           Row(
             children: [
-              const Icon(Icons.schedule, size: 18, color: AppColors.textSecondary),
+              Icon(Icons.schedule, size: 18, color: context.textSecondaryColor),
               const Gap(AppSpacing.sm),
               Text(DateFormatEs.fechaHora(siniestro.fechaSiniestro),
                   style: theme.textTheme.bodyMedium),
@@ -142,9 +142,9 @@ class _Timeline extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         children: [
@@ -194,7 +194,7 @@ class _TimelineRow extends StatelessWidget {
     final color = switch (estado) {
       _PasoEstado.completado => AppColors.success,
       _PasoEstado.actual => AppColors.amber,
-      _PasoEstado.pendiente => AppColors.borderLight,
+      _PasoEstado.pendiente => context.borderColor,
     };
     final activo = estado != _PasoEstado.pendiente;
 
@@ -210,7 +210,7 @@ class _TimelineRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: estado == _PasoEstado.completado
                       ? AppColors.success
-                      : AppColors.white,
+                      : context.cardColor,
                   shape: BoxShape.circle,
                   border: Border.all(color: color, width: 2),
                 ),
@@ -228,7 +228,7 @@ class _TimelineRow extends StatelessWidget {
                     width: 2,
                     color: estado == _PasoEstado.completado
                         ? AppColors.success
-                        : AppColors.borderLight,
+                        : context.borderColor,
                   ),
                 ),
             ],
@@ -243,8 +243,8 @@ class _TimelineRow extends StatelessWidget {
                   Text(estatus.label,
                       style: theme.textTheme.labelLarge?.copyWith(
                         color: activo
-                            ? AppColors.textPrimary
-                            : AppColors.textHint,
+                            ? context.textPrimaryColor
+                            : context.textHintColor,
                       )),
                   Text(subtitulo, style: theme.textTheme.bodySmall),
                 ],
@@ -266,9 +266,9 @@ class _AdjusterCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Row(
         children: [
@@ -305,9 +305,9 @@ class _NarrationCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -329,7 +329,7 @@ class _EstatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (estatus.tono) {
-      SiniestroEstatusTono.neutro => AppColors.textSecondary,
+      SiniestroEstatusTono.neutro => context.textSecondaryColor,
       SiniestroEstatusTono.proceso => AppColors.amber,
       SiniestroEstatusTono.info => AppColors.blueprint,
       SiniestroEstatusTono.exito => AppColors.success,
@@ -362,7 +362,7 @@ class _NotFound extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.search_off, size: 48, color: AppColors.textHint),
+            Icon(Icons.search_off, size: 48, color: context.textHintColor),
             const Gap(AppSpacing.md),
             Text('No encontramos este siniestro',
                 style: theme.textTheme.titleMedium),

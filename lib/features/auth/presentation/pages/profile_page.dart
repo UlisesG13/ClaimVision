@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/storage_keys.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/routes/route_paths.dart';
+import '../../../../core/theme/theme_notifier.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/ajustador_bottom_nav.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 import '../../../../shared/widgets/feedback/app_dialog.dart';
@@ -19,14 +22,42 @@ import '../state/onboarding_controller.dart';
 /// lo capturado en el onboarding (póliza + consentimientos). El backend no
 /// expone aún nombre completo ni datos de aseguradora del cliente, así que se
 /// muestran solo los datos disponibles. "Cerrar sesión" hace logout real.
-class ProfilePage extends ConsumerWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends ConsumerState<ProfilePage> {
+  bool _biometricEnabled = false;
+  bool _biometricDisponible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarEstadoBiometrico();
+  }
+
+  Future<void> _cargarEstadoBiometrico() async {
+    final storage = ref.read(secureStorageProvider);
+    final enabled = await storage.read(StorageKeys.biometricEnabled);
+    final service = ref.read(biometricServiceProvider);
+    final disponible = await service.canCheckBiometrics();
+    if (mounted) {
+      setState(() {
+        _biometricEnabled = enabled == 'true';
+        _biometricDisponible = disponible;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final session = ref.watch(currentSessionProvider);
     final onboarding = ref.watch(onboardingControllerProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     final email = session?.email ?? '';
     final nombre = _nombreDesdeEmail(email);
@@ -35,11 +66,11 @@ class ProfilePage extends ConsumerWidget {
     final tienePoliza = onboarding.numeroPoliza.trim().isNotEmpty;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       appBar: AppBar(
         title: Text('Mi Perfil',
             style: theme.textTheme.titleLarge?.copyWith(
-              color: AppColors.blueprint,
+              color: context.textPrimaryColor,
               fontWeight: FontWeight.bold,
             )),
       ),
@@ -94,6 +125,17 @@ class ProfilePage extends ConsumerWidget {
               onConfiguracion: () => _proximamente(context, 'Configuración'),
             ),
             const Gap(AppSpacing.lg),
+            if (_biometricDisponible)
+              _BiometricCard(
+                enabled: _biometricEnabled,
+                onChanged: (v) => _toggleBiometrico(v, session?.email),
+              ),
+            const Gap(AppSpacing.lg),
+            _ThemeCard(
+              themeMode: themeMode,
+              onChanged: (mode) => ref.read(themeModeProvider.notifier).setThemeMode(mode),
+            ),
+            const Gap(AppSpacing.lg),
           ],
           _LogoutButton(onTap: () => _confirmarLogout(context, ref)),
           const Gap(AppSpacing.md),
@@ -122,6 +164,76 @@ class ProfilePage extends ConsumerWidget {
       ..showSnackBar(SnackBar(content: Text('$que — próximamente.')));
   }
 
+  Future<void> _toggleBiometrico(bool activar, String? email) async {
+    if (activar) {
+      final pass = await _pedirContrasena();
+      if (pass == null) return;
+
+      final biometricService = ref.read(biometricServiceProvider);
+      final autenticado = await biometricService.authenticate(
+        reason: 'Registra tu huella para acceder más rápido',
+      );
+      if (!autenticado) return;
+
+      final storage = ref.read(secureStorageProvider);
+      await storage.write(StorageKeys.biometricEnabled, 'true');
+      if (email != null) {
+        await storage.write(StorageKeys.biometricEmail, email);
+        await storage.write(StorageKeys.biometricPassword, pass);
+      }
+      if (mounted) setState(() => _biometricEnabled = true);
+    } else {
+      final storage = ref.read(secureStorageProvider);
+      await storage.delete(StorageKeys.biometricEnabled);
+      await storage.delete(StorageKeys.biometricEmail);
+      await storage.delete(StorageKeys.biometricPassword);
+      if (mounted) setState(() => _biometricEnabled = false);
+    }
+  }
+
+  Future<String?> _pedirContrasena() async {
+    final ctrl = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        final t = Theme.of(ctx);
+        return AlertDialog(
+          title: Text('Confirma tu contraseña', style: t.textTheme.titleLarge),
+          content: Form(
+            key: formKey,
+            child: AppTextField(
+              controller: ctrl,
+              hintText: 'Contraseña actual',
+              prefixIcon: Icons.lock_outline,
+              obscure: true,
+              validator: (v) =>
+                  (v == null || v.isEmpty) ? 'Ingresa tu contraseña' : null,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: AppColors.blueprint),
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  Navigator.pop(ctx, true);
+                }
+              },
+              child: const Text('Confirmar'),
+            ),
+          ],
+        );
+      },
+    );
+    final pass = ok == true ? ctrl.text : null;
+    ctrl.dispose();
+    return pass;
+  }
+
   Future<void> _confirmarLogout(BuildContext context, WidgetRef ref) async {
     final salir = await AppDialog.confirm(
       context,
@@ -132,7 +244,6 @@ class ProfilePage extends ConsumerWidget {
       danger: true,
     );
     if (salir) {
-      // El router detecta la sesión nula y redirige al login automáticamente.
       await ref.read(authControllerProvider.notifier).logout();
     }
   }
@@ -155,9 +266,9 @@ class _Header extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         children: [
@@ -173,18 +284,18 @@ class _Header extends StatelessWidget {
           const Gap(AppSpacing.xs),
           Text(email,
               style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: AppColors.textSecondary)),
+                  ?.copyWith(color: context.textSecondaryColor)),
           const Gap(AppSpacing.sm),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: AppColors.blueprint.withValues(alpha: 0.06),
+              color: context.textPrimaryColor.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(rol,
                 style: theme.textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppColors.blueprint,
+                  color: context.textPrimaryColor,
                 )),
           ),
         ],
@@ -291,9 +402,9 @@ class _MenuCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -305,22 +416,92 @@ class _MenuCard extends StatelessWidget {
                 leading: const Icon(Icons.directions_car_outlined,
                     color: AppColors.blueprint),
                 title: const Text('Vehículos registrados'),
-                trailing: const Icon(Icons.chevron_right,
-                    color: AppColors.textHint),
+                trailing: Icon(Icons.chevron_right,
+                    color: context.textHintColor),
                 onTap: onVehiculos,
               ),
-              const Divider(height: 1),
+              Divider(height: 1, color: context.borderColor),
               ListTile(
                 leading: const Icon(Icons.settings_outlined,
                     color: AppColors.blueprint),
                 title: const Text('Configuración'),
-                trailing: const Icon(Icons.chevron_right,
-                    color: AppColors.textHint),
+                trailing: Icon(Icons.chevron_right,
+                    color: context.textHintColor),
                 onTap: onConfiguracion,
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ThemeCard extends StatelessWidget {
+  const _ThemeCard({
+    required this.themeMode,
+    required this.onChanged,
+  });
+
+  final ThemeMode themeMode;
+  final ValueChanged<ThemeMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: context.cardColor,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: context.borderColor),
+      ),
+      child: Column(
+        children: [
+          SwitchListTile(
+            title: const Text('Modo oscuro'),
+            subtitle: const Text('Cambiar entre tema claro y oscuro'),
+            secondary: Icon(
+              themeMode == ThemeMode.dark
+                  ? Icons.dark_mode
+                  : Icons.light_mode,
+              color: AppColors.blueprint,
+            ),
+            value: themeMode == ThemeMode.dark,
+            onChanged: (dark) {
+              onChanged(dark ? ThemeMode.dark : ThemeMode.light);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BiometricCard extends StatelessWidget {
+  const _BiometricCard({
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: context.cardColor,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: context.borderColor),
+      ),
+      child: SwitchListTile(
+        title: const Text('Usar huella digital'),
+        subtitle: const Text('Accede sin escribir contraseña'),
+        secondary: Icon(
+          enabled ? Icons.fingerprint : Icons.fingerprint_outlined,
+          color: enabled ? AppColors.amber : context.textHintColor,
+        ),
+        value: enabled,
+        onChanged: onChanged,
       ),
     );
   }
@@ -362,9 +543,9 @@ class _SectionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,7 +575,7 @@ class _InfoRow extends StatelessWidget {
           Expanded(
             child: Text(label,
                 style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: AppColors.textSecondary)),
+                    ?.copyWith(color: context.textSecondaryColor)),
           ),
           const Gap(AppSpacing.md),
           Expanded(
@@ -425,7 +606,7 @@ class _ConsentRow extends StatelessWidget {
           Icon(
             value ? Icons.check_circle : Icons.cancel_outlined,
             size: 20,
-            color: value ? AppColors.success : AppColors.textHint,
+            color: value ? AppColors.success : context.textHintColor,
           ),
         ],
       ),

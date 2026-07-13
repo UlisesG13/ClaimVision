@@ -82,7 +82,7 @@ class _ReportVehiclePageState extends ConsumerState<ReportVehiclePage> {
         if (!didPop) _intentarSalir();
       },
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.scaffoldBgColor,
         body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -108,9 +108,9 @@ class _ReportVehiclePageState extends ConsumerState<ReportVehiclePage> {
                           Text('No se pudieron cargar tus vehículos.',
                               style: theme.textTheme.titleMedium),
                           const Gap(AppSpacing.xs),
-                          Text('$err',
-                              style: theme.textTheme.bodySmall
-                                  ?.copyWith(color: AppColors.textSecondary)),
+                              Text('$err',
+                                  style: theme.textTheme.bodySmall
+                                      ?.copyWith(color: context.textSecondaryColor)),
                           const Gap(AppSpacing.lg),
                           PrimaryButton(
                             label: 'Reintentar',
@@ -129,8 +129,8 @@ class _ReportVehiclePageState extends ConsumerState<ReportVehiclePage> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.directions_car_outlined,
-                                  size: 48, color: AppColors.textHint),
+                              Icon(Icons.directions_car_outlined,
+                                  size: 48, color: context.textHintColor),
                               const Gap(AppSpacing.md),
                               Text('Sin vehículos registrados',
                                   style: theme.textTheme.titleMedium),
@@ -140,7 +140,7 @@ class _ReportVehiclePageState extends ConsumerState<ReportVehiclePage> {
                                 'Contacta a tu aseguradora.',
                                 textAlign: TextAlign.center,
                                 style: theme.textTheme.bodySmall
-                                    ?.copyWith(color: AppColors.textSecondary),
+                                    ?.copyWith(color: context.textSecondaryColor),
                               ),
                             ],
                           ),
@@ -205,10 +205,10 @@ class _VehiculoTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: seleccionado ? AppColors.blueprint.withValues(alpha: 0.06) : AppColors.white,
+          color: seleccionado ? AppColors.blueprint.withValues(alpha: 0.06) : context.cardColor,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           border: Border.all(
-            color: seleccionado ? AppColors.blueprint : AppColors.borderLight,
+            color: seleccionado ? AppColors.blueprint : context.borderColor,
             width: seleccionado ? 2 : 1,
           ),
         ),
@@ -223,7 +223,7 @@ class _VehiculoTile extends StatelessWidget {
               ),
               child: Icon(
                 seleccionado ? Icons.check_circle : Icons.directions_car,
-                color: seleccionado ? AppColors.blueprint : AppColors.textHint,
+                color: seleccionado ? AppColors.blueprint : context.textHintColor,
               ),
             ),
             const Gap(AppSpacing.md),
@@ -240,7 +240,7 @@ class _VehiculoTile extends StatelessWidget {
                   const Gap(2),
                   Text('Placas: ${vehiculo.placas}',
                       style: theme.textTheme.bodyMedium
-                          ?.copyWith(color: AppColors.textSecondary)),
+                          ?.copyWith(color: context.textSecondaryColor)),
                   if (vin != null && vin.isNotEmpty)
                     Text('VIN: $vin',
                         style: theme.textTheme.bodySmall),

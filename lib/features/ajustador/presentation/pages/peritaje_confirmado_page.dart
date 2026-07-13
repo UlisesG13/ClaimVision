@@ -29,7 +29,7 @@ class PeritajeConfirmadoPage extends ConsumerWidget {
     final ajustador = _nombre(session?.email);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: SizedBox(
@@ -75,25 +75,25 @@ class PeritajeConfirmadoPage extends ConsumerWidget {
               'pasó a validación de la aseguradora.',
               textAlign: TextAlign.center,
               style:
-                  theme.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                  theme.textTheme.bodyMedium?.copyWith(color: context.textSecondaryColor),
             ),
             const Gap(AppSpacing.xl),
             Container(
               padding: const EdgeInsets.all(AppSpacing.lg),
               decoration: BoxDecoration(
-                color: AppColors.white,
+                color: context.cardColor,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                border: Border.all(color: AppColors.borderLight),
+                border: Border.all(color: context.borderColor),
               ),
               child: Column(
                 children: [
-                  _fila(theme, 'Estatus',
+                  _fila(context, theme, 'Estatus',
                       siniestro?.estatus.label ?? 'Peritaje validado'),
-                  _fila(theme, 'Caso', siniestro?.folioCorto ?? '—'),
-                  _fila(theme, 'Costo definitivo', _money(state.costoDefinitivo)),
-                  _fila(theme, 'Daños validados', '${state.danos.length}'),
-                  _fila(theme, 'Firmado por', ajustador),
-                  _fila(theme, 'Fecha', DateFormatEs.fechaHora(DateTime.now())),
+                  _fila(context, theme, 'Caso', siniestro?.folioCorto ?? '—'),
+                  _fila(context, theme, 'Costo definitivo', _money(state.costoDefinitivo)),
+                  _fila(context, theme, 'Daños validados', '${state.danos.length}'),
+                  _fila(context, theme, 'Firmado por', ajustador),
+                  _fila(context, theme, 'Fecha', DateFormatEs.fechaHora(DateTime.now())),
                 ],
               ),
             ),
@@ -103,7 +103,7 @@ class PeritajeConfirmadoPage extends ConsumerWidget {
     );
   }
 
-  Widget _fila(ThemeData theme, String label, String value) {
+  Widget _fila(BuildContext context, ThemeData theme, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -111,7 +111,7 @@ class PeritajeConfirmadoPage extends ConsumerWidget {
           Expanded(
             child: Text(label,
                 style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: AppColors.textSecondary)),
+                    ?.copyWith(color: context.textSecondaryColor)),
           ),
           Text(value,
               style:

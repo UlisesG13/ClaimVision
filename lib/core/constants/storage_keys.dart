@@ -17,4 +17,7 @@ class StorageKeys {
   static const String biometricEnabled = 'cv_biometric_enabled';
   static const String biometricEmail = 'cv_biometric_email';
   static const String biometricPassword = 'cv_biometric_password';
+
+  // ── Tema ────────────────────────────────────────────────────────────────
+  static const String themeMode = 'cv_theme_mode';
 }

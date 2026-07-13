@@ -53,7 +53,7 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
     final nombre = _nombreDesdeEmail(session?.email);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       bottomNavigationBar: ClaimVisionBottomNav(
         currentIndex: 0,
         onTap: (index) {
@@ -109,7 +109,7 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
                             onTap: () => context.go(RoutePaths.historial),
                             child: Text('Ver todos',
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: AppColors.blueprint,
+                                  color: context.textPrimaryColor,
                                   fontWeight: FontWeight.w600,
                                 )),
                           ),
@@ -181,9 +181,9 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
     if (yaVisto == 'true') return;
 
     if (!mounted) return;
-    final cambio = await _mostrarDialogoCambioPassword();
+    final nuevaPassword = await _mostrarDialogoCambioPassword();
     if (!mounted) return;
-    if (cambio) {
+    if (nuevaPassword != null) {
       await AppDialog.info(
         context,
         title: 'Contraseña actualizada',
@@ -197,19 +197,20 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
     final biometricService = ref.read(biometricServiceProvider);
     final disponible = await biometricService.canCheckBiometrics();
     if (disponible && mounted) {
-      await _mostrarDialogoBiometrico();
+      await _mostrarDialogoBiometrico(password: nuevaPassword);
     }
 
     if (!mounted) return;
     await storage.write(StorageKeys.primerInicio, 'true');
   }
 
-  Future<bool> _mostrarDialogoCambioPassword() async {
+  Future<String?> _mostrarDialogoCambioPassword() async {
     final currentCtrl = TextEditingController();
     final newCtrl = TextEditingController();
     final formKey = GlobalKey<FormState>();
 
-    final resultado = await showDialog<bool>(
+    String? nuevaPassword;
+    final cambioRealizado = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
@@ -264,6 +265,7 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
                   );
                   if (ctx.mounted) {
                     AppDialog.hideLoading(ctx);
+                    nuevaPassword = newCtrl.text;
                     Navigator.pop(ctx, true);
                   }
                 } on Failure catch (e) {
@@ -282,10 +284,11 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
 
     currentCtrl.dispose();
     newCtrl.dispose();
-    return resultado ?? false;
+    if (cambioRealizado == true && nuevaPassword != null) return nuevaPassword;
+    return null;
   }
 
-  Future<void> _mostrarDialogoBiometrico() async {
+  Future<void> _mostrarDialogoBiometrico({String? password}) async {
     final acepto = await AppDialog.permission(
       context,
       icon: Icons.fingerprint,
@@ -297,6 +300,46 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
     );
 
     if (!acepto || !mounted) return;
+
+    String? pass = password;
+    if (pass == null) {
+      final passCtrl = TextEditingController();
+      final ok = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) {
+          final t = Theme.of(ctx);
+          return AlertDialog(
+            title: Text('Confirma tu contraseña', style: t.textTheme.titleLarge),
+            content: AppTextField(
+              controller: passCtrl,
+              hintText: 'Contraseña actual',
+              prefixIcon: Icons.lock_outline,
+              obscure: true,
+              validator: (v) =>
+                  (v == null || v.isEmpty) ? 'Ingresa tu contraseña' : null,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(foregroundColor: AppColors.blueprint),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Confirmar'),
+              ),
+            ],
+          );
+        },
+      );
+      if (ok == true && passCtrl.text.isNotEmpty) {
+        pass = passCtrl.text;
+      }
+      passCtrl.dispose();
+    }
+
+    if (pass == null || pass.isEmpty) return;
 
     final biometricService = ref.read(biometricServiceProvider);
     final autenticado = await biometricService.authenticate(
@@ -310,6 +353,7 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
     await storage.write(StorageKeys.biometricEnabled, 'true');
     if (session?.email != null) {
       await storage.write(StorageKeys.biometricEmail, session!.email);
+      await storage.write(StorageKeys.biometricPassword, pass);
     }
   }
 }
@@ -345,7 +389,7 @@ class _Header extends StatelessWidget {
         poliza.trim().isEmpty ? 'Bienvenido' : 'Póliza $poliza';
 
     return Container(
-      color: AppColors.white,
+      color: context.cardColor,
       padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.md),
       child: Row(
@@ -497,9 +541,9 @@ class _StatBox extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           vertical: AppSpacing.lg, horizontal: AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -524,14 +568,14 @@ class _EmptyActivity extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           vertical: AppSpacing.xxl, horizontal: AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         children: [
-          const Icon(Icons.inbox_outlined,
-              size: 40, color: AppColors.textHint),
+          Icon(Icons.inbox_outlined,
+              size: 40, color: context.textHintColor),
           const Gap(AppSpacing.md),
           Text('Aún no has reportado siniestros',
               style: theme.textTheme.titleMedium?.copyWith(fontSize: 15)),

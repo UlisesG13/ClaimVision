@@ -43,7 +43,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   Future<void> _pickDocument({required bool isCedula}) async {
     final source = await showModalBottomSheet<_PickSource>(
       context: context,
-      backgroundColor: AppColors.white,
+      backgroundColor: context.surfaceColor,
       shape: const RoundedRectangleBorder(
         borderRadius:
             BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLg)),
@@ -107,7 +107,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -226,7 +226,7 @@ class _Header extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       height: 84,
-      color: AppColors.white,
+      color: context.surfaceColor,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Row(
         children: [
@@ -237,11 +237,11 @@ class _Header extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: AppColors.background,
+                color: context.scaffoldBgColor,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
-              child: const Icon(Icons.arrow_back,
-                  size: 20, color: AppColors.textPrimary),
+              child: Icon(Icons.arrow_back,
+                  size: 20, color: context.textPrimaryColor),
             ),
           ),
           const Gap(AppSpacing.md),
@@ -317,7 +317,7 @@ class _DocumentSlot extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.cardColor,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           border: Border.all(color: const Color(0xFFE5E8EB), width: 1.2),
         ),
@@ -330,7 +330,7 @@ class _DocumentSlot extends StatelessWidget {
                   : Container(
                       width: 44,
                       height: 44,
-                      color: AppColors.background,
+                      color: context.scaffoldBgColor,
                       child: const Icon(Icons.description_outlined,
                           color: AppColors.blueprint),
                     ),
@@ -352,7 +352,7 @@ class _DocumentSlot extends StatelessWidget {
             ),
             Icon(
               hasFile ? Icons.check_circle : Icons.add_circle_outline,
-              color: hasFile ? AppColors.success : AppColors.textSecondary,
+              color: hasFile ? AppColors.success : context.textSecondaryColor,
             ),
           ],
         ),
@@ -384,7 +384,7 @@ class _DetectedDataCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         border: Border.all(color: const Color(0xFFE5E8EB)),
       ),
@@ -450,7 +450,7 @@ class _ConsentRow extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.cardColor,
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           border: Border.all(color: const Color(0xFFE5E8EB)),
         ),

@@ -27,9 +27,9 @@ class ReportAnalysisPage extends ConsumerWidget {
     final siniestro = state.siniestro;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: context.surfaceColor,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -98,7 +98,7 @@ class _SentHero extends StatelessWidget {
             'Recibimos tu siniestro preliminar. Tu aseguradora ya puede revisarlo.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium
-                ?.copyWith(color: AppColors.textSecondary),
+                ?.copyWith(color: context.textSecondaryColor),
           ),
         ],
       ),
@@ -164,9 +164,9 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,7 +217,7 @@ class _Row extends StatelessWidget {
               value,
               textAlign: TextAlign.right,
               style: theme.textTheme.bodyMedium
-                  ?.copyWith(fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                  ?.copyWith(fontWeight: FontWeight.w600, color: context.textPrimaryColor),
             ),
           ),
         ],
@@ -246,7 +246,7 @@ class _AdjusterNote extends StatelessWidget {
             child: Text(
               'La evaluación de la IA es preliminar. Un ajustador la validará en '
               'sitio antes de cualquier dictamen.',
-              style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textPrimary),
+              style: theme.textTheme.bodySmall?.copyWith(color: context.textPrimaryColor),
             ),
           ),
         ],

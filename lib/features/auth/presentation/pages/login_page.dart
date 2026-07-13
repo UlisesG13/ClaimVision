@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../../core/constants/storage_keys.dart';
+import '../../../../core/di/providers.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -12,11 +14,6 @@ import '../../../../shared/widgets/feedback/app_snackbar.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../state/auth_controller.dart';
 
-/// Pantalla de inicio de sesión (Figma node 101:64 — "Portal de Expertos").
-///
-/// Fondo "blueprint" con tarjeta blanca: correo, contraseña, recuperación,
-/// botón "Entrar" y acceso biométrico. Conectada a `POST /api/auth/login` vía
-/// [AuthController]; al autenticar, el router redirige al inicio según el rol.
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
@@ -28,12 +25,42 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _biometricDisponible = false;
+  bool _autoIntentado = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _revisarBiometria();
+    });
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _revisarBiometria() async {
+    final storage = ref.read(secureStorageProvider);
+    final enabled = await storage.read(StorageKeys.biometricEnabled);
+    if (enabled != 'true') return;
+
+    final service = ref.read(biometricServiceProvider);
+    final disponible = await service.canCheckBiometrics();
+    if (!disponible) return;
+
+    if (!mounted) return;
+    setState(() {
+      _biometricDisponible = true;
+    });
+
+    if (!_autoIntentado) {
+      _autoIntentado = true;
+      await _autenticarConBiometria();
+    }
   }
 
   Future<void> _submit() async {
@@ -56,12 +83,40 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 
+  Future<void> _autenticarConBiometria() async {
+    final service = ref.read(biometricServiceProvider);
+    final storage = ref.read(secureStorageProvider);
+
+    final autenticado = await service.authenticate(
+      reason: 'Acceso rápido a tu cuenta',
+    );
+    if (!autenticado || !mounted) return;
+
+    final email = await storage.read(StorageKeys.biometricEmail);
+    final password = await storage.read(StorageKeys.biometricPassword);
+    if (email == null || password == null) return;
+
+    if (!mounted) return;
+    await ref.read(authControllerProvider.notifier).login(
+          email: email,
+          password: password,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Muestra un mensaje cuando el login falla (la UI nunca ve la excepción).
     ref.listen(authControllerProvider, (previous, next) {
+      final prevData = previous?.asData?.value;
+      final nextData = next.asData?.value;
+      // Resetear biometría al cerrar sesión (prev tenía session, next no)
+      if (prevData != null && nextData == null) {
+        _autoIntentado = false;
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          await _revisarBiometria();
+        });
+      }
       if (next.hasError && !next.isLoading) {
         final error = next.error;
         final message = error is Failure
@@ -106,6 +161,27 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       onSubmit: _submit,
                       onForgot: _mostrarModalOlvide,
                     ),
+                    if (_biometricDisponible) ...[
+                      const Gap(AppSpacing.xl),
+                      Row(
+                        children: [
+                          Expanded(child: Divider(color: context.borderColor)),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                            child: Text(
+                              'o ingresar con',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: context.textSecondaryColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          Expanded(child: Divider(color: context.borderColor)),
+                        ],
+                      ),
+                      const Gap(AppSpacing.lg),
+                      _BotonBiometrico(onPressed: _autenticarConBiometria),
+                    ],
                     const Gap(AppSpacing.xl),
                     _Footer(theme: theme),
                   ],
@@ -160,7 +236,7 @@ class _Header extends StatelessWidget {
           'Portal de Expertos',
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyLarge?.copyWith(
-            color: const Color(0xFFB4C7EC),
+            color: Color(0xFFB4C7EC),
           ),
         ),
       ],
@@ -188,12 +264,13 @@ class _LoginCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = context;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: colors.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-        border: Border.all(color: const Color(0xFFC4C6CE)),
+        border: Border.all(color: colors.borderColor),
         boxShadow: [
           BoxShadow(
             color: AppColors.blueprint.withValues(alpha: 0.08),
@@ -239,7 +316,7 @@ class _LoginCard extends StatelessWidget {
                 child: Text(
                   '¿Olvidaste tu contraseña?',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.blueprint,
+                    color: colors.textPrimaryColor,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -253,6 +330,44 @@ class _LoginCard extends StatelessWidget {
               onPressed: onSubmit,
             ),
             const Gap(AppSpacing.xl),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BotonBiometrico extends StatelessWidget {
+  const _BotonBiometrico({required this.onPressed});
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: AppColors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+          border: Border.all(
+            color: AppColors.borderLight.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.fingerprint, color: AppColors.amber, size: 24),
+            const Gap(AppSpacing.sm),
+            Text(
+              'Huella digital',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: AppColors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ],
         ),
       ),

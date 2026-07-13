@@ -24,9 +24,9 @@ class SiniestroCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.cardColor,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          border: Border.all(color: AppColors.borderLight),
+          border: Border.all(color: context.borderColor),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +62,7 @@ class SiniestroEstatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = switch (estatus.tono) {
-      SiniestroEstatusTono.neutro => AppColors.textSecondary,
+      SiniestroEstatusTono.neutro => context.textSecondaryColor,
       SiniestroEstatusTono.proceso => AppColors.amber,
       SiniestroEstatusTono.info => AppColors.blueprint,
       SiniestroEstatusTono.exito => AppColors.success,
@@ -93,7 +93,7 @@ class _IconLine extends StatelessWidget {
     final theme = Theme.of(context);
     return Row(
       children: [
-        Icon(icon, size: 16, color: AppColors.textSecondary),
+        Icon(icon, size: 16, color: context.textSecondaryColor),
         const Gap(AppSpacing.sm),
         Expanded(
           child: Text(text,

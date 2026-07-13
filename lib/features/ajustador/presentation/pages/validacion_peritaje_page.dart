@@ -31,11 +31,11 @@ class ValidacionPeritajePage extends ConsumerWidget {
     final controller = ref.read(peritajeEditorControllerProvider.notifier);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.scaffoldBgColor,
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: context.surfaceColor,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: context.textPrimaryColor),
           onPressed: () => context.canPop() ? context.pop() : null,
         ),
         title: Text('Validación de Peritaje', style: theme.textTheme.titleLarge),
@@ -112,7 +112,7 @@ class ValidacionPeritajePage extends ConsumerWidget {
           const Gap(AppSpacing.lg),
           Text('Observaciones de campo',
               style: theme.textTheme.bodySmall
-                  ?.copyWith(fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+                  ?.copyWith(fontWeight: FontWeight.w500, color: context.textPrimaryColor)),
           const Gap(AppSpacing.sm),
           TextFormField(
             initialValue: state.observaciones,
@@ -121,7 +121,7 @@ class ValidacionPeritajePage extends ConsumerWidget {
             decoration: InputDecoration(
               hintText: 'Notas del peritaje (opcional)…',
               filled: true,
-              fillColor: AppColors.white,
+              fillColor: context.surfaceColor,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 borderSide: const BorderSide(color: Color(0xFFC4C6CE)),
@@ -154,7 +154,7 @@ class ValidacionPeritajePage extends ConsumerWidget {
     return showModalBottomSheet<DanoAjustado>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.white,
+      backgroundColor: context.surfaceColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -218,9 +218,9 @@ class _DanoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,7 +248,7 @@ class _DanoCard extends StatelessWidget {
           const Gap(AppSpacing.xs),
           Text(dano.tipo.label,
               style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: AppColors.textSecondary)),
+                  ?.copyWith(color: context.textSecondaryColor)),
           const Gap(AppSpacing.sm),
           Row(
             children: [
@@ -347,13 +347,13 @@ class _SinDanos extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           vertical: AppSpacing.xl, horizontal: AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.borderLight),
+        border: Border.all(color: context.borderColor),
       ),
       child: Column(
         children: [
-          const Icon(Icons.add_road, size: 36, color: AppColors.textHint),
+          Icon(Icons.add_road, size: 36, color: context.textHintColor),
           const Gap(AppSpacing.sm),
           Text('Agrega los daños del vehículo',
               style: theme.textTheme.bodyMedium),
