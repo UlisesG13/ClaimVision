@@ -4,16 +4,11 @@ import '../../../../core/routes/route_paths.dart';
 import '../pages/login_page.dart';
 import '../pages/onboarding_page.dart';
 import '../pages/profile_page.dart';
-import '../pages/register_page.dart';
 
 List<GoRoute> authRoutes = [
   GoRoute(
     path: RoutePaths.login,
     builder: (_, _) => const LoginPage(),
-  ),
-  GoRoute(
-    path: RoutePaths.register,
-    builder: (_, _) => const RegisterPage(),
   ),
   GoRoute(
     path: RoutePaths.onboarding,

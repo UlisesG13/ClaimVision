@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/failures.dart';
-import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/validators.dart';
 import '../../../../shared/widgets/app_text_field.dart';
+import '../../../../shared/widgets/feedback/app_dialog.dart';
 import '../../../../shared/widgets/feedback/app_snackbar.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../state/auth_controller.dart';
@@ -46,8 +45,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         );
   }
 
-  void _comingSoon(String mensaje) {
-    AppSnackbar.show(context, mensaje);
+  Future<void> _mostrarModalOlvide() async {
+    if (!mounted) return;
+    await AppDialog.info(
+      context,
+      title: '¿Olvidaste tu contraseña?',
+      message:
+          'Tu acceso fue creado por tu aseguradora. Por favor, contacta con '
+          'ellos directamente para restablecer tu contraseña.',
+    );
   }
 
   @override
@@ -98,16 +104,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       passwordController: _passwordController,
                       isLoading: isLoading,
                       onSubmit: _submit,
-                      onForgot: () =>
-                          _comingSoon('Recuperación de contraseña próximamente.'),
-                      onBiometric: () =>
-                          _comingSoon('Acceso biométrico próximamente.'),
+                      onForgot: _mostrarModalOlvide,
                     ),
                     const Gap(AppSpacing.xl),
-                    _Footer(
-                      theme: theme,
-                      onRegister: () => context.push(RoutePaths.register),
-                    ),
+                    _Footer(theme: theme),
                   ],
                 ),
               ),
@@ -176,7 +176,6 @@ class _LoginCard extends StatelessWidget {
     required this.isLoading,
     required this.onSubmit,
     required this.onForgot,
-    required this.onBiometric,
   });
 
   final GlobalKey<FormState> formKey;
@@ -185,7 +184,6 @@ class _LoginCard extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onSubmit;
   final VoidCallback onForgot;
-  final VoidCallback onBiometric;
 
   @override
   Widget build(BuildContext context) {
@@ -255,53 +253,6 @@ class _LoginCard extends StatelessWidget {
               onPressed: onSubmit,
             ),
             const Gap(AppSpacing.xl),
-            Row(
-              children: [
-                const Expanded(child: Divider(color: Color(0xFFE0E3E6))),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                  child: Text(
-                    'o ingresar con',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-                const Expanded(child: Divider(color: Color(0xFFE0E3E6))),
-              ],
-            ),
-            const Gap(AppSpacing.lg),
-            Center(
-              child: InkWell(
-                onTap: onBiometric,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                child: Container(
-                  constraints: const BoxConstraints(minWidth: 80, minHeight: 80),
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                    border: Border.all(color: const Color(0xFFC4C6CE)),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.fingerprint,
-                          size: 28, color: AppColors.blueprint),
-                      const Gap(AppSpacing.sm),
-                      Text(
-                        'Biometría',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -310,9 +261,8 @@ class _LoginCard extends StatelessWidget {
 }
 
 class _Footer extends StatelessWidget {
-  const _Footer({required this.theme, required this.onRegister});
+  const _Footer({required this.theme});
   final ThemeData theme;
-  final VoidCallback onRegister;
 
   @override
   Widget build(BuildContext context) {
@@ -322,29 +272,6 @@ class _Footer extends StatelessWidget {
     );
     return Column(
       children: [
-        Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            Text(
-              '¿No tienes cuenta? ',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFFB4C7EC),
-              ),
-            ),
-            GestureDetector(
-              onTap: onRegister,
-              child: Text(
-                'Crear cuenta',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: AppColors.amber,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const Gap(AppSpacing.lg),
         Text('Acceso restringido a personal autorizado.',
             textAlign: TextAlign.center, style: infoStyle),
         Text('v2.4.1 (Build 809)',

@@ -14,6 +14,7 @@ class ApiConstants {
   static const String recoveryVerify = '/v1/auth/recovery/verify';
   static const String recoveryReset = '/v1/auth/recovery/reset';
   static const String consentimiento = '/v1/auth/consentimiento';
+  static const String cambiarPassword = '/v1/auth/password';
 
   // ── Onboarding del cliente ────────────────────────────────────────────
   static const String onboardingOcr = '/v1/cliente/onboarding/ocr';

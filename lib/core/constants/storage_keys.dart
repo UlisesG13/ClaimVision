@@ -10,4 +10,11 @@ class StorageKeys {
   static const String email = 'cv_email';
   static const String rol = 'cv_rol';
   static const String aseguradoraId = 'cv_aseguradora_id';
+
+  static const String primerInicio = 'cv_primer_inicio';
+
+  // ── Biometría ──────────────────────────────────────────────────────────
+  static const String biometricEnabled = 'cv_biometric_enabled';
+  static const String biometricEmail = 'cv_biometric_email';
+  static const String biometricPassword = 'cv_biometric_password';
 }

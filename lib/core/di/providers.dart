@@ -39,12 +39,17 @@ import '../../features/ajustador/domain/usecases/get_perfil_ajustador.dart';
 import '../../features/ajustador/domain/usecases/registrar_peritaje.dart';
 import '../../features/ajustador/domain/usecases/get_detalle_ajustador.dart';
 import '../network/dio_client.dart';
+import '../services/biometric_service.dart';
 import '../services/image_picker_service.dart';
 import '../services/location_service.dart';
 import '../services/secure_storage_service.dart';
 
 final secureStorageProvider = Provider<SecureStorageService>((ref) {
   return SecureStorageService(const FlutterSecureStorage());
+});
+
+final biometricServiceProvider = Provider<BiometricService>((ref) {
+  return BiometricService();
 });
 
 final dioProvider = Provider<Dio>((ref) {
