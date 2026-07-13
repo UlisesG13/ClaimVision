@@ -145,7 +145,7 @@ class _ReportLocationPageState extends ConsumerState<ReportLocationPage> {
                 label: 'Continuar',
                 icon: Icons.arrow_forward,
                 isLoading: state.submitting,
-                onPressed: state.ubicacionLista ? _continuar : null,
+                onPressed: state.ubicacionLista && !state.submitting ? _continuar : null,
               ),
             ),
           ],

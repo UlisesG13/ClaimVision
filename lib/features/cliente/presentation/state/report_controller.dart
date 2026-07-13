@@ -210,7 +210,7 @@ class ReportController extends Notifier<ReportState> {
   }
 
   Future<bool> crearSiniestro() async {
-    if (state.yaCreado) return true;
+    if (state.yaCreado || state.submitting) return state.yaCreado;
     if (!state.vehiculoCompleto || !state.ubicacionLista) {
       state = state.copyWith(
           errorMessage: 'Faltan datos del vehículo o la ubicación.');
@@ -241,33 +241,8 @@ class ReportController extends Notifier<ReportState> {
   }
 
   Future<bool> guardarNarracion() async {
-    final siniestro = state.siniestro;
-    if (siniestro == null) return false;
-
-    if (state.yaCreado) {
-      state = state.copyWith(submitting: true, clearError: true);
-      try {
-        final actualizado = await ref.read(inicializarSiniestroProvider)(
-          vehiculoId: state.vehiculoId,
-          vehiculoMarca: siniestro.vehiculoMarca,
-          vehiculoModelo: siniestro.vehiculoModelo,
-          vehiculoAnio: siniestro.vehiculoAnio,
-          vehiculoPlacas: siniestro.vehiculoPlacas,
-          latitud: siniestro.latitud,
-          longitud: siniestro.longitud,
-          vehiculoVin: siniestro.vehiculoVin,
-          narracionTexto:
-              state.narracionTexto.trim().isEmpty ? null : state.narracionTexto.trim(),
-          indicacionesDanoInterno: state.danoInterno,
-        );
-        ref.read(misSiniestrosControllerProvider.notifier).refrescar();
-        state = state.copyWith(submitting: false, siniestro: actualizado);
-        return true;
-      } on Failure catch (f) {
-        state = state.copyWith(submitting: false, errorMessage: f.message);
-        return false;
-      }
-    }
+    if (state.siniestro == null) return false;
+    if (state.submitting) return true;
     return true;
   }
 }
