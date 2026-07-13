@@ -33,7 +33,7 @@ abstract interface class AuthRepository {
 
   /// Cambia la contraseña del usuario autenticado.
   Future<void> changePassword({
-    required String currentPassword,
+    required String oldPassword,
     required String newPassword,
   });
 }

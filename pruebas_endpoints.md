@@ -1,7 +1,7 @@
 # Reporte de Pruebas de Endpoints — ClaimVision API
 
-**Fecha:** 2026-07-11 (6ª ronda)  
-**OpenAPI:** v1.5.0  
+**Fecha:** 2026-07-12 (7ª ronda)  
+**OpenAPI:** v1.12.0  
 **Backend:** `https://claimvision.actividades.icu/api/v1`  
 **Aseguradora:** Seguros Demo (`f6c46a9f-...`)
 
@@ -15,6 +15,13 @@
 | `GET /auth/me` | ✅ 200 — `{usuario_id, email, rol, aseguradora_id}` |
 | `POST /auth/register` (nuevo) | ✅ 201 — Usuario creado con token |
 | `POST /auth/register` (duplicado) | ✅ 409 "Email already registered" |
+
+### Cambio de contraseña
+| Endpoint | Body | Resultado |
+|----------|------|-----------|
+| `PATCH /auth/password` | `{"old_password","new_password"}` | ✅ 200 — Primer cambio |
+| `POST /auth/password/request-code` | — | ✅ 200 — Código enviado al correo |
+| `POST /auth/password/verify` | `{"code","new_password"}` | ✅ 200 — Contraseña actualizada |
 
 ### Consentimiento
 | Endpoint | Campos | Resultado |
@@ -133,22 +140,21 @@
 
 | Estado | Cantidad |
 |--------|----------|
-| ✅ Funcionan | **32** endpoints |
+| ✅ Funcionan | **35** endpoints |
 | ❌ Bugs | **0** — todos los bugs resueltos |
-| ⚠️ Observaciones | **2** (ver abajo) |
+| ⚠️ Observaciones | **3** (ver abajo) |
 
 ### Observaciones
 1. **Onboarding** — El campo `curp_rpc` cambió a `curp_rfc`. No es un bug, solo un rename de schema.
 2. **Rutas de operador movidas** — `GET /aseguradora/{vehiculos,talleres,perfil-ajustadores}` ahora son `GET /aseguradora/crud/{vehiculos,talleres,ajustadores}`. El endpoint `ajustadores-disponibles` fue eliminado.
+3. **Nuevos endpoints de contraseña** — Se agregaron `PATCH /auth/password`, `POST /auth/password/request-code` y `POST /auth/password/verify`. El campo del body usa `old_password` (no `current_password`).
 
-### Cambios detectados en el schema (vs ronda 4)
+### Cambios detectados en el schema (vs ronda 6)
 | Endpoint | Cambio |
 |----------|--------|
-| `POST /cliente/siniestros` | **Ahora requiere** `vehiculo_id` además de los campos de vehículo |
-| `POST /auth/consentimiento` | **Campos cambiados** a `aviso_privacidad`, `biometria`, `transferencia_talleres` |
-| `GET /admin/aseguradoras/{id}` | **Campo cambiado** de `nombre_comercial` a `nombre` |
-| `POST /cliente/onboarding/confirmar-datos` | **Campo renombrado** de `curp_rpc` → `curp_rfc` |
-| Rutas de operador | Movidas a `/aseguradora/crud/*` |
+| `PATCH /auth/password` | **NUEVO** — Primer cambio de contraseña (`old_password`, `new_password`) |
+| `POST /auth/password/request-code` | **NUEVO** — Solicitar código de verificación |
+| `POST /auth/password/verify` | **NUEVO** — Verificar código y cambiar contraseña |
 
 ### Historial de bugs resueltos
 

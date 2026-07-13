@@ -1,14 +1,14 @@
 class ChangePasswordRequestDto {
   const ChangePasswordRequestDto({
-    required this.currentPassword,
+    required this.oldPassword,
     required this.newPassword,
   });
 
-  final String currentPassword;
+  final String oldPassword;
   final String newPassword;
 
   Map<String, dynamic> toJson() => {
-        'current_password': currentPassword,
+        'old_password': oldPassword,
         'new_password': newPassword,
       };
 }

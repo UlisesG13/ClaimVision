@@ -94,13 +94,13 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> changePassword({
-    required String currentPassword,
+    required String oldPassword,
     required String newPassword,
   }) async {
     try {
       await _remote.changePassword(
         ChangePasswordRequestDto(
-          currentPassword: currentPassword,
+          oldPassword: oldPassword,
           newPassword: newPassword,
         ),
       );

@@ -259,7 +259,7 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
                 AppDialog.showLoading(ctx, title: 'Actualizando contraseña…');
                 try {
                   await ref.read(changePasswordProvider)(
-                    currentPassword: currentCtrl.text,
+                    oldPassword: currentCtrl.text,
                     newPassword: newCtrl.text,
                   );
                   if (ctx.mounted) {

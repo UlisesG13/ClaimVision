@@ -6,11 +6,11 @@ class ChangePassword {
   final AuthRepository _repository;
 
   Future<void> call({
-    required String currentPassword,
+    required String oldPassword,
     required String newPassword,
   }) {
     return _repository.changePassword(
-      currentPassword: currentPassword,
+      oldPassword: oldPassword,
       newPassword: newPassword,
     );
   }
