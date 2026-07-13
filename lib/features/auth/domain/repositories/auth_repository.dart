@@ -30,4 +30,10 @@ abstract interface class AuthRepository {
 
   /// Cierra sesión: borra el token y los datos sensibles del almacenamiento.
   Future<void> logout();
+
+  /// Cambia la contraseña del usuario autenticado.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  });
 }

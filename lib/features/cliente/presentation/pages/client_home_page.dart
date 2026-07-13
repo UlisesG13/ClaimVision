@@ -3,12 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/constants/storage_keys.dart';
 import '../../../../core/di/providers.dart';
+import '../../../../core/errors/failures.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 import '../../../../shared/widgets/feedback/app_dialog.dart';
+import '../../../../shared/widgets/feedback/app_snackbar.dart';
 import '../../../auth/presentation/state/auth_controller.dart';
 import '../../../auth/presentation/state/onboarding_controller.dart';
 import '../state/mis_siniestros_controller.dart';
@@ -25,11 +29,14 @@ class ClientHomePage extends ConsumerStatefulWidget {
 }
 
 class _ClientHomePageState extends ConsumerState<ClientHomePage> {
+  bool _primerInicioChecked = false;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.invalidate(misSiniestrosControllerProvider);
+      _checkPrimerInicio();
     });
   }
 
@@ -162,6 +169,147 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
     );
     if (salir) {
       await ref.read(authControllerProvider.notifier).logout();
+    }
+  }
+
+  Future<void> _checkPrimerInicio() async {
+    if (_primerInicioChecked) return;
+    _primerInicioChecked = true;
+
+    final storage = ref.read(secureStorageProvider);
+    final yaVisto = await storage.read(StorageKeys.primerInicio);
+    if (yaVisto == 'true') return;
+
+    if (!mounted) return;
+    final cambio = await _mostrarDialogoCambioPassword();
+    if (!mounted) return;
+    if (cambio) {
+      await AppDialog.info(
+        context,
+        title: 'Contraseña actualizada',
+        message: 'Tu contraseña ha sido cambiada correctamente.',
+        icon: Icons.check_circle,
+        accent: AppColors.success,
+      );
+    }
+
+    if (!mounted) return;
+    final biometricService = ref.read(biometricServiceProvider);
+    final disponible = await biometricService.canCheckBiometrics();
+    if (disponible && mounted) {
+      await _mostrarDialogoBiometrico();
+    }
+
+    if (!mounted) return;
+    await storage.write(StorageKeys.primerInicio, 'true');
+  }
+
+  Future<bool> _mostrarDialogoCambioPassword() async {
+    final currentCtrl = TextEditingController();
+    final newCtrl = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+
+    final resultado = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return AlertDialog(
+          title: Text('Actualiza tu contraseña',
+              style: theme.textTheme.titleLarge),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Por seguridad, te recomendamos cambiar tu contraseña por una que recuerdes fácilmente.',
+                  style: theme.textTheme.bodyMedium,
+                ),
+                const Gap(AppSpacing.lg),
+                AppTextField(
+                  controller: currentCtrl,
+                  hintText: 'Contraseña actual',
+                  prefixIcon: Icons.lock_outline,
+                  obscure: true,
+                  validator: (v) =>
+                      (v == null || v.isEmpty) ? 'Ingresa tu contraseña actual' : null,
+                ),
+                const Gap(AppSpacing.md),
+                AppTextField(
+                  controller: newCtrl,
+                  hintText: 'Nueva contraseña',
+                  prefixIcon: Icons.lock,
+                  obscure: true,
+                  validator: (v) =>
+                      (v == null || v.length < 6) ? 'Mínimo 6 caracteres' : null,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Omitir'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: AppColors.blueprint),
+              onPressed: () async {
+                if (!formKey.currentState!.validate()) return;
+                AppDialog.showLoading(ctx, title: 'Actualizando contraseña…');
+                try {
+                  await ref.read(changePasswordProvider)(
+                    currentPassword: currentCtrl.text,
+                    newPassword: newCtrl.text,
+                  );
+                  if (ctx.mounted) {
+                    AppDialog.hideLoading(ctx);
+                    Navigator.pop(ctx, true);
+                  }
+                } on Failure catch (e) {
+                  if (ctx.mounted) {
+                    AppDialog.hideLoading(ctx);
+                    AppSnackbar.error(ctx, e.message);
+                  }
+                }
+              },
+              child: const Text('Guardar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    currentCtrl.dispose();
+    newCtrl.dispose();
+    return resultado ?? false;
+  }
+
+  Future<void> _mostrarDialogoBiometrico() async {
+    final acepto = await AppDialog.permission(
+      context,
+      icon: Icons.fingerprint,
+      title: '¿Usar huella digital?',
+      message:
+          'Puedes usar tu huella digital o Face ID para iniciar sesión más rápido sin escribir tu contraseña.',
+      allowLabel: 'Activar',
+      denyLabel: 'Ahora no',
+    );
+
+    if (!acepto || !mounted) return;
+
+    final biometricService = ref.read(biometricServiceProvider);
+    final autenticado = await biometricService.authenticate(
+      reason: 'Registra tu huella para acceder más rápido',
+    );
+    if (!autenticado) return;
+
+    if (!mounted) return;
+    final storage = ref.read(secureStorageProvider);
+    final session = ref.read(currentSessionProvider);
+    await storage.write(StorageKeys.biometricEnabled, 'true');
+    if (session?.email != null) {
+      await storage.write(StorageKeys.biometricEmail, session!.email);
     }
   }
 }

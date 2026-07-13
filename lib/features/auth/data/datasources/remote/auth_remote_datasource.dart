@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/network/api_error_mapper.dart';
 import '../../dtos/auth_response_dto.dart';
+import '../../dtos/change_password_request_dto.dart';
 import '../../dtos/login_request_dto.dart';
 import '../../dtos/register_request_dto.dart';
 
@@ -18,6 +19,9 @@ abstract interface class AuthRemoteDataSource {
   /// Verifica el token actual contra `GET /auth/me`. Lanza
   /// [UnauthorizedException] si el token es inválido o expiró.
   Future<void> me();
+
+  /// Cambia la contraseña del usuario autenticado.
+  Future<void> changePassword(ChangePasswordRequestDto body);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -39,6 +43,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> me() async {
     try {
       final response = await _dio.get(ApiConstants.me);
+      final status = response.statusCode ?? 500;
+      if (status >= 400) {
+        throw ApiErrorMapper.fromResponse(response);
+      }
+    } on DioException catch (e) {
+      throw ApiErrorMapper.fromDioException(e);
+    }
+  }
+
+  @override
+  Future<void> changePassword(ChangePasswordRequestDto body) async {
+    try {
+      final response = await _dio.patch(ApiConstants.cambiarPassword, data: body.toJson());
       final status = response.statusCode ?? 500;
       if (status >= 400) {
         throw ApiErrorMapper.fromResponse(response);

@@ -12,6 +12,7 @@ import '../../features/auth/domain/repositories/onboarding_repository.dart';
 import '../../features/auth/domain/usecases/confirm_onboarding.dart';
 import '../../features/auth/domain/usecases/extract_policy_data.dart';
 import '../../features/auth/domain/usecases/get_stored_session.dart';
+import '../../features/auth/domain/usecases/change_password.dart';
 import '../../features/auth/domain/usecases/login_user.dart';
 import '../../features/auth/domain/usecases/logout_user.dart';
 import '../../features/auth/domain/usecases/register_user.dart';
@@ -70,6 +71,10 @@ final locationServiceProvider = Provider<LocationService>((ref) {
 });
 
 // ── Auth: datasources ──────────────────────────────────────────────────────
+final changePasswordProvider = Provider<ChangePassword>((ref) {
+  return ChangePassword(ref.watch(authRepositoryProvider));
+});
+
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
   return AuthRemoteDataSourceImpl(ref.watch(dioProvider));
 });

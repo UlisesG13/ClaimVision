@@ -9,6 +9,7 @@ import '../../domain/entities/auth_session.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/local/auth_local_datasource.dart';
 import '../datasources/remote/auth_remote_datasource.dart';
+import '../dtos/change_password_request_dto.dart';
 import '../dtos/login_request_dto.dart';
 import '../dtos/register_request_dto.dart';
 import '../mappers/auth_mapper.dart';
@@ -90,6 +91,23 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> logout() => _local.clearSession();
+
+  @override
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await _remote.changePassword(
+        ChangePasswordRequestDto(
+          currentPassword: currentPassword,
+          newPassword: newPassword,
+        ),
+      );
+    } on AppException catch (e) {
+      throw _toFailure(e);
+    }
+  }
 
   /// Traduce una excepción técnica de la capa data a un Failure de presentación.
   Failure _toFailure(AppException e) {
