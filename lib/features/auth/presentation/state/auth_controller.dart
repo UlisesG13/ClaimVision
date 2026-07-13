@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/biometric/presentation/providers/biometric_providers.dart';
 import '../../../../core/di/providers.dart';
 import '../../domain/entities/auth_session.dart';
 
@@ -62,8 +63,12 @@ class AuthController extends AsyncNotifier<AuthSession?> {
   }
 
   Future<void> logout() async {
+    final userId = session?.usuarioId;
     final logoutUser = ref.read(logoutUserProvider);
     await logoutUser();
+    if (userId != null) {
+      await ref.read(biometricRepositoryProvider).clearForUser(userId);
+    }
     state = const AsyncData(null);
   }
 

@@ -11,7 +11,7 @@ class StorageKeys {
   static const String rol = 'cv_rol';
   static const String aseguradoraId = 'cv_aseguradora_id';
 
-  static const String primerInicio = 'cv_primer_inicio';
+  static String primerInicioPara(String userId) => 'cv_primer_inicio_$userId';
 
   // ── Biometría ──────────────────────────────────────────────────────────
   static const String biometricEnabled = 'cv_biometric_enabled';

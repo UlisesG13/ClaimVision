@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/biometric/presentation/providers/biometric_providers.dart';
 import '../../../../core/constants/storage_keys.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/errors/failures.dart';
@@ -176,8 +177,12 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
     if (_primerInicioChecked) return;
     _primerInicioChecked = true;
 
+    final session = ref.read(currentSessionProvider);
+    final userId = session?.usuarioId;
+    if (userId == null) return;
+
     final storage = ref.read(secureStorageProvider);
-    final yaVisto = await storage.read(StorageKeys.primerInicio);
+    final yaVisto = await storage.read(StorageKeys.primerInicioPara(userId));
     if (yaVisto == 'true') return;
 
     if (!mounted) return;
@@ -201,7 +206,7 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
     }
 
     if (!mounted) return;
-    await storage.write(StorageKeys.primerInicio, 'true');
+    await storage.write(StorageKeys.primerInicioPara(userId), 'true');
   }
 
   Future<String?> _mostrarDialogoCambioPassword() async {
@@ -348,12 +353,14 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
     if (!autenticado) return;
 
     if (!mounted) return;
-    final storage = ref.read(secureStorageProvider);
+    final biometricRepo = ref.read(biometricRepositoryProvider);
     final session = ref.read(currentSessionProvider);
-    await storage.write(StorageKeys.biometricEnabled, 'true');
     if (session?.email != null) {
-      await storage.write(StorageKeys.biometricEmail, session!.email);
-      await storage.write(StorageKeys.biometricPassword, pass);
+      await biometricRepo.enable(
+        userId: session!.usuarioId,
+        email: session.email,
+        password: pass,
+      );
     }
   }
 }

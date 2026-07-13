@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
-import '../../../../core/constants/storage_keys.dart';
+import '../../../../core/biometric/presentation/providers/biometric_providers.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -44,9 +44,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _revisarBiometria() async {
-    final storage = ref.read(secureStorageProvider);
-    final enabled = await storage.read(StorageKeys.biometricEnabled);
-    if (enabled != 'true') return;
+    final biometricRepo = ref.read(biometricRepositoryProvider);
+    final enabled = await biometricRepo.isEnabled();
+    if (!enabled) return;
 
     final service = ref.read(biometricServiceProvider);
     final disponible = await service.canCheckBiometrics();
@@ -85,21 +85,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Future<void> _autenticarConBiometria() async {
     final service = ref.read(biometricServiceProvider);
-    final storage = ref.read(secureStorageProvider);
+    final biometricRepo = ref.read(biometricRepositoryProvider);
 
     final autenticado = await service.authenticate(
       reason: 'Acceso rápido a tu cuenta',
     );
     if (!autenticado || !mounted) return;
 
-    final email = await storage.read(StorageKeys.biometricEmail);
-    final password = await storage.read(StorageKeys.biometricPassword);
-    if (email == null || password == null) return;
+    final creds = await biometricRepo.getCredentials();
+    if (creds == null) return;
 
     if (!mounted) return;
     await ref.read(authControllerProvider.notifier).login(
-          email: email,
-          password: password,
+          email: creds.email,
+          password: creds.encryptedPassword,
         );
   }
 

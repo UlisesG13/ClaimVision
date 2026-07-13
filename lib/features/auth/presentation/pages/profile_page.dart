@@ -3,13 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/constants/storage_keys.dart';
+import '../../../../core/biometric/presentation/providers/biometric_providers.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/theme_notifier.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/ajustador_bottom_nav.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 import '../../../../shared/widgets/feedback/app_dialog.dart';
@@ -32,6 +31,8 @@ class ProfilePage extends ConsumerStatefulWidget {
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   bool _biometricEnabled = false;
   bool _biometricDisponible = false;
+  bool _mostrarPasswordField = false;
+  final _passwordCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -39,14 +40,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     _cargarEstadoBiometrico();
   }
 
+  @override
+  void dispose() {
+    _passwordCtrl.dispose();
+    super.dispose();
+  }
+
   Future<void> _cargarEstadoBiometrico() async {
-    final storage = ref.read(secureStorageProvider);
-    final enabled = await storage.read(StorageKeys.biometricEnabled);
+    final biometricRepo = ref.read(biometricRepositoryProvider);
+    final enabled = await biometricRepo.isEnabled();
     final service = ref.read(biometricServiceProvider);
     final disponible = await service.canCheckBiometrics();
     if (mounted) {
       setState(() {
-        _biometricEnabled = enabled == 'true';
+        _biometricEnabled = enabled;
         _biometricDisponible = disponible;
       });
     }
@@ -62,8 +69,10 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final email = session?.email ?? '';
     final nombre = _nombreDesdeEmail(email);
     final rol = session?.rol.label ?? 'Cliente';
-    final esCliente = session?.rol.isCliente ?? true;
+    final userId = session?.usuarioId;
     final tienePoliza = onboarding.numeroPoliza.trim().isNotEmpty;
+
+    final esCliente = session?.rol.isCliente ?? true;
 
     return Scaffold(
       backgroundColor: context.scaffoldBgColor,
@@ -102,7 +111,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         children: [
           _Header(nombre: nombre, email: email, rol: rol),
           const Gap(AppSpacing.lg),
-          // Póliza, consentimientos y vehículos son del flujo del Cliente.
           if (esCliente) ...[
             if (tienePoliza)
               _PolicyCard(
@@ -125,18 +133,27 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onConfiguracion: () => _proximamente(context, 'Configuración'),
             ),
             const Gap(AppSpacing.lg),
-            if (_biometricDisponible)
-              _BiometricCard(
-                enabled: _biometricEnabled,
-                onChanged: (v) => _toggleBiometrico(v, session?.email),
-              ),
-            const Gap(AppSpacing.lg),
-            _ThemeCard(
-              themeMode: themeMode,
-              onChanged: (mode) => ref.read(themeModeProvider.notifier).setThemeMode(mode),
-            ),
-            const Gap(AppSpacing.lg),
           ],
+          if (_biometricDisponible)
+            _BiometricCard(
+              enabled: _biometricEnabled,
+              mostrarPassword: _mostrarPasswordField,
+              passwordController: _passwordCtrl,
+              onChanged: (v) {
+                if (v) {
+                  setState(() => _mostrarPasswordField = true);
+                } else {
+                  _desactivarBiometria();
+                }
+              },
+              onConfirmPassword: () => _activarBiometria(userId),
+            ),
+          const Gap(AppSpacing.lg),
+          _ThemeCard(
+            themeMode: themeMode,
+            onChanged: (mode) => ref.read(themeModeProvider.notifier).setThemeMode(mode),
+          ),
+          const Gap(AppSpacing.lg),
           _LogoutButton(onTap: () => _confirmarLogout(context, ref)),
           const Gap(AppSpacing.md),
           Center(
@@ -164,74 +181,47 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       ..showSnackBar(SnackBar(content: Text('$que — próximamente.')));
   }
 
-  Future<void> _toggleBiometrico(bool activar, String? email) async {
-    if (activar) {
-      final pass = await _pedirContrasena();
-      if (pass == null) return;
+  Future<void> _activarBiometria(String? userId) async {
+    if (userId == null) return;
+    final pass = _passwordCtrl.text.trim();
+    if (pass.isEmpty) return;
+    _passwordCtrl.clear();
 
-      final biometricService = ref.read(biometricServiceProvider);
-      final autenticado = await biometricService.authenticate(
-        reason: 'Registra tu huella para acceder más rápido',
+    final biometricService = ref.read(biometricServiceProvider);
+    final autenticado = await biometricService.authenticate(
+      reason: 'Registra tu huella para acceder más rápido',
+    );
+    if (!autenticado) {
+      if (mounted) setState(() => _mostrarPasswordField = false);
+      return;
+    }
+
+    final biometricRepo = ref.read(biometricRepositoryProvider);
+    final email = ref.read(currentSessionProvider)?.email;
+    if (email != null) {
+      await biometricRepo.enable(
+        userId: userId,
+        email: email,
+        password: pass,
       );
-      if (!autenticado) return;
-
-      final storage = ref.read(secureStorageProvider);
-      await storage.write(StorageKeys.biometricEnabled, 'true');
-      if (email != null) {
-        await storage.write(StorageKeys.biometricEmail, email);
-        await storage.write(StorageKeys.biometricPassword, pass);
-      }
-      if (mounted) setState(() => _biometricEnabled = true);
-    } else {
-      final storage = ref.read(secureStorageProvider);
-      await storage.delete(StorageKeys.biometricEnabled);
-      await storage.delete(StorageKeys.biometricEmail);
-      await storage.delete(StorageKeys.biometricPassword);
-      if (mounted) setState(() => _biometricEnabled = false);
+    }
+    if (mounted) {
+      setState(() {
+        _biometricEnabled = true;
+        _mostrarPasswordField = false;
+      });
     }
   }
 
-  Future<String?> _pedirContrasena() async {
-    final ctrl = TextEditingController();
-    final formKey = GlobalKey<FormState>();
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        final t = Theme.of(ctx);
-        return AlertDialog(
-          title: Text('Confirma tu contraseña', style: t.textTheme.titleLarge),
-          content: Form(
-            key: formKey,
-            child: AppTextField(
-              controller: ctrl,
-              hintText: 'Contraseña actual',
-              prefixIcon: Icons.lock_outline,
-              obscure: true,
-              validator: (v) =>
-                  (v == null || v.isEmpty) ? 'Ingresa tu contraseña' : null,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(foregroundColor: AppColors.blueprint),
-              onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  Navigator.pop(ctx, true);
-                }
-              },
-              child: const Text('Confirmar'),
-            ),
-          ],
-        );
-      },
-    );
-    final pass = ok == true ? ctrl.text : null;
-    ctrl.dispose();
-    return pass;
+  Future<void> _desactivarBiometria() async {
+    final biometricRepo = ref.read(biometricRepositoryProvider);
+    await biometricRepo.disable();
+    if (mounted) {
+      setState(() {
+        _biometricEnabled = false;
+        _mostrarPasswordField = false;
+      });
+    }
   }
 
   Future<void> _confirmarLogout(BuildContext context, WidgetRef ref) async {
@@ -479,11 +469,17 @@ class _ThemeCard extends StatelessWidget {
 class _BiometricCard extends StatelessWidget {
   const _BiometricCard({
     required this.enabled,
+    required this.mostrarPassword,
+    required this.passwordController,
     required this.onChanged,
+    required this.onConfirmPassword,
   });
 
   final bool enabled;
+  final bool mostrarPassword;
+  final TextEditingController passwordController;
   final ValueChanged<bool> onChanged;
+  final VoidCallback onConfirmPassword;
 
   @override
   Widget build(BuildContext context) {
@@ -493,15 +489,56 @@ class _BiometricCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         border: Border.all(color: context.borderColor),
       ),
-      child: SwitchListTile(
-        title: const Text('Usar huella digital'),
-        subtitle: const Text('Accede sin escribir contraseña'),
-        secondary: Icon(
-          enabled ? Icons.fingerprint : Icons.fingerprint_outlined,
-          color: enabled ? AppColors.amber : context.textHintColor,
-        ),
-        value: enabled,
-        onChanged: onChanged,
+      child: Column(
+        children: [
+          SwitchListTile(
+            title: const Text('Usar huella digital'),
+            subtitle: const Text('Accede sin escribir contraseña'),
+            secondary: Icon(
+              enabled ? Icons.fingerprint : Icons.fingerprint_outlined,
+              color: enabled ? AppColors.amber : context.textHintColor,
+            ),
+            value: enabled,
+            onChanged: onChanged,
+          ),
+          if (mostrarPassword) ...[
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        hintText: 'Confirma tu contraseña',
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => onConfirmPassword(),
+                    ),
+                  ),
+                  const Gap(8),
+                  SizedBox(
+                    height: 36,
+                    child: ElevatedButton(
+                      onPressed: onConfirmPassword,
+                      child: const Text('OK'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
