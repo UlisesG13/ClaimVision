@@ -27,6 +27,14 @@ class CasosAsignadosPage extends ConsumerStatefulWidget {
 class _CasosAsignadosPageState extends ConsumerState<CasosAsignadosPage> {
   String _query = '';
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(casosAsignadosControllerProvider);
+    });
+  }
+
   List<Siniestro> _filtrar(List<Siniestro> casos) {
     final q = _query.trim().toLowerCase();
     if (q.isEmpty) return casos;
