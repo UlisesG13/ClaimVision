@@ -7,11 +7,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../state/notificaciones_controller.dart';
 
-/// Notificaciones - Cliente (Figma node 79:5167).
-///
-/// Lista las notificaciones del cliente agrupadas por día (Hoy / Ayer /
-/// Anteriores), con acción "Leer todo". Las notificaciones se derivan de los
-/// siniestros reportados en la sesión (el backend aún no expone un listado).
 class NotificacionesPage extends ConsumerWidget {
   const NotificacionesPage({super.key});
 

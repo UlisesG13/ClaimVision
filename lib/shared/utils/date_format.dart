@@ -1,5 +1,4 @@
-/// Formateo de fechas en español sin depender de `intl` (que requeriría
-/// inicializar los datos de locale).
+
 class DateFormatEs {
   DateFormatEs._();
 
@@ -8,7 +7,6 @@ class DateFormatEs {
     'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
   ];
 
-  /// "10 Oct 2025 · 14:30"
   static String fechaHora(DateTime fecha) {
     final f = fecha.toLocal();
     final dia = f.day;

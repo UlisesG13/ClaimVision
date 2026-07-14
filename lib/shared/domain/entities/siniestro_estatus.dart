@@ -1,8 +1,4 @@
-/// Estados del siniestro con los valores EXACTOS del enum `estatus_siniestro`
-/// del backend (ver BACKEND_CONTRACT.md §3.1 y `SiniestroResponseDTO`).
-///
-/// Modelo compartido entre el flujo del cliente (incident) y el del ajustador
-/// (peritaje).
+
 enum SiniestroEstatus {
   reportadoPreliminar('Reportado_Preliminar', 'Reportado'),
   asignadoAjustador('Asignado_A_Ajustador', 'Asignado a ajustador'),
@@ -14,10 +10,8 @@ enum SiniestroEstatus {
 
   const SiniestroEstatus(this.apiValue, this.label);
 
-  /// Valor verbatim del backend.
   final String apiValue;
 
-  /// Texto legible para mostrar.
   final String label;
 
   static SiniestroEstatus fromApi(String? value) {
@@ -27,7 +21,7 @@ enum SiniestroEstatus {
     );
   }
 
-  /// El siniestro sigue en proceso (no entregado).
+  /// Indica si el siniestro sigue en proceso (no entregado).
   bool get enProceso => this != SiniestroEstatus.entregado;
 
   /// Categoría de color para los chips de estado (la UI traduce a color).

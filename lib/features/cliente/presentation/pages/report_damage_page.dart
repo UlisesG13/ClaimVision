@@ -12,12 +12,6 @@ import '../../../../shared/widgets/primary_button.dart';
 import '../state/report_controller.dart';
 import '../widgets/report_step_header.dart';
 
-/// Reportar — Paso 4: Captura de Daño (Figma node 70:598).
-///
-/// El cliente fotografía los daños. Cada foto se sube de inmediato
-/// (`POST /siniestros/{id}/imagenes`) y el backend indica si la calidad es
-/// válida (`es_calidad_valida`), que se refleja por miniatura. Al enviar, pasa
-/// al análisis preliminar (#9).
 class ReportDamagePage extends ConsumerWidget {
   const ReportDamagePage({super.key});
 

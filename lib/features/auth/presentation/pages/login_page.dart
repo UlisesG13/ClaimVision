@@ -44,10 +44,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _revisarBiometria() async {
-    final biometricRepo = ref.read(biometricRepositoryProvider);
-    final enabled = await biometricRepo.isEnabled();
-    if (!enabled) return;
-
     final service = ref.read(biometricServiceProvider);
     final disponible = await service.canCheckBiometrics();
     if (!disponible) return;
@@ -57,10 +53,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       _biometricDisponible = true;
     });
 
-    if (!_autoIntentado) {
-      _autoIntentado = true;
-      await _autenticarConBiometria();
-    }
+    if (_autoIntentado) return;
+    _autoIntentado = true;
+
+    final biometricRepo = ref.read(biometricRepositoryProvider);
+    final enabled = await biometricRepo.isEnabled();
+    if (!enabled) return;
+
+    await _autenticarConBiometria();
   }
 
   Future<void> _submit() async {
@@ -87,19 +87,37 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final service = ref.read(biometricServiceProvider);
     final biometricRepo = ref.read(biometricRepositoryProvider);
 
-    final autenticado = await service.authenticate(
-      reason: 'Acceso rápido a tu cuenta',
-    );
-    if (!autenticado || !mounted) return;
+    try {
+      final autenticado = await service.authenticate(
+        reason: 'Acceso rápido a tu cuenta',
+      );
 
-    final creds = await biometricRepo.getCredentials();
-    if (creds == null) return;
+      if (!autenticado) {
+        if (mounted) AppSnackbar.error(context, 'Autenticación biométrica falló');
+        return;
+      }
 
-    if (!mounted) return;
-    await ref.read(authControllerProvider.notifier).login(
-          email: creds.email,
-          password: creds.encryptedPassword,
-        );
+      if (!mounted) return;
+      final creds = await biometricRepo.getCredentials();
+
+      if (creds == null) {
+        if (mounted) {
+          AppSnackbar.warning(
+            context,
+            'No hay datos biométricos. Actívalos desde Mi Perfil.',
+          );
+        }
+        return;
+      }
+
+      if (!mounted) return;
+      await ref.read(authControllerProvider.notifier).login(
+            email: creds.email,
+            password: creds.encryptedPassword,
+          );
+    } catch (_) {
+      if (mounted) AppSnackbar.error(context, 'Ocurrió un error al usar la biometría.');
+    }
   }
 
   @override

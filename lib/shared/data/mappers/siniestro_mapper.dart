@@ -2,8 +2,6 @@ import '../../domain/entities/siniestro.dart';
 import '../../domain/entities/siniestro_estatus.dart';
 import '../dtos/siniestro_response_dto.dart';
 
-/// Convierte `SiniestroResponseDTO` a la entidad de dominio. Función pura.
-/// Compartido entre cliente y ajustador.
 class SiniestroMapper {
   SiniestroMapper._();
 

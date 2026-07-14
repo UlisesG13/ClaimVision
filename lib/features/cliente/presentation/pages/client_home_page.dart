@@ -21,7 +21,6 @@ import '../state/notificaciones_controller.dart';
 import '../state/report_controller.dart';
 import '../widgets/siniestro_card.dart';
 
-/// Inicio del Cliente (Figma node 70:344).
 class ClientHomePage extends ConsumerStatefulWidget {
   const ClientHomePage({super.key});
 

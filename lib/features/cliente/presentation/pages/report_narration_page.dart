@@ -11,11 +11,6 @@ import '../../../../shared/widgets/primary_button.dart';
 import '../state/report_controller.dart';
 import '../widgets/report_step_header.dart';
 
-/// Reportar — Paso 3: Narración (Figma node 70:549).
-///
-/// El cliente describe cómo ocurrió el siniestro e indica si sospecha daño
-/// interno. La narración se envía junto con la creación del siniestro
-/// (paso anterior).
 class ReportNarrationPage extends ConsumerStatefulWidget {
   const ReportNarrationPage({super.key});
 

@@ -1,4 +1,3 @@
-/// Validadores reutilizables para formularios (mensajes en español).
 class Validators {
   Validators._();
 

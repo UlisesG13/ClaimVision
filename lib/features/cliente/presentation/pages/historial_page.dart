@@ -10,11 +10,7 @@ import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 import '../state/mis_siniestros_controller.dart';
 import '../widgets/siniestro_card.dart';
 
-/// Historial de siniestros del cliente.
-///
-/// Lista todos los siniestros reportados en la sesión ([misSiniestrosControllerProvider]).
-/// El backend aún no expone un listado del cliente, por lo que se alimenta del
-/// store de sesión; tappear una tarjeta abre su detalle.
+
 class HistorialPage extends ConsumerWidget {
   const HistorialPage({super.key});
 

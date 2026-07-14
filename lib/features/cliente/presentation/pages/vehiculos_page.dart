@@ -8,10 +8,6 @@ import '../../../../core/theme/app_spacing.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import '../state/mis_siniestros_controller.dart';
 
-/// Vehículos registrados por el cliente.
-///
-/// El backend no expone un endpoint de vehículos del cliente; se derivan de los
-/// siniestros reportados en la sesión (vehículos únicos por placas).
 class VehiculosPage extends ConsumerWidget {
   const VehiculosPage({super.key});
 

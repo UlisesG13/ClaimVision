@@ -31,19 +31,11 @@ class ProfilePage extends ConsumerStatefulWidget {
 class _ProfilePageState extends ConsumerState<ProfilePage> {
   bool _biometricEnabled = false;
   bool _biometricDisponible = false;
-  bool _mostrarPasswordField = false;
-  final _passwordCtrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _cargarEstadoBiometrico();
-  }
-
-  @override
-  void dispose() {
-    _passwordCtrl.dispose();
-    super.dispose();
   }
 
   Future<void> _cargarEstadoBiometrico() async {
@@ -137,16 +129,15 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           if (_biometricDisponible)
             _BiometricCard(
               enabled: _biometricEnabled,
-              mostrarPassword: _mostrarPasswordField,
-              passwordController: _passwordCtrl,
               onChanged: (v) {
                 if (v) {
-                  setState(() => _mostrarPasswordField = true);
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) _showPasswordDialog(userId);
+                  });
                 } else {
                   _desactivarBiometria();
                 }
               },
-              onConfirmPassword: () => _activarBiometria(userId),
             ),
           const Gap(AppSpacing.lg),
           _ThemeCard(
@@ -181,47 +172,72 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       ..showSnackBar(SnackBar(content: Text('$que — próximamente.')));
   }
 
-  Future<void> _activarBiometria(String? userId) async {
+  Future<void> _showPasswordDialog(String? userId) async {
     if (userId == null) return;
-    final pass = _passwordCtrl.text.trim();
-    if (pass.isEmpty) return;
-    _passwordCtrl.clear();
 
+    final email = ref.read(currentSessionProvider)?.email;
     final biometricService = ref.read(biometricServiceProvider);
+    final biometricRepo = ref.read(biometricRepositoryProvider);
+    final passCtrl = TextEditingController();
+
+    final ok = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return AlertDialog(
+          title: Text('Confirma tu contraseña', style: theme.textTheme.titleLarge),
+          content: TextField(
+            controller: passCtrl,
+            obscureText: true,
+            decoration: const InputDecoration(
+              hintText: 'Contraseña actual',
+              prefixIcon: Icon(Icons.lock_outline),
+            ),
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => Navigator.pop(ctx, true),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: AppColors.blueprint),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Confirmar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (ok != true || passCtrl.text.isEmpty || !mounted || email == null) {
+      passCtrl.dispose();
+      return;
+    }
+    passCtrl.dispose();
+
     final autenticado = await biometricService.authenticate(
       reason: 'Registra tu huella para acceder más rápido',
     );
-    if (!autenticado) {
-      if (mounted) setState(() => _mostrarPasswordField = false);
-      return;
-    }
+    if (!autenticado || !mounted) return;
 
-    final biometricRepo = ref.read(biometricRepositoryProvider);
-    final email = ref.read(currentSessionProvider)?.email;
-    if (email != null) {
-      await biometricRepo.enable(
-        userId: userId,
-        email: email,
-        password: pass,
-      );
-    }
-    if (mounted) {
-      setState(() {
-        _biometricEnabled = true;
-        _mostrarPasswordField = false;
-      });
-    }
+    await biometricRepo.enable(
+      userId: userId,
+      email: email,
+      password: passCtrl.text,
+    );
+
+    Future.microtask(() {
+      if (mounted) setState(() => _biometricEnabled = true);
+    });
   }
 
   Future<void> _desactivarBiometria() async {
     final biometricRepo = ref.read(biometricRepositoryProvider);
     await biometricRepo.disable();
-    if (mounted) {
-      setState(() {
-        _biometricEnabled = false;
-        _mostrarPasswordField = false;
-      });
-    }
+    if (mounted) setState(() => _biometricEnabled = false);
   }
 
   Future<void> _confirmarLogout(BuildContext context, WidgetRef ref) async {
@@ -390,38 +406,34 @@ class _MenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.cardColor,
+    return Material(
+      color: context.cardColor,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: context.borderColor),
+        side: BorderSide(color: context.borderColor),
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        child: Material(
-          type: MaterialType.transparency,
-          child: Column(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.directions_car_outlined,
-                    color: AppColors.blueprint),
-                title: const Text('Vehículos registrados'),
-                trailing: Icon(Icons.chevron_right,
-                    color: context.textHintColor),
-                onTap: onVehiculos,
-              ),
-              Divider(height: 1, color: context.borderColor),
-              ListTile(
-                leading: const Icon(Icons.settings_outlined,
-                    color: AppColors.blueprint),
-                title: const Text('Configuración'),
-                trailing: Icon(Icons.chevron_right,
-                    color: context.textHintColor),
-                onTap: onConfiguracion,
-              ),
-            ],
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.directions_car_outlined,
+                color: AppColors.blueprint),
+            title: const Text('Vehículos registrados'),
+            trailing: Icon(Icons.chevron_right,
+                color: context.textHintColor),
+            onTap: onVehiculos,
           ),
-        ),
+          Divider(height: 1, color: context.borderColor),
+          ListTile(
+            leading: const Icon(Icons.settings_outlined,
+                color: AppColors.blueprint),
+            title: const Text('Configuración'),
+            trailing: Icon(Icons.chevron_right,
+                color: context.textHintColor),
+            onTap: onConfiguracion,
+          ),
+        ],
       ),
     );
   }
@@ -438,13 +450,15 @@ class _ThemeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.cardColor,
+    return Material(
+      color: context.cardColor,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: context.borderColor),
+        side: BorderSide(color: context.borderColor),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           SwitchListTile(
             title: const Text('Modo oscuro'),
@@ -469,76 +483,30 @@ class _ThemeCard extends StatelessWidget {
 class _BiometricCard extends StatelessWidget {
   const _BiometricCard({
     required this.enabled,
-    required this.mostrarPassword,
-    required this.passwordController,
     required this.onChanged,
-    required this.onConfirmPassword,
   });
 
   final bool enabled;
-  final bool mostrarPassword;
-  final TextEditingController passwordController;
   final ValueChanged<bool> onChanged;
-  final VoidCallback onConfirmPassword;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.cardColor,
+    return Material(
+      color: context.cardColor,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: context.borderColor),
+        side: BorderSide(color: context.borderColor),
       ),
-      child: Column(
-        children: [
-          SwitchListTile(
-            title: const Text('Usar huella digital'),
-            subtitle: const Text('Accede sin escribir contraseña'),
-            secondary: Icon(
-              enabled ? Icons.fingerprint : Icons.fingerprint_outlined,
-              color: enabled ? AppColors.amber : context.textHintColor,
-            ),
-            value: enabled,
-            onChanged: onChanged,
-          ),
-          if (mostrarPassword) ...[
-            const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: passwordController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        hintText: 'Confirma tu contraseña',
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 10,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      textInputAction: TextInputAction.done,
-                      onSubmitted: (_) => onConfirmPassword(),
-                    ),
-                  ),
-                  const Gap(8),
-                  SizedBox(
-                    height: 36,
-                    child: ElevatedButton(
-                      onPressed: onConfirmPassword,
-                      child: const Text('OK'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
+      clipBehavior: Clip.antiAlias,
+      child: SwitchListTile(
+        title: const Text('Usar huella digital'),
+        subtitle: const Text('Accede sin escribir contraseña'),
+        secondary: Icon(
+          enabled ? Icons.fingerprint : Icons.fingerprint_outlined,
+          color: enabled ? AppColors.amber : context.textHintColor,
+        ),
+        value: enabled,
+        onChanged: onChanged,
       ),
     );
   }

@@ -13,10 +13,6 @@ import '../../domain/entities/vehiculo_cliente.dart';
 import '../state/report_controller.dart';
 import '../widgets/report_step_header.dart';
 
-/// Reportar — Paso 1: Selección del Vehículo Asegurado.
-///
-/// Muestra los vehículos registrados por la aseguradora en un combobox.
-/// El cliente solo selecciona; la información del vehículo se hereda del backend.
 class ReportVehiclePage extends ConsumerStatefulWidget {
   const ReportVehiclePage({super.key});
 

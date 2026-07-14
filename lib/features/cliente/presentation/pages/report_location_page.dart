@@ -14,12 +14,6 @@ import '../../../../shared/widgets/primary_button.dart';
 import '../state/report_controller.dart';
 import '../widgets/report_step_header.dart';
 
-/// Reportar — Paso 2: Ubicación y Fecha (Figma node 70:490).
-///
-/// Captura la ubicación del siniestro por GPS. Al continuar se crea el
-/// siniestro preliminar en el backend (`POST /siniestros/inicializar`), que
-/// requiere vehículo + coordenadas. La fecha/hora la fija el servidor; aquí se
-/// muestra de forma informativa.
 class ReportLocationPage extends ConsumerStatefulWidget {
   const ReportLocationPage({super.key});
 

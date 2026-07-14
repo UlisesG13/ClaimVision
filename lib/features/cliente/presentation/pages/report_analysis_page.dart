@@ -11,12 +11,6 @@ import '../../../../shared/widgets/primary_button.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import '../state/report_controller.dart';
 
-/// Reportar — Cierre: Análisis Preliminar (Figma node 70:657).
-///
-/// El reporte ya fue enviado (siniestro creado + fotos subidas). El backend NO
-/// expone todavía al cliente el resultado del análisis de IA (costo/daños), así
-/// que esta pantalla confirma el envío, resume el reporte con datos reales y
-/// deja claro el estado: la IA es preliminar y un ajustador valida en sitio.
 class ReportAnalysisPage extends ConsumerWidget {
   const ReportAnalysisPage({super.key});
 

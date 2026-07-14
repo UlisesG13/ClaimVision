@@ -1,10 +1,5 @@
 import 'siniestro_estatus.dart';
 
-/// Siniestro del sistema. Entidad de negocio pura, modelada según
-/// `SiniestroResponseDTO` del backend (campos verbatim).
-///
-/// Modelo compartido entre el flujo del cliente (incident) y el del ajustador
-/// (peritaje), por eso vive en `shared/`.
 class Siniestro {
   const Siniestro({
     required this.id,

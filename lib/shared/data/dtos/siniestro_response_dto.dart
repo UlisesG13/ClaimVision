@@ -1,5 +1,4 @@
-/// Respuesta de los endpoints de siniestros (`SiniestroResponseDTO`).
-/// Campos verbatim del backend. Compartido entre cliente y ajustador.
+
 class SiniestroResponseDto {
   const SiniestroResponseDto({
     required this.id,

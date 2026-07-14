@@ -3,7 +3,7 @@ class ApiConstants {
 
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://52.0.23.111:8000/api',
+    defaultValue: 'https://claimvision.actividades.icu/api',
   );
 
   // ── Auth ──────────────────────────────────────────────────────────────
