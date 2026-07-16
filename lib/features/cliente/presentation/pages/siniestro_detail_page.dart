@@ -7,7 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/date_format.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
-import 'package:claimvision/shared/domain/entities/siniestro_estatus.dart';
+import 'package:claimvision/shared/domain/entities/siniestro_status.dart';
 import '../state/mis_siniestros_controller.dart';
 
 class SiniestroDetailPage extends ConsumerWidget {
@@ -130,7 +130,7 @@ class _Timeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const estados = SiniestroEstatus.values;
+    const estados = SiniestroStatus.values;
     final actual = estados.indexOf(siniestro.estatus);
 
     return Container(
@@ -177,7 +177,7 @@ class _TimelineRow extends StatelessWidget {
     required this.esUltimo,
   });
 
-  final SiniestroEstatus estatus;
+  final SiniestroStatus estatus;
   final String subtitulo;
   final _PasoEstado estado;
   final bool esUltimo;
@@ -318,15 +318,15 @@ class _NarrationCard extends StatelessWidget {
 
 class _EstatusChip extends StatelessWidget {
   const _EstatusChip({required this.estatus});
-  final SiniestroEstatus estatus;
+  final SiniestroStatus estatus;
 
   @override
   Widget build(BuildContext context) {
     final color = switch (estatus.tono) {
-      SiniestroEstatusTono.neutro => context.textSecondaryColor,
-      SiniestroEstatusTono.proceso => AppColors.amber,
-      SiniestroEstatusTono.info => AppColors.blueprint,
-      SiniestroEstatusTono.exito => AppColors.success,
+      SiniestroStatusTono.neutro => context.textSecondaryColor,
+      SiniestroStatusTono.proceso => AppColors.amber,
+      SiniestroStatusTono.info => AppColors.blueprint,
+      SiniestroStatusTono.exito => AppColors.success,
     };
     return Container(
       padding:

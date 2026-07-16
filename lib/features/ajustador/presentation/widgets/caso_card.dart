@@ -32,7 +32,7 @@ class CasoCard extends StatelessWidget {
             children: [
               Text(siniestro.folioCorto,
                   style: theme.textTheme.titleMedium?.copyWith(fontSize: 16)),
-              SiniestroEstatusChip(estatus: siniestro.estatus),
+              SiniestroStatusChip(estatus: siniestro.estatus),
             ],
           ),
           const Gap(AppSpacing.md),

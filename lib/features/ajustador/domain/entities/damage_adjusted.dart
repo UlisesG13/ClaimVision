@@ -1,10 +1,8 @@
-import 'dano_severidad.dart';
-import 'dano_tipo.dart';
+import 'damage_severity.dart';
+import 'damage_type.dart';
 
-/// Un daño registrado por el ajustador durante la validación del peritaje.
-/// Entidad pura, modelada según `DanoAjustadoDTO`.
-class DanoAjustado {
-  const DanoAjustado({
+class DamageAdjusted {
+  const DamageAdjusted({
     required this.zonaVehiculo,
     required this.tipo,
     required this.severidad,
@@ -12,20 +10,19 @@ class DanoAjustado {
     this.id,
   });
 
-  /// Id del daño (solo presente cuando viene del backend).
   final String? id;
   final String zonaVehiculo;
-  final DanoTipo tipo;
-  final DanoSeveridad severidad;
+  final DamageType tipo;
+  final DamageSeverity severidad;
   final double costoRealReparacion;
 
-  DanoAjustado copyWith({
+  DamageAdjusted copyWith({
     String? zonaVehiculo,
-    DanoTipo? tipo,
-    DanoSeveridad? severidad,
+    DamageType? tipo,
+    DamageSeverity? severidad,
     double? costoRealReparacion,
   }) {
-    return DanoAjustado(
+    return DamageAdjusted(
       id: id,
       zonaVehiculo: zonaVehiculo ?? this.zonaVehiculo,
       tipo: tipo ?? this.tipo,

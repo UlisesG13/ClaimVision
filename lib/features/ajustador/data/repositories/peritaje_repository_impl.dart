@@ -3,7 +3,7 @@ import 'package:claimvision/shared/domain/entities/siniestro.dart';
 
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
-import '../../domain/entities/dano_ajustado.dart';
+import '../../domain/entities/damage_adjusted.dart';
 import '../../domain/entities/perfil_ajustador.dart';
 import '../../domain/entities/peritaje.dart';
 import '../../domain/repositories/peritaje_repository.dart';
@@ -31,7 +31,7 @@ class PeritajeRepositoryImpl implements PeritajeRepository {
     required String siniestroId,
     required double costoDefinitivo,
     required String firmaDigitalBase64,
-    required List<DanoAjustado> danos,
+    required List<DamageAdjusted> danos,
     String? observacionesCampo,
   }) async {
     try {

@@ -1,4 +1,4 @@
-import 'dano_ajustado_dto.dart';
+import 'damage_adjusted_dto.dart';
 
 /// Respuesta de `PUT /api/siniestros/{id}/peritaje` (`PeritajeResponseDTO`).
 class PeritajeResponseDto {
@@ -18,7 +18,7 @@ class PeritajeResponseDto {
   final String ajustadorId;
   final double costoDefinitivoAjustador;
   final String? observacionesCampo;
-  final List<DanoAjustadoDto> danos;
+  final List<DamageAdjustedDto> danos;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -36,7 +36,7 @@ class PeritajeResponseDto {
       costoDefinitivoAjustador: toDouble(json['costo_definitivo_ajustador']),
       observacionesCampo: json['observaciones_campo'] as String?,
       danos: danosJson
-          .map((d) => DanoAjustadoDto.fromJson(d as Map<String, dynamic>))
+          .map((d) => DamageAdjustedDto.fromJson(d as Map<String, dynamic>))
           .toList(),
       createdAt: toDate(json['created_at']),
       updatedAt: toDate(json['updated_at']),

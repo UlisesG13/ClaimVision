@@ -1,4 +1,4 @@
-import 'dano_ajustado.dart';
+import 'damage_adjusted.dart';
 
 /// Peritaje validado por el ajustador. Entidad pura, modelada según
 /// `PeritajeResponseDTO`.
@@ -19,7 +19,7 @@ class Peritaje {
   final String ajustadorId;
   final double costoDefinitivoAjustador;
   final String? observacionesCampo;
-  final List<DanoAjustado> danos;
+  final List<DamageAdjusted> danos;
   final DateTime createdAt;
   final DateTime updatedAt;
 }

@@ -1,7 +1,5 @@
-/// `DanoAjustadoDTO` (request) y su variante de respuesta (con `id`).
-/// Campos verbatim del backend.
-class DanoAjustadoDto {
-  const DanoAjustadoDto({
+class DamageAdjustedDto {
+  const DamageAdjustedDto({
     required this.zonaVehiculo,
     required this.tipo,
     required this.severidad,
@@ -25,10 +23,10 @@ class DanoAjustadoDto {
         'origen_cambio': origenCambio,
       };
 
-  factory DanoAjustadoDto.fromJson(Map<String, dynamic> json) {
+  factory DamageAdjustedDto.fromJson(Map<String, dynamic> json) {
     double toDouble(dynamic v) =>
         v is num ? v.toDouble() : double.tryParse('$v') ?? 0;
-    return DanoAjustadoDto(
+    return DamageAdjustedDto(
       id: json['id'] as String?,
       zonaVehiculo: (json['zona_vehiculo'] ?? '').toString(),
       tipo: (json['tipo'] ?? '').toString(),

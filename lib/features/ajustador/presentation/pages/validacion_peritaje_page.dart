@@ -9,9 +9,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/feedback/app_snackbar.dart';
 import '../../../../shared/widgets/feedback/app_toast.dart';
-import '../../domain/entities/dano_ajustado.dart';
-import '../../domain/entities/dano_severidad.dart';
-import '../../domain/entities/dano_tipo.dart';
+import '../../domain/entities/damage_adjusted.dart';
+import '../../domain/entities/damage_severity.dart';
+import '../../domain/entities/damage_type.dart';
 import '../state/peritaje_editor_controller.dart';
 
 /// Validación de Peritaje (Figma node 76:4615).
@@ -149,9 +149,9 @@ class ValidacionPeritajePage extends ConsumerWidget {
   }
 
   /// Bottom sheet para crear/editar un daño. Devuelve `null` si se cancela.
-  Future<DanoAjustado?> _editarDano(
-      BuildContext context, DanoAjustado? inicial) {
-    return showModalBottomSheet<DanoAjustado>(
+  Future<DamageAdjusted?> _editarDano(
+      BuildContext context, DamageAdjusted? inicial) {
+    return showModalBottomSheet<DamageAdjusted>(
       context: context,
       isScrollControlled: true,
       backgroundColor: context.surfaceColor,
@@ -203,7 +203,7 @@ String _money(double v) {
 class _DanoCard extends StatelessWidget {
   const _DanoCard(
       {required this.dano, required this.onEditar, required this.onQuitar});
-  final DanoAjustado dano;
+  final DamageAdjusted dano;
   final VoidCallback onEditar;
   final VoidCallback onQuitar;
 
@@ -211,9 +211,9 @@ class _DanoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final sevColor = switch (dano.severidad) {
-      DanoSeveridad.bajo => AppColors.success,
-      DanoSeveridad.medio => AppColors.amber,
-      DanoSeveridad.alto => AppColors.alert,
+      DamageSeverity.bajo => AppColors.success,
+      DamageSeverity.medio => AppColors.amber,
+      DamageSeverity.alto => AppColors.alert,
     };
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -366,7 +366,7 @@ class _SinDanos extends StatelessWidget {
 /// Formulario (bottom sheet) para crear/editar un daño.
 class _DanoForm extends StatefulWidget {
   const _DanoForm({this.inicial});
-  final DanoAjustado? inicial;
+  final DamageAdjusted? inicial;
 
   @override
   State<_DanoForm> createState() => _DanoFormState();
@@ -376,8 +376,8 @@ class _DanoFormState extends State<_DanoForm> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _zona;
   late final TextEditingController _costo;
-  late DanoTipo _tipo;
-  late DanoSeveridad _severidad;
+  late DamageType _tipo;
+  late DamageSeverity _severidad;
 
   @override
   void initState() {
@@ -386,8 +386,8 @@ class _DanoFormState extends State<_DanoForm> {
     _zona = TextEditingController(text: d?.zonaVehiculo ?? '');
     _costo = TextEditingController(
         text: d != null ? d.costoRealReparacion.toStringAsFixed(0) : '');
-    _tipo = d?.tipo ?? DanoTipo.abolladura;
-    _severidad = d?.severidad ?? DanoSeveridad.medio;
+    _tipo = d?.tipo ?? DamageType.abolladura;
+    _severidad = d?.severidad ?? DamageSeverity.medio;
   }
 
   @override
@@ -401,7 +401,7 @@ class _DanoFormState extends State<_DanoForm> {
     if (!_formKey.currentState!.validate()) return;
     Navigator.pop(
       context,
-      DanoAjustado(
+      DamageAdjusted(
         id: widget.inicial?.id,
         zonaVehiculo: _zona.text.trim(),
         tipo: _tipo,
@@ -441,21 +441,21 @@ class _DanoFormState extends State<_DanoForm> {
                   (v == null || v.trim().isEmpty) ? 'Indica la zona.' : null,
             ),
             const Gap(AppSpacing.md),
-            DropdownButtonFormField<DanoTipo>(
+            DropdownButtonFormField<DamageType>(
               initialValue: _tipo,
               decoration: const InputDecoration(labelText: 'Tipo de daño'),
               items: [
-                for (final t in DanoTipo.values)
+                for (final t in DamageType.values)
                   DropdownMenuItem(value: t, child: Text(t.label)),
               ],
               onChanged: (v) => setState(() => _tipo = v ?? _tipo),
             ),
             const Gap(AppSpacing.md),
-            DropdownButtonFormField<DanoSeveridad>(
+            DropdownButtonFormField<DamageSeverity>(
               initialValue: _severidad,
               decoration: const InputDecoration(labelText: 'Severidad'),
               items: [
-                for (final s in DanoSeveridad.values)
+                for (final s in DamageSeverity.values)
                   DropdownMenuItem(value: s, child: Text(s.label)),
               ],
               onChanged: (v) => setState(() => _severidad = v ?? _severidad),

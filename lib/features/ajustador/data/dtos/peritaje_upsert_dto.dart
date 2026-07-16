@@ -1,4 +1,4 @@
-import 'dano_ajustado_dto.dart';
+import 'damage_adjusted_dto.dart';
 
 /// Cuerpo de `POST /api/v1/ajustador/siniestros/{id}/peritaje` (`PeritajeUpsertRequestDTO`).
 /// Campos verbatim del backend.
@@ -13,7 +13,7 @@ class PeritajeUpsertDto {
   final double costoDefinitivoAjustador;
   final String firmaDigitalAjustador;
   final String? observacionesCampo;
-  final List<DanoAjustadoDto> danos;
+  final List<DamageAdjustedDto> danos;
 
   Map<String, dynamic> toJson() => {
         'costo_definitivo_ajustador': costoDefinitivoAjustador,

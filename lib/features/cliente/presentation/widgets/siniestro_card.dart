@@ -5,7 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/date_format.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
-import 'package:claimvision/shared/domain/entities/siniestro_estatus.dart';
+import 'package:claimvision/shared/domain/entities/siniestro_status.dart';
 
 /// Tarjeta de un siniestro (folio, estatus, vehículo, fecha). Reutilizada en el
 /// dashboard y en el historial.
@@ -36,7 +36,7 @@ class SiniestroCard extends StatelessWidget {
               children: [
                 Text('Siniestro ${siniestro.folioCorto}',
                     style: theme.textTheme.titleMedium?.copyWith(fontSize: 15)),
-                SiniestroEstatusChip(estatus: siniestro.estatus),
+                SiniestroStatusChip(estatus: siniestro.estatus),
               ],
             ),
             const Gap(AppSpacing.md),
@@ -55,17 +55,17 @@ class SiniestroCard extends StatelessWidget {
 }
 
 /// Chip de color según el estatus del siniestro.
-class SiniestroEstatusChip extends StatelessWidget {
-  const SiniestroEstatusChip({super.key, required this.estatus});
-  final SiniestroEstatus estatus;
+class SiniestroStatusChip extends StatelessWidget {
+  const SiniestroStatusChip({super.key, required this.estatus});
+  final SiniestroStatus estatus;
 
   @override
   Widget build(BuildContext context) {
     final color = switch (estatus.tono) {
-      SiniestroEstatusTono.neutro => context.textSecondaryColor,
-      SiniestroEstatusTono.proceso => AppColors.amber,
-      SiniestroEstatusTono.info => AppColors.blueprint,
-      SiniestroEstatusTono.exito => AppColors.success,
+      SiniestroStatusTono.neutro => context.textSecondaryColor,
+      SiniestroStatusTono.proceso => AppColors.amber,
+      SiniestroStatusTono.info => AppColors.blueprint,
+      SiniestroStatusTono.exito => AppColors.success,
     };
     return Container(
       padding:

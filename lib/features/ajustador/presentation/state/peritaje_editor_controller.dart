@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/errors/failures.dart';
-import '../../domain/entities/dano_ajustado.dart';
+import '../../domain/entities/damage_adjusted.dart';
 
 class PeritajeEditorState {
   const PeritajeEditorState({
@@ -18,7 +18,7 @@ class PeritajeEditorState {
   });
 
   final String siniestroId;
-  final List<DanoAjustado> danos;
+  final List<DamageAdjusted> danos;
   final String observaciones;
   final double? costoOverride;
   final String? firmaBase64;
@@ -36,7 +36,7 @@ class PeritajeEditorState {
 
   PeritajeEditorState copyWith({
     String? siniestroId,
-    List<DanoAjustado>? danos,
+    List<DamageAdjusted>? danos,
     String? observaciones,
     double? costoOverride,
     bool clearCostoOverride = false,
@@ -68,10 +68,10 @@ class PeritajeEditorController extends Notifier<PeritajeEditorState> {
     state = PeritajeEditorState(siniestroId: siniestroId);
   }
 
-  void agregarDano(DanoAjustado dano) =>
+  void agregarDano(DamageAdjusted dano) =>
       state = state.copyWith(danos: [...state.danos, dano], clearError: true);
 
-  void actualizarDano(int index, DanoAjustado dano) {
+  void actualizarDano(int index, DamageAdjusted dano) {
     final lista = [...state.danos];
     if (index < 0 || index >= lista.length) return;
     lista[index] = dano;

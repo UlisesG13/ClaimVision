@@ -1,5 +1,5 @@
 import '../../domain/entities/siniestro.dart';
-import '../../domain/entities/siniestro_estatus.dart';
+import '../../domain/entities/siniestro_status.dart';
 import '../dtos/siniestro_response_dto.dart';
 
 class SiniestroMapper {
@@ -12,7 +12,7 @@ class SiniestroMapper {
       clienteId: dto.clienteId,
       ajustadorId: dto.ajustadorId,
       tallerId: dto.tallerId,
-      estatus: SiniestroEstatus.fromApi(dto.estatus),
+      estatus: SiniestroStatus.fromApi(dto.estatus),
       vehiculoMarca: dto.vehiculoMarca,
       vehiculoModelo: dto.vehiculoModelo,
       vehiculoAnio: dto.vehiculoAnio,

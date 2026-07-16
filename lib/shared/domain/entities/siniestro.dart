@@ -1,4 +1,4 @@
-import 'siniestro_estatus.dart';
+import 'siniestro_status.dart';
 
 class Siniestro {
   const Siniestro({
@@ -27,7 +27,7 @@ class Siniestro {
   final String clienteId;
   final String? ajustadorId;
   final String? tallerId;
-  final SiniestroEstatus estatus;
+  final SiniestroStatus estatus;
 
   final String vehiculoMarca;
   final String vehiculoModelo;

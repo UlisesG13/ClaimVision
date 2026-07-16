@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/network/api_error_mapper.dart';
 import '../../dtos/ajustador_response_dto.dart';
-import '../../dtos/dano_ajustado_dto.dart';
+import '../../dtos/damage_adjusted_dto.dart';
 import '../../dtos/peritaje_response_dto.dart';
 import '../../dtos/peritaje_upsert_dto.dart';
 
@@ -14,7 +14,7 @@ abstract interface class PeritajeRemoteDataSource {
   Future<SiniestroResponseDto> obtenerDetalleSiniestro(String id);
   Future<PeritajeResponseDto> registrarPeritaje(String siniestroId, PeritajeUpsertDto body);
   Future<PeritajeResponseDto> editarPeritaje(String peritajeId, Map<String, dynamic> body);
-  Future<PeritajeResponseDto> agregarDano(String peritajeId, DanoAjustadoDto dano);
+  Future<PeritajeResponseDto> agregarDano(String peritajeId, DamageAdjustedDto dano);
   Future<AjustadorResponseDto> obtenerPerfil();
 }
 
@@ -89,7 +89,7 @@ class PeritajeRemoteDataSourceImpl implements PeritajeRemoteDataSource {
 
   @override
   Future<PeritajeResponseDto> agregarDano(
-      String peritajeId, DanoAjustadoDto dano) async {
+      String peritajeId, DamageAdjustedDto dano) async {
     try {
       final response = await _dio.post(
         ApiConstants.ajustadorPeritajeDanos(peritajeId),

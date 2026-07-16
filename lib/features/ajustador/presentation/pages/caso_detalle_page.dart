@@ -83,7 +83,7 @@ class CasoDetallePage extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    SiniestroEstatusChip(estatus: siniestro.estatus),
+                    SiniestroStatusChip(estatus: siniestro.estatus),
                     if (siniestro.indicacionesDanoInterno) ...[
                       const Gap(AppSpacing.sm),
                       _Tag(

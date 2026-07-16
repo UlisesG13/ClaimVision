@@ -1,8 +1,8 @@
-import '../../domain/entities/dano_ajustado.dart';
-import '../../domain/entities/dano_severidad.dart';
-import '../../domain/entities/dano_tipo.dart';
+import '../../domain/entities/damage_adjusted.dart';
+import '../../domain/entities/damage_severity.dart';
+import '../../domain/entities/damage_type.dart';
 import '../../domain/entities/peritaje.dart';
-import '../dtos/dano_ajustado_dto.dart';
+import '../dtos/damage_adjusted_dto.dart';
 import '../dtos/peritaje_response_dto.dart';
 
 /// Convierte DTOs del peritaje a entidades de dominio (y daños a DTO).
@@ -22,18 +22,18 @@ class PeritajeMapper {
     );
   }
 
-  static DanoAjustado _danoToEntity(DanoAjustadoDto dto) {
-    return DanoAjustado(
+  static DamageAdjusted _danoToEntity(DamageAdjustedDto dto) {
+    return DamageAdjusted(
       id: dto.id,
       zonaVehiculo: dto.zonaVehiculo,
-      tipo: DanoTipo.fromApi(dto.tipo),
-      severidad: DanoSeveridad.fromApi(dto.severidad),
+      tipo: DamageType.fromApi(dto.tipo),
+      severidad: DamageSeverity.fromApi(dto.severidad),
       costoRealReparacion: dto.costoRealReparacion,
     );
   }
 
-  static DanoAjustadoDto danoToDto(DanoAjustado dano) {
-    return DanoAjustadoDto(
+  static DamageAdjustedDto danoToDto(DamageAdjusted dano) {
+    return DamageAdjustedDto(
       id: dano.id,
       zonaVehiculo: dano.zonaVehiculo,
       tipo: dano.tipo.apiValue,

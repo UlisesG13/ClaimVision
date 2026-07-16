@@ -1,4 +1,4 @@
-import '../entities/dano_ajustado.dart';
+import '../entities/damage_adjusted.dart';
 import '../entities/peritaje.dart';
 import '../repositories/peritaje_repository.dart';
 
@@ -11,7 +11,7 @@ class RegistrarPeritaje {
     required String siniestroId,
     required double costoDefinitivo,
     required String firmaDigitalBase64,
-    required List<DanoAjustado> danos,
+    required List<DamageAdjusted> danos,
     String? observacionesCampo,
   }) {
     return _repository.registrarPeritaje(

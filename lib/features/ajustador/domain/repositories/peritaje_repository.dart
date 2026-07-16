@@ -1,6 +1,6 @@
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 
-import '../entities/dano_ajustado.dart';
+import '../entities/damage_adjusted.dart';
 import '../entities/perfil_ajustador.dart';
 import '../entities/peritaje.dart';
 
@@ -11,7 +11,7 @@ abstract interface class PeritajeRepository {
     required String siniestroId,
     required double costoDefinitivo,
     required String firmaDigitalBase64,
-    required List<DanoAjustado> danos,
+    required List<DamageAdjusted> danos,
     String? observacionesCampo,
   });
 
