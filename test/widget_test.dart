@@ -1,11 +1,12 @@
 import 'package:claimvision/app.dart';
 import 'package:claimvision/core/di/providers.dart';
+import 'package:claimvision/core/security/domain/entities/security_status.dart';
+import 'package:claimvision/core/security/domain/services/device_inspector.dart';
 import 'package:claimvision/core/services/secure_storage_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Almacenamiento falso (sin plugins nativos): siempre devuelve "sin sesión".
 class _FakeSecureStorage extends SecureStorageService {
   _FakeSecureStorage() : super(const FlutterSecureStorage());
 
@@ -22,6 +23,11 @@ class _FakeSecureStorage extends SecureStorageService {
   Future<void> clearSession() async {}
 }
 
+class _FakeDeviceInspector implements DeviceInspector {
+  @override
+  Future<SecurityStatus> inspect() async => const SecurityOk();
+}
+
 void main() {
   testWidgets('Sin sesión guardada, la app muestra el inicio de sesión',
       (WidgetTester tester) async {
@@ -29,12 +35,12 @@ void main() {
       ProviderScope(
         overrides: [
           secureStorageProvider.overrideWithValue(_FakeSecureStorage()),
+          deviceInspectorProvider.overrideWith((_) => _FakeDeviceInspector()),
         ],
         child: const ClaimVisionApp(),
       ),
     );
 
-    // Restaura sesión (null) → el router redirige al login.
     await tester.pumpAndSettle();
 
     expect(find.text('Iniciar Sesión'), findsOneWidget);

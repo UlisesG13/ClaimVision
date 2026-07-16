@@ -37,4 +37,7 @@ class RoutePaths {
   static const String peritajeConfirmado = '/caso/:id/confirmado';
   static String peritajeConfirmadoDe(String id) => '/caso/$id/confirmado';
   static const String notificacionesAjustador = '/ajustador/notificaciones';
+
+  // ── Seguridad ───────────────────────────────────────────────────────────
+  static const String bloqueado = '/bloqueado';
 }

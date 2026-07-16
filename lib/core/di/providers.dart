@@ -39,7 +39,11 @@ import '../../features/ajustador/domain/usecases/get_perfil_ajustador.dart';
 import '../../features/ajustador/domain/usecases/registrar_peritaje.dart';
 import '../../features/ajustador/domain/usecases/get_detalle_ajustador.dart';
 import '../network/dio_client.dart';
+import '../security/domain/repositories/security_repository.dart';
+import '../security/data/repositories/security_repository_impl.dart';
+import '../security/domain/services/device_inspector.dart';
 import '../services/biometric_service.dart';
+import '../services/device_inspector_service.dart';
 import '../services/image_picker_service.dart';
 import '../services/location_service.dart';
 import '../services/secure_storage_service.dart';
@@ -67,6 +71,15 @@ final imagePickerServiceProvider = Provider<ImagePickerService>((ref) {
 
 final locationServiceProvider = Provider<LocationService>((ref) {
   return const LocationService();
+});
+
+// ── Security ────────────────────────────────────────────────────────────────
+final deviceInspectorProvider = Provider<DeviceInspector>((ref) {
+  return DeviceInspectorService();
+});
+
+final securityRepositoryProvider = Provider<SecurityRepository>((ref) {
+  return SecurityRepositoryImpl(ref.watch(deviceInspectorProvider));
 });
 
 // ── Auth: datasources ──────────────────────────────────────────────────────

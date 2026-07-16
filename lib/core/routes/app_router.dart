@@ -8,6 +8,9 @@ import '../../features/auth/presentation/state/auth_controller.dart';
 import '../../features/ajustador/presentation/routes/ajustador_routes.dart';
 import '../../features/auth/presentation/routes/auth_routes.dart';
 import '../../features/cliente/presentation/routes/cliente_routes.dart';
+import '../security/domain/entities/security_status.dart';
+import '../security/presentation/pages/blocked_page.dart';
+import '../security/presentation/providers/security_providers.dart';
 import '../theme/app_colors.dart';
 import 'route_paths.dart';
 
@@ -28,8 +31,16 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: RoutePaths.splash,
     refreshListenable: refresh,
     redirect: (context, state) {
-      final auth = ref.read(authControllerProvider);
       final location = state.matchedLocation;
+
+      final security = ref.read(securityControllerProvider);
+      final status = security.asData?.value;
+      if (status is SecurityCompromised && location != RoutePaths.bloqueado) {
+        return RoutePaths.bloqueado;
+      }
+      if (location == RoutePaths.bloqueado) return null;
+
+      final auth = ref.read(authControllerProvider);
 
       if (ref.read(authControllerProvider.notifier).isRestoring) {
         return location == RoutePaths.splash ? null : RoutePaths.splash;
@@ -52,6 +63,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RoutePaths.splash,
         builder: (_, _) => const _SplashScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.bloqueado,
+        builder: (_, _) => Consumer(
+          builder: (context, ref, _) {
+            final status = ref.watch(securityControllerProvider).asData?.value;
+            final issues = status is SecurityCompromised
+                ? status.issues
+                : <SecurityIssue>[];
+            return BlockedPage(issues: issues);
+          },
+        ),
       ),
       ...authRoutes,
       ...clienteRoutes,
