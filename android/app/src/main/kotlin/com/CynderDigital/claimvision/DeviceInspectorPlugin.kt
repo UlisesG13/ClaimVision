@@ -1,4 +1,4 @@
-package com.example.claimvision
+package com.CynderDigital.claimvision
 
 import android.content.Context
 import android.content.pm.ApplicationInfo

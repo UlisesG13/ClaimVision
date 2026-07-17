@@ -1,4 +1,4 @@
-package com.example.claimvision
+package com.CynderDigital.claimvision
 
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
