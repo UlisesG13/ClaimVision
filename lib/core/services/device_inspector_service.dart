@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../security/domain/entities/security_status.dart';
@@ -8,6 +9,7 @@ class DeviceInspectorService implements DeviceInspector {
 
   @override
   Future<SecurityStatus> inspect() async {
+    if (kDebugMode) return const SecurityOk();
     try {
       final results = await _channel.invokeMethod<Map<Object?, Object?>>('inspect');
       if (results == null) return const SecurityOk();

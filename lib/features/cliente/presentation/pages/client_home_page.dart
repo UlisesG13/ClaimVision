@@ -211,7 +211,6 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
   Future<String?> _mostrarDialogoCambioPassword() async {
     final currentCtrl = TextEditingController();
     final newCtrl = TextEditingController();
-    final formKey = GlobalKey<FormState>();
 
     String? nuevaPassword;
     final cambioRealizado = await showDialog<bool>(
@@ -222,35 +221,32 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
         return AlertDialog(
           title: Text('Actualiza tu contraseña',
               style: theme.textTheme.titleLarge),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Por seguridad, te recomendamos cambiar tu contraseña por una que recuerdes fácilmente.',
-                  style: theme.textTheme.bodyMedium,
-                ),
-                const Gap(AppSpacing.lg),
-                AppTextField(
-                  controller: currentCtrl,
-                  hintText: 'Contraseña actual',
-                  prefixIcon: Icons.lock_outline,
-                  obscure: true,
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? 'Ingresa tu contraseña actual' : null,
-                ),
-                const Gap(AppSpacing.md),
-                AppTextField(
-                  controller: newCtrl,
-                  hintText: 'Nueva contraseña',
-                  prefixIcon: Icons.lock,
-                  obscure: true,
-                  validator: (v) =>
-                      (v == null || v.length < 6) ? 'Mínimo 6 caracteres' : null,
-                ),
-              ],
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Por seguridad, te recomendamos cambiar tu contraseña por una que recuerdes fácilmente.',
+                style: theme.textTheme.bodyMedium,
+              ),
+              const Gap(AppSpacing.lg),
+              AppTextField(
+                controller: currentCtrl,
+                hintText: 'Contraseña actual',
+                prefixIcon: Icons.lock_outline,
+                obscure: true,
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'Ingresa tu contraseña actual' : null,
+              ),
+              const Gap(AppSpacing.md),
+              AppTextField(
+                controller: newCtrl,
+                hintText: 'Nueva contraseña',
+                prefixIcon: Icons.lock,
+                obscure: true,
+                validator: (v) =>
+                    (v == null || v.length < 6) ? 'Mínimo 6 caracteres' : null,
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -260,7 +256,7 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
             TextButton(
               style: TextButton.styleFrom(foregroundColor: AppColors.blueprint),
               onPressed: () async {
-                if (!formKey.currentState!.validate()) return;
+                if (currentCtrl.text.isEmpty || newCtrl.text.length < 6) return;
                 AppDialog.showLoading(ctx, title: 'Actualizando contraseña…');
                 try {
                   await ref.read(changePasswordProvider)(
