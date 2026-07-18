@@ -1,28 +1,27 @@
 {
   "project_info": {
-    "project_number": "REEMPLAZAR_CON_FIREBASE_PROJECT_NUMBER",
+    "project_number": "498050735837",
     "project_id": "claimvision-b0f20",
     "storage_bucket": "claimvision-b0f20.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "REEMPLAZAR:DESDE_FIREBASE_CONSOLE",
+        "mobilesdk_app_id": "1:498050735837:android:23d1ca53685a3308e5c534",
         "android_client_info": {
-          "package_name": "com.example.claimvision"
+          "package_name": "com.CynderDigital.claimvision"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "REEMPLAZAR_CON_FIREBASE_API_KEY"
+          "current_key": "AIzaSyBevh42_f8iIQMo5bNhkhKMgfw5PadS_KM"
         }
       ],
       "services": {
-        "analytics_service": { "status": 1 },
-        "appinvite_service": { "status": 1 },
-        "google_cast_service": { "status": 2 },
-        "cloud_messaging_service": { "status": 2 }
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
       }
     }
   ],

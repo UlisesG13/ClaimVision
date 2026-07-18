@@ -2,9 +2,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../../firebase_options.dart';
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await NotificationService._handleMessage(message);
 }
 
@@ -23,7 +25,6 @@ class NotificationService {
   Future<void> initialize() async {
     if (_initialized) return;
 
-    await Firebase.initializeApp();
     _messaging = FirebaseMessaging.instance;
     _localNotifications = FlutterLocalNotificationsPlugin();
 

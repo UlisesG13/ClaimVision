@@ -1,5 +1,1 @@
-{
-  "projects": {
-    "default": "claimvision-b0f20"
-  }
-}
+{"projects":{"default":"claimvision-b0f20"},"flutter":{"platforms":{"android":{"default":{"projectId":"claimvision-b0f20","appId":"1:498050735837:android:23d1ca53685a3308e5c534","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"claimvision-b0f20","configurations":{"android":"1:498050735837:android:23d1ca53685a3308e5c534","ios":"1:498050735837:ios:a6b7411ad457e94de5c534","macos":"1:498050735837:ios:a6b7411ad457e94de5c534","web":"1:498050735837:web:5a44557a54de0a93e5c534","windows":"1:498050735837:web:202e07d61a5d7287e5c534"}}}}}}
