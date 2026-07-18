@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,6 +13,8 @@ import '../ocr/presentation/ocr_routes.dart';
 import '../security/domain/entities/security_status.dart';
 import '../security/presentation/pages/blocked_page.dart';
 import '../security/presentation/providers/security_providers.dart';
+import '../services/notification_payload.dart';
+import '../services/notification_service.dart';
 import '../theme/app_colors.dart';
 import 'route_paths.dart';
 
@@ -28,7 +31,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref.onDispose(refresh.dispose);
   ref.listen(authControllerProvider, (_, _) => refresh.bump());
 
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: RoutePaths.splash,
     refreshListenable: refresh,
     redirect: (context, state) {
@@ -83,6 +86,60 @@ final routerProvider = Provider<GoRouter>((ref) {
       ...ajustadorRoutes,
     ],
   );
+
+  // ── Notificaciones push ──────────────────────────────────────────────
+
+  void navigateByNotification(
+    NotificationPayload payload,
+    AuthSession session,
+  ) {
+    final route = switch ((session.rol, payload.type)) {
+      (UserRole.ajustador, 'asignacion') when payload.id != null
+          => RoutePaths.casoDetalleDe(payload.id!),
+      (UserRole.cliente, 'siniestro') when payload.id != null
+          => RoutePaths.detalleSiniestroDe(payload.id!),
+      (UserRole.ajustador, 'notificacion')
+          => RoutePaths.notificacionesAjustador,
+      (_, 'notificacion') => RoutePaths.notificaciones,
+      _ => _homeFor(session),
+    };
+    router.go(route);
+  }
+
+  void handleNotificationPayload(NotificationPayload payload) {
+    final session = ref.read(authControllerProvider).asData?.value;
+    if (session != null) {
+      navigateByNotification(payload, session);
+    } else {
+      NotificationService.pendingNavigationPayload = payload;
+    }
+  }
+
+  void handleRemoteMessage(RemoteMessage message) {
+    handleNotificationPayload(NotificationPayload.fromMessage(message));
+  }
+
+  // Abierta desde background
+  NotificationService.instance.onMessageOpenedApp = handleRemoteMessage;
+
+  // Tap en notificación local (foreground)
+  NotificationService.instance.onNotificationTap =
+      handleNotificationPayload;
+
+  // Pendiente por sesión no restaurada aún
+  ref.listen(authControllerProvider, (prev, next) {
+    final wasLoading = prev?.isLoading ?? true;
+    final session = next.asData?.value;
+    if (wasLoading && session != null) {
+      final pending = NotificationService.pendingNavigationPayload;
+      if (pending != null) {
+        NotificationService.pendingNavigationPayload = null;
+        navigateByNotification(pending, session);
+      }
+    }
+  });
+
+  return router;
 });
 
 String _homeFor(AuthSession session) {

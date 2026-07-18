@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../firebase_options.dart';
+import 'notification_payload.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -19,8 +22,12 @@ class NotificationService {
   FlutterLocalNotificationsPlugin? _localNotifications;
   bool _initialized = false;
 
+  static NotificationPayload? pendingNavigationPayload;
+
   void Function(String token)? onTokenRefreshed;
   void Function(RemoteMessage message)? onMessageOpenedApp;
+  void Function(NotificationPayload payload)? onNotificationTap;
+  void Function(RemoteMessage message)? onForegroundMessage;
 
   Future<void> initialize() async {
     if (_initialized) return;
@@ -36,7 +43,13 @@ class NotificationService {
     );
     await _localNotifications!.initialize(
       const InitializationSettings(android: androidSettings, iOS: iosSettings),
-      onDidReceiveNotificationResponse: (response) {},
+      onDidReceiveNotificationResponse: (response) {
+        if (response.payload == null) return;
+        try {
+          final data = jsonDecode(response.payload!) as Map<String, dynamic>;
+          onNotificationTap?.call(NotificationPayload.fromJson(data));
+        } catch (_) {}
+      },
     );
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -49,7 +62,7 @@ class NotificationService {
 
     final msg = await _messaging!.getInitialMessage();
     if (msg != null) {
-      onMessageOpenedApp?.call(msg);
+      pendingNavigationPayload = NotificationPayload.fromMessage(msg);
     }
 
     _messaging!.onTokenRefresh.listen((token) {
@@ -79,6 +92,7 @@ class NotificationService {
   }
 
   Future<void> _showForegroundNotification(RemoteMessage message) async {
+    onForegroundMessage?.call(message);
     await _handleMessage(message);
   }
 
@@ -105,7 +119,7 @@ class NotificationService {
         android: androidDetails,
         iOS: iosDetails,
       ),
-      payload: data.isNotEmpty ? data.toString() : null,
+      payload: data.isNotEmpty ? jsonEncode(data) : null,
     );
   }
 }
