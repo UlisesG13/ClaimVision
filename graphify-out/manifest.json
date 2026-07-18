@@ -50,7 +50,7 @@
     "semantic_hash": ""
   },
   "ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift": {
-    "mtime": 1784264242.1333318,
+    "mtime": 1784322405.780952,
     "ast_hash": "63bc00d19466662a75b7492ac07d5a97",
     "semantic_hash": "63bc00d19466662a75b7492ac07d5a97"
   },
@@ -125,8 +125,8 @@
     "semantic_hash": ""
   },
   "lib/core/di/providers.dart": {
-    "mtime": 1784229294.2185652,
-    "ast_hash": "991469679e644f20a09b01d9cb5e8814",
+    "mtime": 1784322205.079747,
+    "ast_hash": "21602cdeb19db83b65a8725caf184631",
     "semantic_hash": ""
   },
   "lib/core/errors/exceptions.dart": {
@@ -150,13 +150,13 @@
     "semantic_hash": "bf746d6bb0135d710aed997951e38284"
   },
   "lib/core/routes/app_router.dart": {
-    "mtime": 1784229294.2185652,
-    "ast_hash": "7ffeee9b0af587ed35e749fdfe5df62d",
+    "mtime": 1784322225.686579,
+    "ast_hash": "1dec29723221ecf2e78b2500e42b03f9",
     "semantic_hash": ""
   },
   "lib/core/routes/route_paths.dart": {
-    "mtime": 1784229294.2185652,
-    "ast_hash": "1c31ed18a77f827207fa795dad9c785a",
+    "mtime": 1784322209.8555827,
+    "ast_hash": "fb7ce2c586b224f10892ef5d8f55b9c1",
     "semantic_hash": ""
   },
   "lib/core/services/image_picker_service.dart": {
@@ -690,7 +690,7 @@
     "semantic_hash": ""
   },
   "macos/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift": {
-    "mtime": 1784264242.2395947,
+    "mtime": 1784322405.7998118,
     "ast_hash": "61d013e6c93b3d917c4f6178b9f6c9cb",
     "semantic_hash": "61d013e6c93b3d917c4f6178b9f6c9cb"
   },
@@ -1202,6 +1202,86 @@
   "web/icons/Icon-maskable-512.png": {
     "mtime": 1784229294.033642,
     "ast_hash": "301a7604d45b3e739efc881eb04896ea",
+    "semantic_hash": ""
+  },
+  "lib/core/ocr/data/datasources/ocr_remote_datasource.dart": {
+    "mtime": 1784322101.7208812,
+    "ast_hash": "b73f64324f498e96048e528eca1dd9e1",
+    "semantic_hash": ""
+  },
+  "lib/core/ocr/data/ocr_repository_impl.dart": {
+    "mtime": 1784322108.057382,
+    "ast_hash": "8523efd6abe59c628eed949d30f6144c",
+    "semantic_hash": ""
+  },
+  "lib/core/ocr/domain/document_type.dart": {
+    "mtime": 1784322066.1597717,
+    "ast_hash": "b6e6f46d140ed5428b0b7943dce6ac30",
+    "semantic_hash": ""
+  },
+  "lib/core/ocr/domain/image_quality.dart": {
+    "mtime": 1784322071.7106128,
+    "ast_hash": "3ec420f5e66f97ce42d6ec009dceb346",
+    "semantic_hash": ""
+  },
+  "lib/core/ocr/domain/image_validator.dart": {
+    "mtime": 1784322083.760914,
+    "ast_hash": "8ba276540edc13bacb5fa78b54d99e77",
+    "semantic_hash": ""
+  },
+  "lib/core/ocr/domain/ocr_extraction.dart": {
+    "mtime": 1784322078.504387,
+    "ast_hash": "0e0b057f138112e59b0cd48709fcf5d7",
+    "semantic_hash": ""
+  },
+  "lib/core/ocr/domain/ocr_repository.dart": {
+    "mtime": 1784322087.612184,
+    "ast_hash": "e5d8f10a6e0c8df2db239709aa13d632",
+    "semantic_hash": ""
+  },
+  "lib/core/ocr/presentation/ocr_controller.dart": {
+    "mtime": 1784322130.584181,
+    "ast_hash": "43cad0c87720b463a401426f57f82da6",
+    "semantic_hash": ""
+  },
+  "lib/core/ocr/presentation/ocr_routes.dart": {
+    "mtime": 1784322214.6019795,
+    "ast_hash": "8fb8efd4d8509be0a37736c5cac28c6d",
+    "semantic_hash": ""
+  },
+  "lib/core/ocr/presentation/pages/document_capture_page.dart": {
+    "mtime": 1784322382.5685437,
+    "ast_hash": "620b959c58c41490bec5e620ebafbc18",
+    "semantic_hash": ""
+  },
+  "lib/core/ocr/presentation/pages/document_type_page.dart": {
+    "mtime": 1784322359.571969,
+    "ast_hash": "d3a1d9c8f758fa5b416f0ce63e1d257c",
+    "semantic_hash": ""
+  },
+  "lib/core/ocr/presentation/pages/ocr_result_page.dart": {
+    "mtime": 1784322386.7369604,
+    "ast_hash": "57484c11aa6b033d9f5dc197ffcb5b03",
+    "semantic_hash": ""
+  },
+  "lib/core/ocr/presentation/widgets/capture_overlay.dart": {
+    "mtime": 1784322147.8597188,
+    "ast_hash": "f605a29b4905bcac82505c571b11dc11",
+    "semantic_hash": ""
+  },
+  "lib/core/ocr/presentation/widgets/validation_indicator.dart": {
+    "mtime": 1784322138.5820155,
+    "ast_hash": "40b00e8f6b97db42f58b82c8f32f6e71",
+    "semantic_hash": ""
+  },
+  "lib/core/services/image_quality_service.dart": {
+    "mtime": 1784322121.4561434,
+    "ast_hash": "e0e35daae4dd0b1bf47fbbe98f68b805",
+    "semantic_hash": ""
+  },
+  "openapi_backend.json": {
+    "mtime": 1784321267.4885957,
+    "ast_hash": "3ee8259815f21c9c9ad7bd210eec8d47",
     "semantic_hash": ""
   }
 }

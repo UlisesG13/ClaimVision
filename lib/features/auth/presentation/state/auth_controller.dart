@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../domain/entities/auth_session.dart';
@@ -45,7 +46,9 @@ class AuthController extends AsyncNotifier<AuthSession?> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final loginUser = ref.read(loginUserProvider);
-      return loginUser(email: email, password: password);
+      final session = loginUser(email: email, password: password);
+      _registerDeviceToken();
+      return session;
     });
   }
 
@@ -57,8 +60,26 @@ class AuthController extends AsyncNotifier<AuthSession?> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final registerUser = ref.read(registerUserProvider);
-      return registerUser(nombre: nombre, email: email, password: password);
+      final session = registerUser(nombre: nombre, email: email, password: password);
+      _registerDeviceToken();
+      return session;
     });
+  }
+
+  Future<void> _registerDeviceToken() async {
+    try {
+      final messaging = FirebaseMessaging.instance;
+      final fcmToken = await messaging.getToken();
+      if (fcmToken == null) return;
+
+      final registerToken = ref.read(registerDeviceTokenProvider);
+      await registerToken(fcmToken);
+
+      messaging.onTokenRefresh.listen((newToken) async {
+        final registerToken = ref.read(registerDeviceTokenProvider);
+        await registerToken(newToken);
+      });
+    } catch (_) {}
   }
 
   Future<void> logout() async {

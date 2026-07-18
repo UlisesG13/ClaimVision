@@ -1,16 +1,16 @@
 # Graph Report - claimvision  (2026-07-17)
 
 ## Corpus Check
-- 194 files · ~51,731 words
+- 210 files · ~71,140 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2001 nodes · 2845 edges · 147 communities (140 shown, 7 thin omitted)
+- 2148 nodes · 3086 edges · 154 communities (147 shown, 7 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 18 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `36dc5cdd`
+- Built from commit: `813901d8`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -156,6 +156,13 @@
 - damage_type.dart
 - change_password_request_dto.dart
 - biometric_credentials.dart
+- ajustador_routes.dart
+- validation_indicator.dart
+- _ClaimVisionAppState
+- image_validator.dart
+- ReportController
+- app_theme.dart
+- ChangeNotifier
 
 ## God Nodes (most connected - your core abstractions)
 1. `Win32Window` - 22 edges
@@ -184,7 +191,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (147 total, 7 thin omitted)
+## Communities (154 total, 7 thin omitted)
 
 ### Community 0 - "Win32Window"
 Cohesion: 0.06
@@ -192,7 +199,7 @@ Nodes (53): PluginRegistry, Point, RECT, Size, unique_ptr, RegisterPlugins(), Da
 
 ### Community 1 - "providers.dart"
 Cohesion: 0.03
-Nodes (60): ../../features/ajustador/data/datasources/remote/peritaje_remote_datasource.dart, ../../features/ajustador/data/repositories/peritaje_repository_impl.dart, ../../features/ajustador/domain/repositories/peritaje_repository.dart, ../../features/ajustador/domain/usecases/get_casos_asignados.dart, ../../features/ajustador/domain/usecases/get_detalle_ajustador.dart, ../../features/ajustador/domain/usecases/get_perfil_ajustador.dart, ../../features/ajustador/domain/usecases/registrar_peritaje.dart, ../../features/auth/data/datasources/local/auth_local_datasource.dart (+52 more)
+Nodes (65): ../../features/ajustador/data/datasources/remote/peritaje_remote_datasource.dart, ../../features/ajustador/data/repositories/peritaje_repository_impl.dart, ../../features/ajustador/domain/repositories/peritaje_repository.dart, ../../features/ajustador/domain/usecases/get_casos_asignados.dart, ../../features/ajustador/domain/usecases/get_detalle_ajustador.dart, ../../features/ajustador/domain/usecases/get_perfil_ajustador.dart, ../../features/ajustador/domain/usecases/registrar_peritaje.dart, ../../features/auth/data/datasources/local/auth_local_datasource.dart (+57 more)
 
 ### Community 2 - "app_toast.dart"
 Cohesion: 0.09
@@ -211,52 +218,52 @@ Cohesion: 0.05
 Nodes (37): int get, anio, build, calidadValida, copyWith, danoInterno, error, errorMessage (+29 more)
 
 ### Community 6 - "onboarding_controller.dart"
-Cohesion: 0.07
-Nodes (26): File, avisoPrivacidad, biometria, build, canConfirm, cedula, completed, copyWith (+18 more)
+Cohesion: 0.08
+Nodes (25): avisoPrivacidad, biometria, build, canConfirm, cedula, completed, copyWith, curpRfc (+17 more)
 
 ### Community 7 - "package:flutter_riverpod/flutter_riverpod.dart"
-Cohesion: 0.10
-Nodes (19): app.dart, color, _NarracionCard, _Section, siniestroId, _Tag, text, texto (+11 more)
+Cohesion: 0.09
+Nodes (20): app.dart, ../../../cliente/presentation/widgets/siniestro_card.dart, color, _NarracionCard, _Section, siniestroId, _Tag, text (+12 more)
 
 ### Community 8 - "client_home_page.dart"
 Cohesion: 0.09
 Nodes (22): ../../../auth/presentation/state/auth_controller.dart, ../../../auth/presentation/state/onboarding_controller.dart, activos, createState, _EmptyActivity, _Header, initState, label (+14 more)
 
 ### Community 9 - "app_router.dart"
-Cohesion: 0.05
-Nodes (41): ChangeNotifier, core/routes/app_router.dart, core/security/domain/entities/security_status.dart, core/security/presentation/pages/blocked_page.dart, core/security/presentation/providers/security_providers.dart, core/theme/app_theme.dart, ../../../../core/theme/theme_notifier.dart, ../../features/ajustador/presentation/routes/ajustador_routes.dart (+33 more)
+Cohesion: 0.11
+Nodes (17): ../../features/ajustador/presentation/routes/ajustador_routes.dart, ../../features/auth/domain/entities/auth_session.dart, ../../features/auth/domain/entities/user_role.dart, ../../features/auth/presentation/routes/auth_routes.dart, ../../features/auth/presentation/state/auth_controller.dart, ../../features/cliente/presentation/routes/cliente_routes.dart, GoRouter, build (+9 more)
 
 ### Community 10 - "onboarding_page.dart"
 Cohesion: 0.07
-Nodes (28): _ConsentRow, controller, createState, _curpController, _DetectedDataCard, dispose, _DocumentSlot, _Field (+20 more)
+Nodes (27): _ConsentRow, controller, createState, _curpController, _DetectedDataCard, dispose, _DocumentSlot, _Field (+19 more)
 
 ### Community 11 - "StatelessWidget"
 Cohesion: 0.06
 Nodes (39): avisoPrivacidad, biometria, _BiometricCard, _biometricDisponible, _biometricEnabled, children, _ConsentCard, _ConsentRow (+31 more)
 
 ### Community 12 - "dart:io"
-Cohesion: 0.08
-Nodes (24): dart:io, ../entities/onboarding_data.dart, ImagePicker, fromCamera, fromGallery, ImagePickerService, _pick, _picker (+16 more)
+Cohesion: 0.16
+Nodes (13): ../entities/onboarding_data.dart, OnboardingRepositoryImpl, OnboardingRepository, call, ConfirmOnboarding, _repository, call, ExtractPolicyData (+5 more)
 
 ### Community 13 - "peritaje_editor_provider.dart"
-Cohesion: 0.07
-Nodes (28): double?, double get, registrarPeritajeProvider, actualizarDano, agregarDano, build, copyWith, costoDefinitivo (+20 more)
+Cohesion: 0.08
+Nodes (27): double?, registrarPeritajeProvider, actualizarDano, agregarDano, build, copyWith, costoDefinitivo, costoOverride (+19 more)
 
 ### Community 14 - "validacion_peritaje_page.dart"
 Cohesion: 0.07
 Nodes (27): buf, _costo, _CostoCard, createState, dano, _DanoCard, definitivo, dispose (+19 more)
 
 ### Community 15 - "siniestro.dart"
-Cohesion: 0.10
-Nodes (20): ajustadorId, aseguradoraId, clienteId, createdAt, estatus, fechaSiniestro, id, indicacionesDanoInterno (+12 more)
+Cohesion: 0.06
+Nodes (29): anio, id, marca, modelo, placas, resumen, VehiculoCliente, vin (+21 more)
 
 ### Community 16 - "widget_test.dart"
 Cohesion: 0.15
 Nodes (12): package:claimvision/app.dart, package:claimvision/core/di/providers.dart, package:claimvision/core/security/domain/entities/security_status.dart, package:claimvision/core/security/domain/services/device_inspector.dart, package:claimvision/core/services/secure_storage_service.dart, package:flutter_test/flutter_test.dart, clearSession, delete (+4 more)
 
 ### Community 17 - "siniestro_update_dto.dart"
-Cohesion: 0.22
-Nodes (13): Exception, int?, AppException, CacheException, ConflictException, ForbiddenException, message, NotFoundException (+5 more)
+Cohesion: 0.09
+Nodes (26): Exception, int?, AppException, CacheException, ConflictException, ForbiddenException, message, NotFoundException (+18 more)
 
 ### Community 18 - "package:claimvision/shared/domain/entities/siniestro.dart"
 Cohesion: 0.18
@@ -264,7 +271,7 @@ Nodes (11): ../entities/damage_adjusted.dart, ../entities/peritaje.dart, Peritaj
 
 ### Community 19 - "route_paths.dart"
 Cohesion: 0.07
-Nodes (28): bloqueado, casoDetalle, casoDetalleDe, casos, detalleSiniestro, detalleSiniestroDe, firmaPeritaje, firmaPeritajeDe (+20 more)
+Nodes (29): bloqueado, capturaDocumentos, casoDetalle, casoDetalleDe, casos, detalleSiniestro, detalleSiniestroDe, firmaPeritaje (+21 more)
 
 ### Community 20 - "my_application.cc"
 Cohesion: 0.09
@@ -287,8 +294,8 @@ Cohesion: 0.09
 Nodes (22): ../entities/auth_session.dart, AuthRepositoryImpl, AuthRepository, call, ChangePassword, _repository, call, GetStoredSession (+14 more)
 
 ### Community 25 - "notificaciones_provider.dart"
-Cohesion: 0.09
-Nodes (22): build, _construirSecciones, NotificacionesPage, build, cuerpo, fecha, id, leida (+14 more)
+Cohesion: 0.07
+Nodes (29): build, _construirSecciones, _Empty, _hora, notificacion, NotificacionesPage, _NotificacionTile, onTap (+21 more)
 
 ### Community 26 - "SiniestroRepository"
 Cohesion: 0.15
@@ -303,20 +310,20 @@ Cohesion: 0.05
 Nodes (39): BuildContext, Color get, adapt, alert, amber, AppColors, background, blueprint (+31 more)
 
 ### Community 29 - "peritaje_repository_impl.dart"
-Cohesion: 0.17
-Nodes (11): ../datasources/remote/peritaje_remote_datasource.dart, ../../domain/entities/perfil_ajustador.dart, ../../domain/repositories/peritaje_repository.dart, ../dtos/peritaje_upsert_dto.dart, getCasosAsignados, obtenerDetalleSiniestro, obtenerPerfil, registrarPeritaje (+3 more)
+Cohesion: 0.09
+Nodes (21): ../datasources/remote/peritaje_remote_datasource.dart, ../../domain/entities/damage_adjusted.dart, ../../domain/entities/damage_severity.dart, ../../domain/entities/damage_type.dart, ../../domain/entities/perfil_ajustador.dart, ../../domain/entities/peritaje.dart, ../../domain/repositories/peritaje_repository.dart, ../dtos/damage_adjusted_dto.dart (+13 more)
 
 ### Community 30 - "onboarding_remote_datasource.dart"
-Cohesion: 0.10
-Nodes (20): ../../../../../core/network/api_error_mapper.dart, ../datasources/remote/onboarding_remote_datasource.dart, ../../domain/entities/onboarding_data.dart, ../../domain/repositories/onboarding_repository.dart, ../dtos/confirm_data_request_dto.dart, ../dtos/consent_request_dto.dart, ../../dtos/ocr_response_dto.dart, confirmData (+12 more)
+Cohesion: 0.11
+Nodes (19): ../datasources/remote/onboarding_remote_datasource.dart, ../../domain/entities/onboarding_data.dart, ../../domain/repositories/onboarding_repository.dart, ../dtos/confirm_data_request_dto.dart, ../dtos/consent_request_dto.dart, ../../dtos/ocr_response_dto.dart, confirmData, _dio (+11 more)
 
 ### Community 31 - "siniestro_response_dto.dart"
 Cohesion: 0.10
 Nodes (20): ajustadorId, aseguradoraId, clienteId, createdAt, estatus, fechaSiniestro, fromJson, id (+12 more)
 
 ### Community 32 - "caso_card.dart"
-Cohesion: 0.10
-Nodes (18): ../../../cliente/presentation/widgets/siniestro_card.dart, build, CasoCard, color, icon, _Line, onValidar, siniestro (+10 more)
+Cohesion: 0.08
+Nodes (26): ../../core/theme/app_spacing.dart, _Empty, _Empty, siniestro, _VehiculoCard, build, onBack, pasoActual (+18 more)
 
 ### Community 33 - "signature_pad.dart"
 Cohesion: 0.11
@@ -324,27 +331,27 @@ Nodes (18): CustomPainter, dart:ui, GlobalKey, appendPoint, boundaryKey, build, 
 
 ### Community 34 - "firma_peritaje_page.dart"
 Cohesion: 0.12
-Nodes (15): ajustador, buf, costo, createState, danos, dispose, _fila, _firma (+7 more)
+Nodes (17): ajustador, buf, costo, createState, danos, dispose, _fila, _firma (+9 more)
 
 ### Community 35 - "VoidCallback"
-Cohesion: 0.08
-Nodes (25): ../../core/theme/app_spacing.dart, _Empty, _hora, notificacion, _NotificacionTile, onTap, Notificacion, build (+17 more)
+Cohesion: 0.07
+Nodes (28): Color, IconData?, build, CasoCard, color, icon, _Line, onValidar (+20 more)
 
 ### Community 36 - "../../../../core/theme/app_spacing.dart"
-Cohesion: 0.22
-Nodes (8): _acento, AppSnackbar, error, _icono, show, SnackKind, success, warning
+Cohesion: 0.10
+Nodes (20): document_capture_page.dart, capture, _DocumentCard, _Header, onBack, onTap, _openCapture, type (+12 more)
 
 ### Community 37 - "api_error_mapper.dart"
-Cohesion: 0.25
-Nodes (7): ../errors/exceptions.dart, Coordenada, latitud, LocationService, longitud, ubicacionActual, package:geolocator/geolocator.dart
+Cohesion: 0.13
+Nodes (13): ../errors/exceptions.dart, ApiErrorMapper, _byStatus, _defaultMessage, _extractDetail, fromDioException, fromResponse, Coordenada (+5 more)
 
 ### Community 38 - "reportControllerProvider"
-Cohesion: 0.12
-Nodes (17): imagePickerServiceProvider, build, _capturar, ReportDamagePage, build, _continuar, initState, build (+9 more)
+Cohesion: 0.13
+Nodes (16): imagePickerServiceProvider, ReportAnalysisPage, build, _capturar, ReportDamagePage, build, _continuar, initState (+8 more)
 
 ### Community 39 - "report_location_page.dart"
-Cohesion: 0.07
-Nodes (32): createState, _fecha, icon, label, lista, _locating, _MapCard, onTap (+24 more)
+Cohesion: 0.08
+Nodes (24): createState, _fecha, icon, label, lista, _locating, _MapCard, onTap (+16 more)
 
 ### Community 40 - "login_page.dart"
 Cohesion: 0.10
@@ -352,51 +359,51 @@ Nodes (19): ../../../../core/biometric/presentation/providers/biometric_provider
 
 ### Community 41 - "register_page.dart"
 Cohesion: 0.11
-Nodes (19): FormState, createState, dispose, _emailController, _formKey, _goToLogin, _Header, isLoading (+11 more)
+Nodes (17): FormState, createState, dispose, _emailController, _formKey, _goToLogin, _Header, isLoading (+9 more)
 
 ### Community 42 - "auth_local_datasource.dart"
-Cohesion: 0.25
-Nodes (8): ../../../../core/constants/storage_keys.dart, ../../../../../core/services/secure_storage_service.dart, AuthLocalDataSource, AuthLocalDataSourceImpl, cacheSession, clearSession, readSession, _storage
+Cohesion: 0.15
+Nodes (13): ../../../../core/constants/storage_keys.dart, ../../../../../core/services/secure_storage_service.dart, ../../domain/entities/auth_session.dart, ../../domain/entities/user_role.dart, ../dtos/auth_response_dto.dart, AuthLocalDataSource, AuthLocalDataSourceImpl, cacheSession (+5 more)
 
 ### Community 43 - "report_vehicle_page.dart"
 Cohesion: 0.10
 Nodes (20): Acciones del Frontend, Credencial INE (Instituto Nacional Electoral), Código de Respuesta HTTP, Ejemplo de Captura Correcta, Ejemplo de Captura Correcta, Errores Comunes que Rechazan el Documento, Errores Comunes que Rechazan la Imagen, Especificaciones Físicas (+12 more)
 
 ### Community 44 - "report_damage_page.dart"
-Cohesion: 0.08
-Nodes (23): Color, IconData?, _AddTile, _CaptureCard, color, error, evidencia, icon (+15 more)
+Cohesion: 0.13
+Nodes (14): _AddTile, _CaptureCard, color, error, evidencia, icon, onRemove, onTap (+6 more)
 
 ### Community 45 - "app_spacing.dart"
 Cohesion: 0.14
 Nodes (13): AppSpacing, lg, md, radiusLg, radiusMd, radiusSm, radiusXl, sm (+5 more)
 
 ### Community 46 - "build"
-Cohesion: 0.13
-Nodes (20): build, CasoDetallePage, build, build, build, casosAsignadosControllerProvider, build, build (+12 more)
+Cohesion: 0.16
+Nodes (16): build, OnboardingPage, _OnboardingPageState, build, onboardingControllerProvider, build, build, build (+8 more)
 
 ### Community 47 - "report_analysis_page.dart"
-Cohesion: 0.15
-Nodes (12): _AdjusterNote, _AnalysisCard, danoInterno, fotosValidas, label, _Row, _SentHero, siniestro (+4 more)
+Cohesion: 0.09
+Nodes (20): ../../../../core/routes/route_paths.dart, ocrRoutes, authRoutes, _AdjusterNote, _AnalysisCard, danoInterno, fotosValidas, label (+12 more)
 
 ### Community 48 - "report_narration_page.dart"
 Cohesion: 0.11
 Nodes (17): dart:convert, _decrypt, deleteAll, disable, _encrypt, getDecryptedPassword, getEmail, _getOrCreateKey (+9 more)
 
 ### Community 49 - "../../../../core/theme/app_colors.dart"
-Cohesion: 0.06
-Nodes (34): ../../../../core/routes/route_paths.dart, createState, _EmptyState, _ErrorState, _filtrar, _Header, initState, mensaje (+26 more)
+Cohesion: 0.09
+Nodes (21): createState, _EmptyState, _ErrorState, _filtrar, _Header, initState, mensaje, nombre (+13 more)
 
 ### Community 50 - "ConsumerState"
-Cohesion: 0.16
-Nodes (15): ConsumerState, ConsumerStatefulWidget, locationServiceProvider, vehiculosClienteProvider, CasosAsignadosPage, _CasosAsignadosPageState, FirmaPeritajePage, _obtenerUbicacion (+7 more)
+Cohesion: 0.19
+Nodes (13): ConsumerState, ConsumerStatefulWidget, locationServiceProvider, CasosAsignadosPage, _CasosAsignadosPageState, ProfilePage, _ProfilePageState, RegisterPage (+5 more)
 
 ### Community 51 - "_ClientHomePageState"
-Cohesion: 0.17
-Nodes (17): biometricRepositoryProvider, biometricServiceProvider, changePasswordProvider, secureStorageProvider, _autenticarConBiometria, LoginPage, _LoginPageState, _revisarBiometria (+9 more)
+Cohesion: 0.21
+Nodes (14): biometricRepositoryProvider, biometricServiceProvider, changePasswordProvider, secureStorageProvider, _autenticarConBiometria, LoginPage, _LoginPageState, _revisarBiometria (+6 more)
 
 ### Community 52 - "peritaje_remote_datasource.dart"
-Cohesion: 0.15
-Nodes (13): ../../dtos/ajustador_response_dto.dart, agregarDano, _dio, editarPeritaje, _ensureSuccess, getAsignados, obtenerDetalleSiniestro, obtenerPerfil (+5 more)
+Cohesion: 0.14
+Nodes (14): ../../dtos/ajustador_response_dto.dart, ../dtos/peritaje_upsert_dto.dart, agregarDano, _dio, editarPeritaje, _ensureSuccess, getAsignados, obtenerDetalleSiniestro (+6 more)
 
 ### Community 53 - "wWinMain"
 Cohesion: 0.24
@@ -411,12 +418,12 @@ Cohesion: 0.18
 Nodes (10): damage_adjusted.dart, ajustadorId, costoDefinitivoAjustador, createdAt, danos, id, observacionesCampo, Peritaje (+2 more)
 
 ### Community 56 - "peritaje_mapper.dart"
-Cohesion: 0.18
-Nodes (10): ../../domain/entities/damage_adjusted.dart, ../../domain/entities/damage_severity.dart, ../../domain/entities/damage_type.dart, ../../domain/entities/peritaje.dart, ../dtos/damage_adjusted_dto.dart, ../dtos/peritaje_response_dto.dart, danoToDto, _danoToEntity (+2 more)
+Cohesion: 0.10
+Nodes (20): ocrRepositoryProvider, addCapture, build, captureFor, captures, copyWith, errorMessage, extraction (+12 more)
 
 ### Community 57 - "currentSessionProvider"
-Cohesion: 0.24
-Nodes (10): currentSessionProvider, build, _confirmar, _FirmaPeritajePageState, PeritajeConfirmadoPage, build, ValidacionPeritajePage, peritajeEditorControllerProvider (+2 more)
+Cohesion: 0.22
+Nodes (11): currentSessionProvider, build, _confirmar, build, PeritajeConfirmadoPage, build, ValidacionPeritajePage, peritajeEditorControllerProvider (+3 more)
 
 ### Community 58 - "failures.dart"
 Cohesion: 0.31
@@ -439,8 +446,8 @@ Cohesion: 0.13
 Nodes (14): fechaSiniestro, indicacionesDanoInterno, latitud, longitud, narracionAudioUrl, narracionTexto, SiniestroInicializarDto, toJson (+6 more)
 
 ### Community 63 - "siniestro_card.dart"
-Cohesion: 0.18
-Nodes (10): build, estatus, icon, _IconLine, onTap, siniestro, SiniestroCard, SiniestroStatusChip (+2 more)
+Cohesion: 0.12
+Nodes (15): core/routes/app_router.dart, core/security/domain/entities/security_status.dart, core/security/presentation/pages/blocked_page.dart, core/security/presentation/providers/security_providers.dart, core/theme/app_theme.dart, ../../../../core/theme/theme_notifier.dart, _blockedApp, createState (+7 more)
 
 ### Community 64 - "manifest.json"
 Cohesion: 0.18
@@ -448,7 +455,7 @@ Nodes (10): background_color, description, display, icons, name, orientation, pr
 
 ### Community 65 - "ConsumerWidget"
 Cohesion: 0.18
-Nodes (14): ConsumerWidget, inicializarSiniestroProvider, subirImagenSiniestroProvider, HistorialPage, ReportAnalysisPage, build, SiniestroDetailPage, build (+6 more)
+Nodes (14): ConsumerWidget, ocrControllerProvider, _confirm, build, DocumentTypePage, _submit, build, OcrResultPage (+6 more)
 
 ### Community 66 - "dano_ajustado.dart"
 Cohesion: 0.12
@@ -479,12 +486,12 @@ Cohesion: 0.20
 Nodes (9): autorizaTransferenciaTalleres, consentimientoAvisoPrivacidad, consentimientoBiometria, fechaConsentimiento, id, numeroPoliza, PerfilCliente, usuarioId (+1 more)
 
 ### Community 73 - "package:flutter/material.dart"
-Cohesion: 0.08
-Nodes (24): app_colors.dart, app_spacing.dart, app_typography.dart, ../../core/theme/app_colors.dart, AppTheme, AppTypography, AjustadorBottomNav, build (+16 more)
+Cohesion: 0.07
+Nodes (28): ../../core/theme/app_colors.dart, AppTypography, AjustadorBottomNav, build, currentIndex, onTap, build, ClaimVisionBottomNav (+20 more)
 
 ### Community 74 - "cliente_remote_datasource.dart"
 Cohesion: 0.25
-Nodes (8): ../../../../../core/constants/api_constants.dart, Dio, ../../dtos/cliente_response_dto.dart, ClienteRemoteDataSource, ClienteRemoteDataSourceImpl, _dio, _ensureSuccess, obtenerPerfil
+Nodes (8): ../../../../../core/constants/api_constants.dart, ../../../../../core/network/api_error_mapper.dart, ../../dtos/cliente_response_dto.dart, ClienteRemoteDataSource, ClienteRemoteDataSourceImpl, _dio, _ensureSuccess, obtenerPerfil
 
 ### Community 75 - "List"
 Cohesion: 0.25
@@ -503,12 +510,12 @@ Cohesion: 0.15
 Nodes (12): aseguradoraId, biometricEmail, biometricEnabled, biometricPassword, email, primerInicioPara, rol, StorageKeys (+4 more)
 
 ### Community 79 - "ReportController"
-Cohesion: 0.15
-Nodes (12): ../datasources/remote/siniestro_remote_datasource.dart, ../../domain/entities/imagen_siniestro.dart, ../../domain/entities/vehiculo_cliente.dart, ../../domain/repositories/siniestro_repository.dart, crear, listar, obtener, obtenerVehiculos (+4 more)
+Cohesion: 0.10
+Nodes (19): ../../../../core/errors/exceptions.dart, ../../../../core/errors/failures.dart, ../datasources/remote/cliente_remote_datasource.dart, ../datasources/remote/siniestro_remote_datasource.dart, ../../domain/entities/imagen_siniestro.dart, ../../domain/entities/perfil_cliente.dart, ../../domain/entities/vehiculo_cliente.dart, ../../domain/repositories/cliente_repository.dart (+11 more)
 
 ### Community 80 - "notificaciones_ajustador_provider.dart"
-Cohesion: 0.18
-Nodes (11): ThemeModeNotifier, NotificacionesAjustadorPage, build, marcarLeida, marcarLeidas, NotificacionesAjustadorController, notificacionesAjustadorControllerProvider, NotificacionesController (+3 more)
+Cohesion: 0.22
+Nodes (9): ThemeModeNotifier, build, marcarLeida, marcarLeidas, NotificacionesAjustadorController, NotificacionesController, Notifier, Set (+1 more)
 
 ### Community 81 - "auth_response_dto.dart"
 Cohesion: 0.25
@@ -591,24 +598,24 @@ Cohesion: 0.40
 Nodes (3): FlutterEngine, MainActivity, FlutterActivity
 
 ### Community 101 - "ChangeNotifier"
-Cohesion: 0.20
-Nodes (9): anio, id, marca, modelo, placas, resumen, VehiculoCliente, vin (+1 more)
+Cohesion: 0.15
+Nodes (14): File, imageValidatorProvider, build, createState, dispose, DocumentCapturePage, _DocumentCapturePageState, documentType (+6 more)
 
 ### Community 103 - "graphify.js"
-Cohesion: 0.22
-Nodes (8): ../../../../core/errors/exceptions.dart, ../../../../core/errors/failures.dart, ../datasources/remote/cliente_remote_datasource.dart, ../../domain/entities/perfil_cliente.dart, ../../domain/repositories/cliente_repository.dart, obtenerPerfil, _remote, _toFailure
+Cohesion: 0.15
+Nodes (14): vehiculosClienteProvider, build, _continuar, createState, _hayProgreso, initState, onTap, ReportVehiclePage (+6 more)
 
 ### Community 116 - "biometric_repository_impl.dart"
-Cohesion: 0.22
-Nodes (8): ../datasources/biometric_local_datasource.dart, ../../domain/entities/biometric_credentials.dart, clearForUser, _dataSource, disable, enable, getCredentials, isEnabled
+Cohesion: 0.09
+Nodes (21): ../../data/datasources/biometric_local_datasource.dart, ../../data/repositories/biometric_repository_impl.dart, ../datasources/biometric_local_datasource.dart, ../../domain/entities/biometric_credentials.dart, ../../domain/repositories/biometric_repository.dart, ../entities/biometric_credentials.dart, BiometricLocalDataSource, BiometricRepositoryImpl (+13 more)
 
 ### Community 117 - "biometric_repository.dart"
-Cohesion: 0.22
-Nodes (8): ../entities/biometric_credentials.dart, BiometricRepositoryImpl, BiometricRepository, clearForUser, disable, enable, getCredentials, isEnabled
+Cohesion: 0.16
+Nodes (12): ../../domain/document_type.dart, double get, brightnessMax, brightnessMin, DocumentType, DocumentTypeX, build, CaptureOverlay (+4 more)
 
 ### Community 118 - "secure_storage_service.dart"
 Cohesion: 0.22
-Nodes (8): clearSession, delete, read, SecureStorageService, _storage, write, package:flutter_secure_storage/flutter_secure_storage.dart, _FakeSecureStorage
+Nodes (8): FlutterSecureStorage, clearSession, delete, read, SecureStorageService, _storage, write, _FakeSecureStorage
 
 ### Community 119 - "_ToastWidgetState"
 Cohesion: 0.28
@@ -628,11 +635,11 @@ Nodes (7): ../constants/api_constants.dart, ../constants/storage_keys.dart, crea
 
 ### Community 123 - "theme_notifier.dart"
 Cohesion: 0.25
-Nodes (7): FlutterSecureStorage, build, _fromString, _load, setThemeMode, _storage, _toString
+Nodes (7): build, _fromString, _load, setThemeMode, _storage, _toString, package:flutter_secure_storage/flutter_secure_storage.dart
 
 ### Community 124 - "api_error_mapper.dart"
-Cohesion: 0.25
-Nodes (7): ApiErrorMapper, _byStatus, _defaultMessage, _extractDetail, fromDioException, fromResponse, package:dio/dio.dart
+Cohesion: 0.13
+Nodes (14): datasources/ocr_remote_datasource.dart, Dio, ../domain/ocr_extraction.dart, ../domain/ocr_repository.dart, _dio, extractOcr, OcrRemoteDataSource, _datasource (+6 more)
 
 ### Community 125 - "biometric_service.dart"
 Cohesion: 0.25
@@ -647,8 +654,8 @@ Cohesion: 0.25
 Nodes (7): data, fromJson, page, PageDto, pageSize, total, List
 
 ### Community 128 - "bool get"
-Cohesion: 0.29
-Nodes (6): bool get, apiValue, fromApi, isAjustador, isCliente, UserRole
+Cohesion: 0.14
+Nodes (12): bool get, apiValue, fromApi, isAjustador, isCliente, UserRole, apiValue, enProceso (+4 more)
 
 ### Community 129 - "siniestro_repository.dart"
 Cohesion: 0.29
@@ -667,32 +674,32 @@ Cohesion: 0.43
 Nodes (6): issues, SecurityCompromised, SecurityIssue, SecurityLoading, SecurityOk, SecurityStatus
 
 ### Community 133 - "device_inspector_service.dart"
-Cohesion: 0.29
-Nodes (6): _channel, inspect, package:flutter/services.dart, ../security/domain/entities/security_status.dart, ../security/domain/services/device_inspector.dart, static const
+Cohesion: 0.15
+Nodes (11): BlockedPage, build, _iconoIssue, issues, _mensajeIssue, _channel, inspect, package:flutter/services.dart (+3 more)
 
 ### Community 134 - "siniestro_status.dart"
-Cohesion: 0.29
-Nodes (6): apiValue, enProceso, fromApi, label, SiniestroStatus, SiniestroStatusTono
+Cohesion: 0.20
+Nodes (9): dart:math, _computeBrightness, _computeSharpness, _laplacian3x3, validate, ../ocr/domain/document_type.dart, ../ocr/domain/image_quality.dart, ../ocr/domain/image_validator.dart (+1 more)
 
 ### Community 135 - "../../../../core/di/providers.dart"
 Cohesion: 0.40
 Nodes (5): ../../../../core/di/providers.dart, getSiniestrosClienteProvider, build, MisSiniestrosController, refrescar
 
 ### Community 136 - "biometric_providers.dart"
-Cohesion: 0.33
-Nodes (5): ../../data/datasources/biometric_local_datasource.dart, ../../data/repositories/biometric_repository_impl.dart, ../../domain/repositories/biometric_repository.dart, BiometricLocalDataSource, biometricLocalDataSourceProvider
+Cohesion: 0.24
+Nodes (10): build, CasoDetallePage, build, build, NotificacionesAjustadorPage, casosAsignadosControllerProvider, notificacionesAjustadorControllerProvider, RoutePaths.casoDetalleDe (+2 more)
 
 ### Community 137 - "auth_mapper.dart"
-Cohesion: 0.33
-Nodes (5): ../../domain/entities/auth_session.dart, ../../domain/entities/user_role.dart, ../dtos/auth_response_dto.dart, AuthMapper, toEntity
+Cohesion: 0.22
+Nodes (8): aspectRatio, brightness, checkErrors, height, ImageQuality, passesMinimum, sharpness, width
 
 ### Community 138 - "blocked_page.dart"
-Cohesion: 0.33
-Nodes (5): BlockedPage, build, _iconoIssue, issues, _mensajeIssue
+Cohesion: 0.25
+Nodes (6): dart:io, extract, confirmOnboarding, extractPolicyData, sendConsent, ocr_extraction.dart
 
 ### Community 139 - "onboardingControllerProvider"
-Cohesion: 0.33
-Nodes (6): build, OnboardingPage, _OnboardingPageState, onboardingControllerProvider, build, RoutePaths.inicio
+Cohesion: 0.25
+Nodes (7): ImagePicker, fromCamera, fromGallery, ImagePickerService, _pick, _picker, package:image_picker/image_picker.dart
 
 ### Community 140 - "get_perfil_ajustador.dart"
 Cohesion: 0.40
@@ -722,25 +729,53 @@ Nodes (4): ChangePasswordRequestDto, newPassword, oldPassword, toJson
 Cohesion: 0.50
 Nodes (3): BiometricCredentials, email, encryptedPassword
 
+### Community 147 - "ajustador_routes.dart"
+Cohesion: 0.25
+Nodes (7): ajustadorRoutes, ../pages/caso_detalle_page.dart, ../pages/casos_asignados_page.dart, ../pages/firma_peritaje_page.dart, ../pages/notificaciones_ajustador_page.dart, ../pages/peritaje_confirmado_page.dart, ../pages/validacion_peritaje_page.dart
+
+### Community 148 - "validation_indicator.dart"
+Cohesion: 0.29
+Nodes (6): ../../domain/image_quality.dart, build, _line, quality, type, ValidationIndicator
+
+### Community 149 - "_ClaimVisionAppState"
+Cohesion: 0.33
+Nodes (7): build, ClaimVisionApp, _ClaimVisionAppState, didChangeAppLifecycleState, securityControllerProvider, themeModeProvider, WidgetsBindingObserver
+
+### Community 150 - "image_validator.dart"
+Cohesion: 0.33
+Nodes (5): document_type.dart, image_quality.dart, ImageValidator, validate, ImageQualityService
+
+### Community 151 - "ReportController"
+Cohesion: 0.33
+Nodes (6): inicializarSiniestroProvider, subirImagenSiniestroProvider, crearSiniestro, ReportController, ReportState, subirEvidencia
+
+### Community 152 - "app_theme.dart"
+Cohesion: 0.40
+Nodes (4): app_colors.dart, app_spacing.dart, app_typography.dart, AppTheme
+
+### Community 153 - "ChangeNotifier"
+Cohesion: 0.67
+Nodes (3): ChangeNotifier, _AuthRefreshNotifier, SignatureController
+
 ## Knowledge Gaps
-- **1048 isolated node(s):** `recordToolUse.sh script`, `flutter_export_environment.sh script`, `+registerWithRegistry`, `router`, `createState` (+1043 more)
+- **1125 isolated node(s):** `recordToolUse.sh script`, `flutter_export_environment.sh script`, `+registerWithRegistry`, `router`, `createState` (+1120 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **7 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Siniestro` connect `caso_card.dart` to `report_controller.dart`, `peritaje_editor_provider.dart`, `report_analysis_page.dart`, `siniestro.dart`, `../../../../core/theme/app_colors.dart`, `siniestro_detail_page.dart`, `siniestro_card.dart`?**
-  _High betweenness centrality (0.015) - this node is a cross-community bridge._
-- **Why does `_continuar` connect `reportControllerProvider` to `report_location_page.dart`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+- **Why does `OcrExtraction` connect `siniestro_update_dto.dart` to `peritaje_mapper.dart`?**
+  _High betweenness centrality (0.033) - this node is a cross-community bridge._
 - **Why does `AuthRepository` connect `AuthRepository` to `providers.dart`, `auth_repository.dart`?**
-  _High betweenness centrality (0.007) - this node is a cross-community bridge._
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
+- **Why does `Siniestro` connect `caso_card.dart` to `VoidCallback`, `report_controller.dart`, `peritaje_editor_provider.dart`, `report_analysis_page.dart`, `siniestro.dart`, `../../../../core/theme/app_colors.dart`, `siniestro_detail_page.dart`?**
+  _High betweenness centrality (0.011) - this node is a cross-community bridge._
 - **What connects `recordToolUse.sh script`, `Intercept NOTIFY_DEBUGGER_ABOUT_RX_PAGES and touch the pages.`, `flutter_export_environment.sh script` to the rest of the system?**
-  _1049 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1126 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Win32Window` be split into smaller, more focused modules?**
   _Cohesion score 0.0597567424643046 - nodes in this community are weakly interconnected._
 - **Should `providers.dart` be split into smaller, more focused modules?**
-  _Cohesion score 0.03278688524590164 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.030303030303030304 - nodes in this community are weakly interconnected._
 - **Should `app_toast.dart` be split into smaller, more focused modules?**
   _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._

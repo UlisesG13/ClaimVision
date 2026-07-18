@@ -3,7 +3,7 @@ class ApiConstants {
 
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'https://claimvision.actividades.icu/api',
+    defaultValue: 'https://api.actividades.icu/api',
   );
 
   // ── Auth ──────────────────────────────────────────────────────────────
@@ -15,6 +15,7 @@ class ApiConstants {
   static const String recoveryReset = '/v1/auth/recovery/reset';
   static const String consentimiento = '/v1/auth/consentimiento';
   static const String cambiarPassword = '/v1/auth/password';
+  static const String deviceToken = '/v1/auth/device-token';
 
   // ── Onboarding del cliente ────────────────────────────────────────────
   static const String onboardingOcr = '/v1/cliente/onboarding/ocr';
@@ -35,6 +36,21 @@ class ApiConstants {
   static String ajustadorRegistrarPeritaje(String id) => '/v1/ajustador/siniestros/$id/peritaje';
   static String ajustadorEditarPeritaje(String id) => '/v1/ajustador/peritajes/$id';
   static String ajustadorPeritajeDanos(String id) => '/v1/ajustador/peritajes/$id/danos';
+
+  // ── IA Service ─────────────────────────────────────────────────────────
+  static const String iaBaseUrl = String.fromEnvironment(
+    'IA_BASE_URL',
+    defaultValue: 'https://ia.actividades.icu',
+  );
+
+  static const String iaOcr = '/v1/ocr';
+  static const String iaOcrExtractIne = '/v1/ocr/extract-ine';
+  static const String iaOcrExtractPoliza = '/v1/ocr/extract-poliza';
+  static const String iaOcrExtractAndValidate = '/v1/ocr/extract-and-validate';
+  static const String iaPredict = '/v1/predict';
+  static const String iaNlpAnalizar = '/v1/nlp/analizar';
+  static const String iaNlpTranscribir = '/v1/nlp/transcribir';
+  static String iaNlpTranscribirStatus(String jobId) => '/v1/nlp/transcribir/status/$jobId';
 
   // Tiempos de espera de la red.
   static const Duration connectTimeout = Duration(seconds: 20);

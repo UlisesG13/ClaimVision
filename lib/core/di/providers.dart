@@ -15,6 +15,7 @@ import '../../features/auth/domain/usecases/change_password.dart';
 import '../../features/auth/domain/usecases/login_user.dart';
 import '../../features/auth/domain/usecases/logout_user.dart';
 import '../../features/auth/domain/usecases/register_user.dart';
+import '../../features/auth/domain/usecases/register_device_token.dart';
 import '../../features/auth/domain/entities/auth_session.dart';
 import '../../features/auth/domain/usecases/send_consent.dart';
 import '../../features/auth/domain/usecases/verify_session.dart';
@@ -42,10 +43,16 @@ import '../network/dio_client.dart';
 import '../security/domain/repositories/security_repository.dart';
 import '../security/data/repositories/security_repository_impl.dart';
 import '../security/domain/services/device_inspector.dart';
+import '../ocr/data/datasources/ocr_remote_datasource.dart';
+import '../ocr/data/ocr_repository_impl.dart';
+import '../ocr/domain/image_validator.dart';
+import '../ocr/domain/ocr_repository.dart';
 import '../services/biometric_service.dart';
 import '../services/device_inspector_service.dart';
 import '../services/image_picker_service.dart';
+import '../services/image_quality_service.dart';
 import '../services/location_service.dart';
+import '../services/notification_service.dart';
 import '../services/secure_storage_service.dart';
 
 final secureStorageProvider = Provider<SecureStorageService>((ref) {
@@ -71,6 +78,19 @@ final imagePickerServiceProvider = Provider<ImagePickerService>((ref) {
 
 final locationServiceProvider = Provider<LocationService>((ref) {
   return const LocationService();
+});
+
+// ── OCR ─────────────────────────────────────────────────────────────────────
+final imageValidatorProvider = Provider<ImageValidator>((ref) {
+  return ImageQualityService();
+});
+
+final ocrRemoteDataSourceProvider = Provider<OcrRemoteDataSource>((ref) {
+  return OcrRemoteDataSource(ref.watch(dioProvider));
+});
+
+final ocrRepositoryProvider = Provider<OcrRepository>((ref) {
+  return OcrRepositoryImpl(ref.watch(ocrRemoteDataSourceProvider));
 });
 
 // ── Security ────────────────────────────────────────────────────────────────
@@ -122,6 +142,14 @@ final verifySessionProvider = Provider<VerifySession>((ref) {
 
 final logoutUserProvider = Provider<LogoutUser>((ref) {
   return LogoutUser(ref.watch(authRepositoryProvider));
+});
+
+final registerDeviceTokenProvider = Provider<RegisterDeviceToken>((ref) {
+  return RegisterDeviceToken(ref.watch(authRepositoryProvider));
+});
+
+final notificationServiceProvider = Provider<NotificationService>((ref) {
+  return NotificationService.instance;
 });
 
 // ── Onboarding (cliente): datasource, repositorio y casos de uso ───────────

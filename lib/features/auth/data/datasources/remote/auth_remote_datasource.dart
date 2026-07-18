@@ -4,6 +4,7 @@ import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/network/api_error_mapper.dart';
 import '../../dtos/auth_response_dto.dart';
 import '../../dtos/change_password_request_dto.dart';
+import '../../dtos/device_token_request_dto.dart';
 import '../../dtos/login_request_dto.dart';
 import '../../dtos/register_request_dto.dart';
 
@@ -22,6 +23,9 @@ abstract interface class AuthRemoteDataSource {
 
   /// Cambia la contraseña del usuario autenticado.
   Future<void> changePassword(ChangePasswordRequestDto body);
+
+  /// Registra el FCM token del dispositivo en el backend.
+  Future<void> registerDeviceToken(DeviceTokenRequestDto body);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -56,6 +60,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> changePassword(ChangePasswordRequestDto body) async {
     try {
       final response = await _dio.patch(ApiConstants.cambiarPassword, data: body.toJson());
+      final status = response.statusCode ?? 500;
+      if (status >= 400) {
+        throw ApiErrorMapper.fromResponse(response);
+      }
+    } on DioException catch (e) {
+      throw ApiErrorMapper.fromDioException(e);
+    }
+  }
+
+  @override
+  Future<void> registerDeviceToken(DeviceTokenRequestDto body) async {
+    try {
+      final response = await _dio.post(ApiConstants.deviceToken, data: body.toJson());
       final status = response.statusCode ?? 500;
       if (status >= 400) {
         throw ApiErrorMapper.fromResponse(response);

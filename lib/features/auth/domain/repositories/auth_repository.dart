@@ -36,4 +36,7 @@ abstract interface class AuthRepository {
     required String oldPassword,
     required String newPassword,
   });
+
+  /// Registra el FCM token del dispositivo en el backend.
+  Future<void> registerDeviceToken(String token);
 }

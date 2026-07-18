@@ -8,6 +8,7 @@ import '../../features/auth/presentation/state/auth_controller.dart';
 import '../../features/ajustador/presentation/routes/ajustador_routes.dart';
 import '../../features/auth/presentation/routes/auth_routes.dart';
 import '../../features/cliente/presentation/routes/cliente_routes.dart';
+import '../ocr/presentation/ocr_routes.dart';
 import '../security/domain/entities/security_status.dart';
 import '../security/presentation/pages/blocked_page.dart';
 import '../security/presentation/providers/security_providers.dart';
@@ -76,6 +77,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           },
         ),
       ),
+      ...ocrRoutes,
       ...authRoutes,
       ...clienteRoutes,
       ...ajustadorRoutes,

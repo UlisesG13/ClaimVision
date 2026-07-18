@@ -10,6 +10,7 @@ import '../../domain/repositories/auth_repository.dart';
 import '../datasources/local/auth_local_datasource.dart';
 import '../datasources/remote/auth_remote_datasource.dart';
 import '../dtos/change_password_request_dto.dart';
+import '../dtos/device_token_request_dto.dart';
 import '../dtos/login_request_dto.dart';
 import '../dtos/register_request_dto.dart';
 import '../mappers/auth_mapper.dart';
@@ -104,6 +105,15 @@ class AuthRepositoryImpl implements AuthRepository {
           newPassword: newPassword,
         ),
       );
+    } on AppException catch (e) {
+      throw _toFailure(e);
+    }
+  }
+
+  @override
+  Future<void> registerDeviceToken(String token) async {
+    try {
+      await _remote.registerDeviceToken(DeviceTokenRequestDto(token: token));
     } on AppException catch (e) {
       throw _toFailure(e);
     }

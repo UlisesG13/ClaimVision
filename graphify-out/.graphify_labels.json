@@ -145,5 +145,12 @@
   "143": "damage_severity.dart",
   "144": "damage_type.dart",
   "145": "change_password_request_dto.dart",
-  "146": "biometric_credentials.dart"
+  "146": "biometric_credentials.dart",
+  "147": "ajustador_routes.dart",
+  "148": "validation_indicator.dart",
+  "149": "_ClaimVisionAppState",
+  "150": "image_validator.dart",
+  "151": "ReportController",
+  "152": "app_theme.dart",
+  "153": "ChangeNotifier"
 }
