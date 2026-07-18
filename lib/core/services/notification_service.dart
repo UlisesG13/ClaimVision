@@ -24,6 +24,29 @@ class NotificationService {
 
   static NotificationPayload? pendingNavigationPayload;
 
+  static const _channels = <String, AndroidNotificationChannel>{
+    'siniestro': AndroidNotificationChannel(
+      'siniestros',
+      'Siniestros',
+      description: 'Actualizaciones de tus siniestros',
+      importance: Importance.high,
+    ),
+    'asignacion': AndroidNotificationChannel(
+      'peritajes',
+      'Peritajes',
+      description: 'Asignaciones de peritaje',
+      importance: Importance.high,
+    ),
+  };
+
+  static AndroidNotificationChannel get _fallbackChannel =>
+      AndroidNotificationChannel(
+        'sistema',
+        'Sistema',
+        description: 'Avisos de cuenta y términos',
+        importance: Importance.defaultImportance,
+      );
+
   void Function(String token)? onTokenRefreshed;
   void Function(RemoteMessage message)? onMessageOpenedApp;
   void Function(NotificationPayload payload)? onNotificationTap;
@@ -41,6 +64,9 @@ class NotificationService {
       requestBadgePermission: true,
       requestSoundPermission: true,
     );
+
+    await _createChannels();
+
     await _localNotifications!.initialize(
       const InitializationSettings(android: androidSettings, iOS: iosSettings),
       onDidReceiveNotificationResponse: (response) {
@@ -91,6 +117,21 @@ class NotificationService {
     await messaging.deleteToken();
   }
 
+  Future<void> _createChannels() async {
+    final plugin = _localNotifications!.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    if (plugin == null) return;
+    for (final channel in _channels.values) {
+      await plugin.createNotificationChannel(channel);
+    }
+    await plugin.createNotificationChannel(_fallbackChannel);
+  }
+
+  static AndroidNotificationChannel _channelFor(RemoteMessage message) {
+    final type = message.data['type'] as String?;
+    return _channels[type] ?? _fallbackChannel;
+  }
+
   Future<void> _showForegroundNotification(RemoteMessage message) async {
     onForegroundMessage?.call(message);
     await _handleMessage(message);
@@ -102,11 +143,12 @@ class NotificationService {
 
     if (notification == null) return;
 
+    final channel = _channelFor(message);
     final androidDetails = AndroidNotificationDetails(
-      'claimvision_channel',
-      'Notificaciones ClaimVision',
-      channelDescription: 'Notificaciones de siniestros y actualizaciones',
-      importance: Importance.high,
+      channel.id,
+      channel.name,
+      channelDescription: channel.description,
+      importance: channel.importance,
       priority: Priority.high,
     );
     const iosDetails = DarwinNotificationDetails();

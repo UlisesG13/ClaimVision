@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,9 +6,11 @@ import 'core/routes/app_router.dart';
 import 'core/security/domain/entities/security_status.dart';
 import 'core/security/presentation/pages/blocked_page.dart';
 import 'core/security/presentation/providers/security_providers.dart';
+import 'core/services/notification_service.dart';
 import 'core/theme/app_colors.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_notifier.dart';
+import 'core/widgets/in_app_banner.dart';
 
 class ClaimVisionApp extends ConsumerStatefulWidget {
   const ClaimVisionApp({super.key});
@@ -22,6 +25,9 @@ class _ClaimVisionAppState extends ConsumerState<ClaimVisionApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    NotificationService.instance.onForegroundMessage = (RemoteMessage message) {
+      ref.read(currentNotificationProvider.notifier).show(message);
+    };
   }
 
   @override
@@ -84,6 +90,19 @@ Widget _normalApp(ThemeMode themeMode, WidgetRef ref) {
     darkTheme: AppTheme.dark,
     themeMode: themeMode,
     routerConfig: router,
+    builder: (context, child) {
+      return Stack(
+        children: [
+          child!,
+          const Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: InAppBanner(),
+          ),
+        ],
+      );
+    },
   );
 }
 
