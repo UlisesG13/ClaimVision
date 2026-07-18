@@ -26,6 +26,9 @@ abstract interface class AuthRemoteDataSource {
 
   /// Registra el FCM token del dispositivo en el backend.
   Future<void> registerDeviceToken(DeviceTokenRequestDto body);
+
+  /// Elimina el FCM token del dispositivo en el backend (logout).
+  Future<void> deleteDeviceToken(DeviceTokenRequestDto body);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -73,6 +76,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> registerDeviceToken(DeviceTokenRequestDto body) async {
     try {
       final response = await _dio.post(ApiConstants.deviceToken, data: body.toJson());
+      final status = response.statusCode ?? 500;
+      if (status >= 400) {
+        throw ApiErrorMapper.fromResponse(response);
+      }
+    } on DioException catch (e) {
+      throw ApiErrorMapper.fromDioException(e);
+    }
+  }
+
+  @override
+  Future<void> deleteDeviceToken(DeviceTokenRequestDto body) async {
+    try {
+      final response = await _dio.delete(ApiConstants.deviceToken, data: body.toJson());
       final status = response.statusCode ?? 500;
       if (status >= 400) {
         throw ApiErrorMapper.fromResponse(response);

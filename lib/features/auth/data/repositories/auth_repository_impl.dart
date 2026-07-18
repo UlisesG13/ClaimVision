@@ -5,6 +5,7 @@
 
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../domain/entities/auth_session.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/local/auth_local_datasource.dart';
@@ -91,7 +92,15 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> logout() => _local.clearSession();
+  Future<void> logout() async {
+    try {
+      final token = await NotificationService.instance.getToken();
+      if (token != null) {
+        await _remote.deleteDeviceToken(DeviceTokenRequestDto(token: token));
+      }
+    } catch (_) {}
+    await _local.clearSession();
+  }
 
   @override
   Future<void> changePassword({
