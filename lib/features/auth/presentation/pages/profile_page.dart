@@ -146,6 +146,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
           const Gap(AppSpacing.lg),
           _LogoutButton(onTap: () => _confirmarLogout(context, ref)),
+          const Gap(AppSpacing.lg),
+          const _IaStatusCard(),
           const Gap(AppSpacing.md),
           Center(
             child: Text('ClaimVision · v1.0',
@@ -531,6 +533,81 @@ class _LogoutButton extends StatelessWidget {
 }
 
 // ── Helpers de UI ──────────────────────────────────────────────────────────
+
+class _IaStatusCard extends ConsumerWidget {
+  const _IaStatusCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final health = ref.watch(iaHealthStatusProvider);
+
+    return health.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => _StatusTile(
+        theme: theme,
+        icon: Icons.cloud_off,
+        color: AppColors.alert,
+        text: 'IA Service no disponible',
+      ),
+      data: (status) {
+        final todoOk = status.v1 && status.v2;
+        return _StatusTile(
+          theme: theme,
+          icon: todoOk ? Icons.smart_toy_outlined : Icons.warning_amber,
+          color: todoOk ? AppColors.success : AppColors.amber,
+          text: todoOk
+              ? 'IA Service operativo (v1 + v2)'
+              : status.v2
+                  ? 'IA: modelo supervisado activo'
+                  : status.v1
+                      ? 'IA: modelo base activo'
+                      : 'IA Service sin modelos cargados',
+        );
+      },
+    );
+  }
+}
+
+class _StatusTile extends StatelessWidget {
+  const _StatusTile({
+    required this.theme,
+    required this.icon,
+    required this.color,
+    required this.text,
+  });
+  final ThemeData theme;
+  final IconData icon;
+  final Color color;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 16, color: color),
+          const Gap(AppSpacing.sm),
+          Flexible(
+            child: Text(
+              text,
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(color: context.textPrimaryColor),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class _SectionCard extends StatelessWidget {
   const _SectionCard({required this.titulo, required this.children});

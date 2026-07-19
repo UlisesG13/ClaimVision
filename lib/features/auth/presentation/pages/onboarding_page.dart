@@ -31,12 +31,20 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   final _numeroController = TextEditingController();
   final _vigenciaController = TextEditingController();
   final _curpController = TextEditingController();
+  final _marcaController = TextEditingController();
+  final _modeloController = TextEditingController();
+  final _anioController = TextEditingController();
+  final _placasController = TextEditingController();
 
   @override
   void dispose() {
     _numeroController.dispose();
     _vigenciaController.dispose();
     _curpController.dispose();
+    _marcaController.dispose();
+    _modeloController.dispose();
+    _anioController.dispose();
+    _placasController.dispose();
     super.dispose();
   }
 
@@ -81,6 +89,10 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
           _numeroController.text = s.numeroPoliza;
           _vigenciaController.text = s.vigenciaPoliza;
           _curpController.text = s.curpRfc;
+          _marcaController.text = s.vehiculoMarca;
+          _modeloController.text = s.vehiculoModelo;
+          _anioController.text = s.vehiculoAnio;
+          _placasController.text = s.vehiculoPlacas;
         }
       },
     );
@@ -153,9 +165,19 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                         numeroController: _numeroController,
                         vigenciaController: _vigenciaController,
                         curpController: _curpController,
+                        marcaController: _marcaController,
+                        modeloController: _modeloController,
+                        anioController: _anioController,
+                        placasController: _placasController,
+                        aseguradora: state.aseguradora,
+                        nombreAsegurado: state.nombreAsegurado,
                         onNumero: controller.editNumeroPoliza,
                         onVigencia: controller.editVigencia,
                         onCurp: controller.editCurpRfc,
+                        onMarca: controller.editVehiculoMarca,
+                        onModelo: controller.editVehiculoModelo,
+                        onAnio: controller.editVehiculoAnio,
+                        onPlacas: controller.editVehiculoPlacas,
                       ),
                       const Gap(AppSpacing.lg),
                       const InlineBanner(
@@ -366,17 +388,37 @@ class _DetectedDataCard extends StatelessWidget {
     required this.numeroController,
     required this.vigenciaController,
     required this.curpController,
+    required this.marcaController,
+    required this.modeloController,
+    required this.anioController,
+    required this.placasController,
+    required this.aseguradora,
+    required this.nombreAsegurado,
     required this.onNumero,
     required this.onVigencia,
     required this.onCurp,
+    required this.onMarca,
+    required this.onModelo,
+    required this.onAnio,
+    required this.onPlacas,
   });
 
   final TextEditingController numeroController;
   final TextEditingController vigenciaController;
   final TextEditingController curpController;
+  final TextEditingController marcaController;
+  final TextEditingController modeloController;
+  final TextEditingController anioController;
+  final TextEditingController placasController;
+  final String aseguradora;
+  final String nombreAsegurado;
   final ValueChanged<String> onNumero;
   final ValueChanged<String> onVigencia;
   final ValueChanged<String> onCurp;
+  final ValueChanged<String> onMarca;
+  final ValueChanged<String> onModelo;
+  final ValueChanged<String> onAnio;
+  final ValueChanged<String> onPlacas;
 
   @override
   Widget build(BuildContext context) {
@@ -396,6 +438,13 @@ class _DetectedDataCard extends StatelessWidget {
           const Gap(AppSpacing.xs),
           Text('Revisa y corrige si es necesario.',
               style: theme.textTheme.bodySmall),
+          if (aseguradora.isNotEmpty || nombreAsegurado.isNotEmpty) ...[
+            const Gap(AppSpacing.md),
+            if (aseguradora.isNotEmpty)
+              _ReadOnlyRow(label: 'Aseguradora', value: aseguradora),
+            if (nombreAsegurado.isNotEmpty)
+              _ReadOnlyRow(label: 'Asegurado', value: nombreAsegurado),
+          ],
           const Gap(AppSpacing.md),
           _Field(
               label: 'Número de Póliza',
@@ -411,6 +460,58 @@ class _DetectedDataCard extends StatelessWidget {
               label: 'CURP / RFC',
               controller: curpController,
               onChanged: onCurp),
+          const Gap(AppSpacing.md),
+          Text('Vehículo asegurado',
+              style: theme.textTheme.labelLarge),
+          const Gap(AppSpacing.sm),
+          _Field(
+              label: 'Marca',
+              controller: marcaController,
+              onChanged: onMarca),
+          const Gap(AppSpacing.sm),
+          _Field(
+              label: 'Modelo',
+              controller: modeloController,
+              onChanged: onModelo),
+          const Gap(AppSpacing.sm),
+          _Field(
+              label: 'Año',
+              controller: anioController,
+              onChanged: onAnio),
+          const Gap(AppSpacing.sm),
+          _Field(
+              label: 'Placas',
+              controller: placasController,
+              onChanged: onPlacas),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReadOnlyRow extends StatelessWidget {
+  const _ReadOnlyRow({required this.label, required this.value});
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 110,
+            child: Text(label, style: theme.textTheme.bodyMedium),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(fontWeight: FontWeight.w600),
+            ),
+          ),
         ],
       ),
     );

@@ -17,6 +17,10 @@ class Evidencia {
     this.calidadValida,
     this.error,
     this.imagenId,
+    this.tipoDano,
+    this.severidad,
+    this.confianza,
+    this.predicting = false,
   });
 
   final File file;
@@ -24,12 +28,22 @@ class Evidencia {
   final bool? calidadValida;
   final String? error;
   final String? imagenId;
+  final String? tipoDano;
+  final String? severidad;
+  final double? confianza;
+  final bool predicting;
+
+  bool get prediccionLista => tipoDano != null;
 
   Evidencia copyWith({
     bool? subiendo,
     bool? calidadValida,
     String? error,
     String? imagenId,
+    String? tipoDano,
+    String? severidad,
+    double? confianza,
+    bool? predicting,
     bool clearError = false,
   }) {
     return Evidencia(
@@ -38,6 +52,10 @@ class Evidencia {
       calidadValida: calidadValida ?? this.calidadValida,
       error: clearError ? null : (error ?? this.error),
       imagenId: imagenId ?? this.imagenId,
+      tipoDano: tipoDano ?? this.tipoDano,
+      severidad: severidad ?? this.severidad,
+      confianza: confianza ?? this.confianza,
+      predicting: predicting ?? this.predicting,
     );
   }
 }
@@ -63,6 +81,7 @@ class ReportState {
     this.transcripcion,
     this.analizando = false,
     this.analisisEntidades = const [],
+    this.prediccionesFotos = const [],
     this.errorMessage,
   });
 
@@ -85,6 +104,7 @@ class ReportState {
   final String? transcripcion;
   final bool analizando;
   final List<IaDamageEntityDto> analisisEntidades;
+  final List<IaDamageEntityDto> prediccionesFotos;
   final String? errorMessage;
 
   bool get vehiculoCompleto =>
@@ -124,6 +144,7 @@ class ReportState {
     String? transcripcion,
     bool? analizando,
     List<IaDamageEntityDto>? analisisEntidades,
+    List<IaDamageEntityDto>? prediccionesFotos,
     String? errorMessage,
     bool clearError = false,
   }) {
@@ -147,6 +168,7 @@ class ReportState {
       transcripcion: transcripcion ?? this.transcripcion,
       analizando: analizando ?? this.analizando,
       analisisEntidades: analisisEntidades ?? this.analisisEntidades,
+      prediccionesFotos: prediccionesFotos ?? this.prediccionesFotos,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
@@ -202,17 +224,36 @@ class ReportController extends Notifier<ReportState> {
         id: siniestro.id,
         imagen: file,
       );
-      _reemplazar(
-        nueva,
-        nueva.copyWith(
-          subiendo: false,
-          calidadValida: imagen.esCalidadValida,
-          imagenId: imagen.id,
-          clearError: true,
-        ),
+      final actualizada = nueva.copyWith(
+        subiendo: false,
+        calidadValida: imagen.esCalidadValida,
+        imagenId: imagen.id,
+        clearError: true,
       );
+      _reemplazar(nueva, actualizada);
+      _predecirDano(actualizada, file);
     } on Failure catch (f) {
       _reemplazar(nueva, nueva.copyWith(subiendo: false, error: f.message));
+    }
+  }
+
+  Future<void> _predecirDano(Evidencia evidencia, File file) async {
+    final conPrediccion =
+        evidencia.copyWith(predicting: true);
+    _reemplazar(evidencia, conPrediccion);
+    try {
+      final result = await ref.read(iaPredictDamageV2Provider)(file: file);
+      _reemplazar(
+        conPrediccion,
+        conPrediccion.copyWith(
+          predicting: false,
+          tipoDano: result.tipoDano,
+          severidad: result.severidad,
+          confianza: result.confianza,
+        ),
+      );
+    } catch (_) {
+      _reemplazar(conPrediccion, conPrediccion.copyWith(predicting: false));
     }
   }
 
@@ -223,10 +264,24 @@ class ReportController extends Notifier<ReportState> {
   }
 
   void _reemplazar(Evidencia vieja, Evidencia nueva) {
+    final nuevasEvidencias = [
+      for (final e in state.evidencias)
+        if (identical(e, vieja)) nueva else e,
+    ];
     state = state.copyWith(
-      evidencias: [
-        for (final e in state.evidencias)
-          if (identical(e, vieja)) nueva else e,
+      evidencias: nuevasEvidencias,
+      prediccionesFotos: [
+        for (final e in nuevasEvidencias)
+          if (e.tipoDano != null)
+            IaDamageEntityDto(
+              tipoDano: e.tipoDano!,
+              severidad: e.severidad ?? 'desconocida',
+              parteAfectada: 'Foto',
+              sintoma: e.confianza != null
+                  ? '${(e.confianza! * 100).toStringAsFixed(0)}% confianza'
+                  : '',
+              confianza: e.confianza ?? 0,
+            ),
       ],
     );
   }

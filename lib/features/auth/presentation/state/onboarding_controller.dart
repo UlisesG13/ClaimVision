@@ -18,6 +18,12 @@ class OnboardingState {
     this.numeroPoliza = '',
     this.vigenciaPoliza = '',
     this.curpRfc = '',
+    this.vehiculoMarca = '',
+    this.vehiculoModelo = '',
+    this.vehiculoAnio = '',
+    this.vehiculoPlacas = '',
+    this.aseguradora = '',
+    this.nombreAsegurado = '',
     this.avisoPrivacidad = false,
     this.biometria = false,
     this.transferenciaTalleres = false,
@@ -35,6 +41,12 @@ class OnboardingState {
   final String numeroPoliza;
   final String vigenciaPoliza;
   final String curpRfc;
+  final String vehiculoMarca;
+  final String vehiculoModelo;
+  final String vehiculoAnio;
+  final String vehiculoPlacas;
+  final String aseguradora;
+  final String nombreAsegurado;
 
   // Consentimientos ARCO.
   final bool avisoPrivacidad;
@@ -64,6 +76,12 @@ class OnboardingState {
     String? numeroPoliza,
     String? vigenciaPoliza,
     String? curpRfc,
+    String? vehiculoMarca,
+    String? vehiculoModelo,
+    String? vehiculoAnio,
+    String? vehiculoPlacas,
+    String? aseguradora,
+    String? nombreAsegurado,
     bool? avisoPrivacidad,
     bool? biometria,
     bool? transferenciaTalleres,
@@ -80,6 +98,12 @@ class OnboardingState {
       numeroPoliza: numeroPoliza ?? this.numeroPoliza,
       vigenciaPoliza: vigenciaPoliza ?? this.vigenciaPoliza,
       curpRfc: curpRfc ?? this.curpRfc,
+      vehiculoMarca: vehiculoMarca ?? this.vehiculoMarca,
+      vehiculoModelo: vehiculoModelo ?? this.vehiculoModelo,
+      vehiculoAnio: vehiculoAnio ?? this.vehiculoAnio,
+      vehiculoPlacas: vehiculoPlacas ?? this.vehiculoPlacas,
+      aseguradora: aseguradora ?? this.aseguradora,
+      nombreAsegurado: nombreAsegurado ?? this.nombreAsegurado,
       avisoPrivacidad: avisoPrivacidad ?? this.avisoPrivacidad,
       biometria: biometria ?? this.biometria,
       transferenciaTalleres:
@@ -111,8 +135,12 @@ class OnboardingController extends Notifier<OnboardingState> {
   void editNumeroPoliza(String v) => state = state.copyWith(numeroPoliza: v);
   void editVigencia(String v) => state = state.copyWith(vigenciaPoliza: v);
   void editCurpRfc(String v) => state = state.copyWith(curpRfc: v);
+  void editVehiculoMarca(String v) => state = state.copyWith(vehiculoMarca: v);
+  void editVehiculoModelo(String v) => state = state.copyWith(vehiculoModelo: v);
+  void editVehiculoAnio(String v) => state = state.copyWith(vehiculoAnio: v);
+  void editVehiculoPlacas(String v) => state = state.copyWith(vehiculoPlacas: v);
 
-  /// Ejecuta el OCR sobre cédula + póliza y llena los campos detectados.
+  /// Ejecuta el OCR sobre cédula + póliza vía IA Service y llena los campos.
   Future<void> runOcr() async {
     final cedula = state.cedula;
     final poliza = state.poliza;
@@ -125,19 +153,32 @@ class OnboardingController extends Notifier<OnboardingState> {
 
     state = state.copyWith(ocrLoading: true, clearError: true);
     try {
-      final data = await ref.read(extractPolicyDataProvider)(
-        cedula: cedula,
+      final result = await ref.read(iaExtractAndValidateProvider)(
         poliza: poliza,
+        ine: cedula,
       );
+      final p = result.poliza;
+      final i = result.ine;
       state = state.copyWith(
         ocrLoading: false,
         hasDetected: true,
-        numeroPoliza: data.numeroPoliza,
-        vigenciaPoliza: data.vigenciaPoliza,
-        curpRfc: data.curpRfc,
+        numeroPoliza: p.numeroPoliza,
+        vigenciaPoliza: p.vigenciaFin,
+        curpRfc: i.curp,
+        vehiculoMarca: p.vehiculoMarca,
+        vehiculoModelo: p.vehiculoModelo,
+        vehiculoAnio: p.vehiculoAnio.toString(),
+        vehiculoPlacas: p.vehiculoPlacas,
+        aseguradora: p.aseguradora,
+        nombreAsegurado: p.nombreAsegurado,
       );
     } on Failure catch (f) {
       state = state.copyWith(ocrLoading: false, errorMessage: f.message);
+    } catch (e) {
+      state = state.copyWith(
+        ocrLoading: false,
+        errorMessage: 'No se pudieron analizar los documentos. Verifica que las fotos sean legibles.',
+      );
     }
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/routes/app_router.dart';
+import 'core/di/providers.dart';
 import 'core/security/domain/entities/security_status.dart';
 import 'core/security/presentation/pages/blocked_page.dart';
 import 'core/security/presentation/providers/security_providers.dart';
@@ -28,6 +29,8 @@ class _ClaimVisionAppState extends ConsumerState<ClaimVisionApp>
     NotificationService.instance.onForegroundMessage = (RemoteMessage message) {
       ref.read(currentNotificationProvider.notifier).show(message);
     };
+    // Warm-up: verifica salud del IA Service en background al iniciar la app.
+    Future.microtask(() => ref.read(iaHealthStatusProvider.future));
   }
 
   @override

@@ -185,6 +185,7 @@ class _Thumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SizedBox(
       width: 90,
       height: 90,
@@ -195,22 +196,26 @@ class _Thumb extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             child: Image.file(evidencia.file, fit: BoxFit.cover),
           ),
-          if (evidencia.subiendo)
+          if (evidencia.subiendo || evidencia.predicting)
             Container(
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.35),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
-              child: const Center(
-                child: SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                      strokeWidth: 2.5, color: AppColors.white),
-                ),
+              child: Center(
+                child: evidencia.predicting
+                    ? Text('IA…',
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: AppColors.white))
+                    : const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2.5, color: AppColors.white),
+                      ),
               ),
             )
-          else
+          else ...[
             Positioned(
               left: 4,
               bottom: 4,
@@ -219,6 +224,13 @@ class _Thumb extends StatelessWidget {
                 error: evidencia.error != null,
               ),
             ),
+            if (evidencia.prediccionLista)
+              Positioned(
+                left: 4,
+                top: 4,
+                child: _PredictBadge(evidencia: evidencia),
+              ),
+          ],
           Positioned(
             right: 2,
             top: 2,
@@ -235,6 +247,33 @@ class _Thumb extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PredictBadge extends StatelessWidget {
+  const _PredictBadge({required this.evidencia});
+  final Evidencia evidencia;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      decoration: BoxDecoration(
+        color: AppColors.blueprint,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        evidencia.tipoDano!.length > 8
+            ? '${evidencia.tipoDano!.substring(0, 7)}…'
+            : evidencia.tipoDano!,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: AppColors.white,
+          fontSize: 9,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

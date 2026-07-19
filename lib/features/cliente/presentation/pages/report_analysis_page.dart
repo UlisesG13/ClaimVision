@@ -60,6 +60,15 @@ class _ReportAnalysisPageState extends ConsumerState<ReportAnalysisPage> {
                     theme: theme,
                     analizando: state.analizando,
                     entidades: state.analisisEntidades,
+                    titulo: 'Análisis del relato (IA)',
+                  ),
+                  const Gap(AppSpacing.lg),
+                  _AnalysisCard(
+                    theme: theme,
+                    analizando: state.subiendoAlguna ||
+                        state.evidencias.any((e) => e.predicting),
+                    entidades: state.prediccionesFotos,
+                    titulo: 'Predicción de daños (IA)',
                   ),
                   const Gap(AppSpacing.lg),
                   _SummaryCard(
@@ -124,11 +133,13 @@ class _AnalysisCard extends StatelessWidget {
     required this.theme,
     required this.analizando,
     required this.entidades,
+    required this.titulo,
   });
 
   final ThemeData theme;
   final bool analizando;
   final List<IaDamageEntityDto> entidades;
+  final String titulo;
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +156,7 @@ class _AnalysisCard extends StatelessWidget {
             children: [
               const Icon(Icons.auto_awesome, color: AppColors.amber, size: 20),
               const Gap(AppSpacing.sm),
-              Text('Análisis del relato (IA)',
+              Text(titulo,
                   style: theme.textTheme.labelLarge
                       ?.copyWith(color: AppColors.amber)),
             ],

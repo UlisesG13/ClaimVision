@@ -58,6 +58,7 @@ import '../ia/data/datasources/ia_remote_datasource.dart';
 import '../ia/data/ia_repository_impl.dart';
 import '../ia/domain/ia_repository.dart';
 import '../ia/domain/usecases/ia_check_health.dart';
+import '../ia/domain/usecases/ia_history_uc.dart';
 import '../ia/domain/usecases/ia_nlp_uc.dart';
 import '../ia/domain/usecases/ia_ocr_uc.dart';
 import '../ia/domain/usecases/ia_predict_uc.dart';
@@ -307,4 +308,42 @@ final iaCheckHealthProvider = Provider<IaCheckHealth>((ref) {
 
 final iaCheckHealthV2Provider = Provider<IaCheckHealthV2>((ref) {
   return IaCheckHealthV2(ref.watch(iaRepositoryProvider));
+});
+
+/// Estado de salud del IA Service: `(v1 disponible, v2 disponible)`.
+/// Se evalúa una sola vez al primer watch y queda cacheado.
+final iaHealthStatusProvider = FutureProvider<({bool v1, bool v2})>((ref) async {
+  var v1 = false;
+  var v2 = false;
+  try {
+    final h = await ref.read(iaCheckHealthProvider)();
+    v1 = h.modelLoaded;
+  } catch (_) {}
+  try {
+    final h2 = await ref.read(iaCheckHealthV2Provider)();
+    v2 = h2.modelLoaded;
+  } catch (_) {}
+  return (v1: v1, v2: v2);
+});
+
+// ── IA: historiales ────────────────────────────────────────────────────────
+
+final iaGetV2HistoryProvider = Provider<IaGetV2History>((ref) {
+  return IaGetV2History(ref.watch(iaRepositoryProvider));
+});
+
+final iaGetNlpHistoryProvider = Provider<IaGetNlpHistory>((ref) {
+  return IaGetNlpHistory(ref.watch(iaRepositoryProvider));
+});
+
+final iaGetNlpDetailProvider = Provider<IaGetNlpDetail>((ref) {
+  return IaGetNlpDetail(ref.watch(iaRepositoryProvider));
+});
+
+final iaV2HistoryProvider = FutureProvider.autoDispose((ref) {
+  return ref.watch(iaGetV2HistoryProvider)();
+});
+
+final iaNlpHistoryProvider = FutureProvider.autoDispose((ref) {
+  return ref.watch(iaGetNlpHistoryProvider)();
 });
