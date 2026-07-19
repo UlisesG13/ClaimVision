@@ -178,7 +178,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final email = ref.read(currentSessionProvider)?.email;
     final biometricService = ref.read(biometricServiceProvider);
     final biometricRepo = ref.read(biometricRepositoryProvider);
-    final passCtrl = TextEditingController();
+    String captured = '';
 
     final ok = await showDialog<bool>(
       context: context,
@@ -188,23 +188,23 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         return AlertDialog(
           title: Text('Confirma tu contraseña', style: theme.textTheme.titleLarge),
           content: TextField(
-            controller: passCtrl,
             obscureText: true,
             decoration: const InputDecoration(
               hintText: 'Contraseña actual',
               prefixIcon: Icon(Icons.lock_outline),
             ),
             textInputAction: TextInputAction.done,
-            onSubmitted: (_) => Navigator.pop(ctx, true),
+            onChanged: (v) => captured = v,
+            onSubmitted: (_) => Future.microtask(() => Navigator.pop(ctx, true)),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
+              onPressed: () => Future.microtask(() => Navigator.pop(ctx, false)),
               child: const Text('Cancelar'),
             ),
             TextButton(
               style: TextButton.styleFrom(foregroundColor: AppColors.blueprint),
-              onPressed: () => Navigator.pop(ctx, true),
+              onPressed: () => Future.microtask(() => Navigator.pop(ctx, true)),
               child: const Text('Confirmar'),
             ),
           ],
@@ -212,11 +212,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       },
     );
 
-    if (ok != true || passCtrl.text.isEmpty || !mounted || email == null) {
-      passCtrl.dispose();
-      return;
-    }
-    passCtrl.dispose();
+    if (ok != true || captured.isEmpty || !mounted || email == null) return;
 
     final autenticado = await biometricService.authenticate(
       reason: 'Registra tu huella para acceder más rápido',
@@ -226,7 +222,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     await biometricRepo.enable(
       userId: userId,
       email: email,
-      password: passCtrl.text,
+      password: captured,
     );
 
     Future.microtask(() {
