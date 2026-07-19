@@ -2,6 +2,9 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
+import '../../../../core/constants/api_constants.dart';
+import '../../../../core/network/api_error_mapper.dart';
+
 class OcrRemoteDataSource {
   OcrRemoteDataSource(this._dio);
 
@@ -12,21 +15,28 @@ class OcrRemoteDataSource {
     File? ineBack,
     required File policy,
   }) async {
-    final form = FormData.fromMap({
-      'ine_front': await MultipartFile.fromFile(ineFront.path,
-          filename: 'ine_front.jpg'),
-      if (ineBack != null)
-        'ine_back': await MultipartFile.fromFile(ineBack.path,
-            filename: 'ine_back.jpg'),
-      'policy': await MultipartFile.fromFile(policy.path,
-          filename: 'policy.jpg'),
-    });
+    try {
+      final form = FormData.fromMap({
+        'poliza': await MultipartFile.fromFile(policy.path, filename: 'poliza.pdf'),
+        'ine': await MultipartFile.fromFile(ineFront.path, filename: 'ine_front.jpg'),
+      });
 
-    final response = await _dio.post(
-      '/api/v1/cliente/onboarding/ocr',
-      data: form,
-    );
+      final response = await _dio.post(
+        ApiConstants.iaOcrExtractAndValidate,
+        data: form,
+        options: Options(contentType: 'multipart/form-data'),
+      );
+      _ensureSuccess(response);
+      return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      throw ApiErrorMapper.fromDioException(e);
+    }
+  }
 
-    return response.data as Map<String, dynamic>;
+  void _ensureSuccess(Response response) {
+    final status = response.statusCode ?? 500;
+    if (status >= 400) {
+      throw ApiErrorMapper.fromResponse(response);
+    }
   }
 }

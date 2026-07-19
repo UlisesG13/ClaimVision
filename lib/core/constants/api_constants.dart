@@ -43,14 +43,32 @@ class ApiConstants {
     defaultValue: 'https://ia.actividades.icu',
   );
 
-  static const String iaOcr = '/v1/ocr';
-  static const String iaOcrExtractIne = '/v1/ocr/extract-ine';
-  static const String iaOcrExtractPoliza = '/v1/ocr/extract-poliza';
-  static const String iaOcrExtractAndValidate = '/v1/ocr/extract-and-validate';
-  static const String iaPredict = '/v1/predict';
-  static const String iaNlpAnalizar = '/v1/nlp/analizar';
-  static const String iaNlpTranscribir = '/v1/nlp/transcribir';
-  static String iaNlpTranscribirStatus(String jobId) => '/v1/nlp/transcribir/status/$jobId';
+  // ── IA: OCR ────────────────────────────────────────────────────────────
+  static const String iaOcr = '/api/v1/ocr';
+  static const String iaOcrExtractIne = '/api/v1/ocr/extract-ine';
+  static const String iaOcrExtractPoliza = '/api/v1/ocr/extract-poliza';
+  static const String iaOcrExtractAndValidate = '/api/v1/ocr/extract-and-validate';
+  static const String iaOcrHistory = '/api/v1/ocr/history';
+
+  // ── IA: Predict (No Supervised v1) ─────────────────────────────────────
+  static const String iaPredict = '/api/v1/predict';
+  static const String iaHistory = '/api/v1/history';
+  static const String iaRetrain = '/api/v1/retrain';
+  static const String iaHealth = '/api/v1/health';
+
+  // ── IA: Supervised v2 ──────────────────────────────────────────────────
+  static const String iaV2Predict = '/api/v2/predict';
+  static const String iaV2Retrain = '/api/v2/retrain';
+  static String iaV2RetrainStatus(String jobId) => '/api/v2/retrain/$jobId';
+  static const String iaV2History = '/api/v2/history';
+  static const String iaV2Health = '/api/v2/health';
+
+  // ── IA: NLP ────────────────────────────────────────────────────────────
+  static const String iaNlpAnalizar = '/api/v1/nlp/analizar';
+  static const String iaNlpTranscribir = '/api/v1/nlp/transcribir';
+  static String iaNlpTranscribirStatus(String jobId) => '/api/v1/nlp/transcribir/status/$jobId';
+  static const String iaNlpHistory = '/api/v1/nlp/history';
+  static String iaNlpDetail(String id) => '/api/v1/nlp/$id';
 
   // Tiempos de espera de la red.
   static const Duration connectTimeout = Duration(seconds: 20);

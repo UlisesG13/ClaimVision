@@ -54,6 +54,14 @@ import '../services/image_quality_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
 import '../services/secure_storage_service.dart';
+import '../ia/data/datasources/ia_remote_datasource.dart';
+import '../ia/data/ia_repository_impl.dart';
+import '../ia/domain/ia_repository.dart';
+import '../ia/domain/usecases/ia_check_health.dart';
+import '../ia/domain/usecases/ia_nlp_uc.dart';
+import '../ia/domain/usecases/ia_ocr_uc.dart';
+import '../ia/domain/usecases/ia_predict_uc.dart';
+import '../constants/api_constants.dart';
 
 final secureStorageProvider = Provider<SecureStorageService>((ref) {
   return SecureStorageService(const FlutterSecureStorage());
@@ -86,7 +94,7 @@ final imageValidatorProvider = Provider<ImageValidator>((ref) {
 });
 
 final ocrRemoteDataSourceProvider = Provider<OcrRemoteDataSource>((ref) {
-  return OcrRemoteDataSource(ref.watch(dioProvider));
+  return OcrRemoteDataSource(ref.watch(iaDioProvider));
 });
 
 final ocrRepositoryProvider = Provider<OcrRepository>((ref) {
@@ -248,4 +256,55 @@ final getSiniestroDetalleProvider = Provider<GetSiniestroDetalle>((ref) {
 final vehiculosClienteProvider = FutureProvider<List<VehiculoCliente>>((ref) {
   ref.watch(currentSessionProvider);
   return ref.watch(siniestroRepositoryProvider).obtenerVehiculos();
+});
+
+// ── IA Service ──────────────────────────────────────────────────────────────
+
+final iaDioProvider = Provider<Dio>((ref) {
+  return Dio(
+    BaseOptions(
+      baseUrl: ApiConstants.iaBaseUrl,
+      connectTimeout: ApiConstants.connectTimeout,
+      receiveTimeout: ApiConstants.receiveTimeout,
+      validateStatus: (status) => status != null && status < 500,
+    ),
+  );
+});
+
+final iaRemoteDataSourceProvider = Provider<IaRemoteDataSource>((ref) {
+  return IaRemoteDataSource(ref.watch(iaDioProvider));
+});
+
+final iaRepositoryProvider = Provider<IaRepository>((ref) {
+  return IaRepositoryImpl(ref.watch(iaRemoteDataSourceProvider));
+});
+
+// ── IA: use cases ──────────────────────────────────────────────────────────
+
+final iaPredictDamageProvider = Provider<IaPredictDamage>((ref) {
+  return IaPredictDamage(ref.watch(iaRepositoryProvider));
+});
+
+final iaPredictDamageV2Provider = Provider<IaPredictDamageV2>((ref) {
+  return IaPredictDamageV2(ref.watch(iaRepositoryProvider));
+});
+
+final iaExtractAndValidateProvider = Provider<IaExtractAndValidate>((ref) {
+  return IaExtractAndValidate(ref.watch(iaRepositoryProvider));
+});
+
+final iaTranscribirAudioProvider = Provider<IaTranscribirAudio>((ref) {
+  return IaTranscribirAudio(ref.watch(iaRepositoryProvider));
+});
+
+final iaAnalizarTextoProvider = Provider<IaAnalizarTexto>((ref) {
+  return IaAnalizarTexto(ref.watch(iaRepositoryProvider));
+});
+
+final iaCheckHealthProvider = Provider<IaCheckHealth>((ref) {
+  return IaCheckHealth(ref.watch(iaRepositoryProvider));
+});
+
+final iaCheckHealthV2Provider = Provider<IaCheckHealthV2>((ref) {
+  return IaCheckHealthV2(ref.watch(iaRepositoryProvider));
 });

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/ia/data/dtos/ia_nlp_dto.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -11,14 +12,28 @@ import '../../../../shared/widgets/primary_button.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import '../state/report_controller.dart';
 
-class ReportAnalysisPage extends ConsumerWidget {
+class ReportAnalysisPage extends ConsumerStatefulWidget {
   const ReportAnalysisPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ReportAnalysisPage> createState() => _ReportAnalysisPageState();
+}
+
+class _ReportAnalysisPageState extends ConsumerState<ReportAnalysisPage> {
+  bool _analisisIniciado = false;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final state = ref.watch(reportControllerProvider);
     final siniestro = state.siniestro;
+
+    if (!_analisisIniciado && siniestro != null) {
+      _analisisIniciado = true;
+      Future.microtask(
+        () => ref.read(reportControllerProvider.notifier).analizarTexto(),
+      );
+    }
 
     return Scaffold(
       backgroundColor: context.scaffoldBgColor,
@@ -41,7 +56,11 @@ class ReportAnalysisPage extends ConsumerWidget {
                 children: [
                   const _SentHero(),
                   const Gap(AppSpacing.lg),
-                  _AnalysisCard(theme: theme),
+                  _AnalysisCard(
+                    theme: theme,
+                    analizando: state.analizando,
+                    entidades: state.analisisEntidades,
+                  ),
                   const Gap(AppSpacing.lg),
                   _SummaryCard(
                     siniestro: siniestro,
@@ -101,8 +120,15 @@ class _SentHero extends StatelessWidget {
 }
 
 class _AnalysisCard extends StatelessWidget {
-  const _AnalysisCard({required this.theme});
+  const _AnalysisCard({
+    required this.theme,
+    required this.analizando,
+    required this.entidades,
+  });
+
   final ThemeData theme;
+  final bool analizando;
+  final List<IaDamageEntityDto> entidades;
 
   @override
   Widget build(BuildContext context) {
@@ -119,21 +145,71 @@ class _AnalysisCard extends StatelessWidget {
             children: [
               const Icon(Icons.auto_awesome, color: AppColors.amber, size: 20),
               const Gap(AppSpacing.sm),
-              Text('Análisis preliminar (IA)',
+              Text('Análisis del relato (IA)',
                   style: theme.textTheme.labelLarge
                       ?.copyWith(color: AppColors.amber)),
             ],
           ),
           const Gap(AppSpacing.md),
-          Text('En proceso',
-              style: theme.textTheme.displayMedium
-                  ?.copyWith(color: AppColors.white, fontSize: 28)),
-          const Gap(AppSpacing.xs),
-          Text(
-            'Estamos procesando las fotos del daño. La estimación de costo y las '
-            'zonas afectadas aparecerán cuando el análisis esté disponible.',
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: AppColors.white.withValues(alpha: 0.75)),
+          if (analizando)
+            const Column(
+              children: [
+                SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.5,
+                    color: AppColors.amber,
+                  ),
+                ),
+                Gap(AppSpacing.sm),
+              ],
+            ),
+          if (entidades.isEmpty && !analizando)
+            Text(
+              'No se detectaron daños específicos en la narración.',
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: AppColors.white.withValues(alpha: 0.75)),
+            ),
+          ...entidades.map((e) => _EntityRow(entity: e)),
+        ],
+      ),
+    );
+  }
+}
+
+class _EntityRow extends StatelessWidget {
+  const _EntityRow({required this.entity});
+  final IaDamageEntityDto entity;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.error_outline, color: AppColors.amber, size: 18),
+          const Gap(AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${entity.parteAfectada} · ${entity.tipoDano}',
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: AppColors.white, fontWeight: FontWeight.w600),
+                ),
+                const Gap(2),
+                Text(
+                  '${entity.sintoma} · ${entity.severidad} '
+                  '(${(entity.confianza * 100).toStringAsFixed(0)}%)',
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: AppColors.white.withValues(alpha: 0.7)),
+                ),
+              ],
+            ),
           ),
         ],
       ),

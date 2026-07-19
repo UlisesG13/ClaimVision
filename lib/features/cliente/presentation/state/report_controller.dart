@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/ia/data/dtos/ia_nlp_dto.dart';
 import '../../domain/entities/vehiculo_cliente.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import 'mis_siniestros_controller.dart';
@@ -56,6 +58,11 @@ class ReportState {
     this.evidencias = const [],
     this.siniestro,
     this.submitting = false,
+    this.audioFile,
+    this.transcribiendo = false,
+    this.transcripcion,
+    this.analizando = false,
+    this.analisisEntidades = const [],
     this.errorMessage,
   });
 
@@ -73,6 +80,11 @@ class ReportState {
   final List<Evidencia> evidencias;
   final Siniestro? siniestro;
   final bool submitting;
+  final File? audioFile;
+  final bool transcribiendo;
+  final String? transcripcion;
+  final bool analizando;
+  final List<IaDamageEntityDto> analisisEntidades;
   final String? errorMessage;
 
   bool get vehiculoCompleto =>
@@ -107,6 +119,11 @@ class ReportState {
     List<Evidencia>? evidencias,
     Siniestro? siniestro,
     bool? submitting,
+    File? audioFile,
+    bool? transcribiendo,
+    String? transcripcion,
+    bool? analizando,
+    List<IaDamageEntityDto>? analisisEntidades,
     String? errorMessage,
     bool clearError = false,
   }) {
@@ -125,6 +142,11 @@ class ReportState {
       evidencias: evidencias ?? this.evidencias,
       siniestro: siniestro ?? this.siniestro,
       submitting: submitting ?? this.submitting,
+      audioFile: audioFile ?? this.audioFile,
+      transcribiendo: transcribiendo ?? this.transcribiendo,
+      transcripcion: transcripcion ?? this.transcripcion,
+      analizando: analizando ?? this.analizando,
+      analisisEntidades: analisisEntidades ?? this.analisisEntidades,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
@@ -237,6 +259,67 @@ class ReportController extends Notifier<ReportState> {
     } on Failure catch (f) {
       state = state.copyWith(submitting: false, errorMessage: f.message);
       return false;
+    }
+  }
+
+  void setAudioFile(File? file) => state = state.copyWith(audioFile: file);
+
+  void setTranscripcion(String? texto) =>
+      state = state.copyWith(transcripcion: texto, transcribiendo: false);
+
+  Future<void> transcribirAudio() async {
+    final file = state.audioFile;
+    if (file == null) return;
+    state = state.copyWith(transcribiendo: true, clearError: true);
+    try {
+      final job = await ref.read(iaTranscribirAudioProvider)(file: file);
+      const maxPolls = 30;
+      for (var i = 0; i < maxPolls; i++) {
+        await Future.delayed(const Duration(seconds: 2));
+        final status = await ref.read(iaRepositoryProvider).transcribirStatus(job.jobId);
+        if (status.status == 'completed') {
+          state = state.copyWith(
+            transcripcion: status.result?.texto,
+            transcribiendo: false,
+          );
+          return;
+        }
+        if (status.status == 'failed') {
+          state = state.copyWith(
+            transcribiendo: false,
+            errorMessage: status.error,
+          );
+          return;
+        }
+      }
+      state = state.copyWith(transcribiendo: false);
+    } on Failure catch (f) {
+      state = state.copyWith(transcribiendo: false, errorMessage: f.message);
+    } catch (e) {
+      state = state.copyWith(
+        transcribiendo: false,
+        errorMessage: 'Error al transcribir audio: $e',
+      );
+    }
+  }
+
+  Future<void> analizarTexto() async {
+    final texto = state.transcripcion ?? state.narracionTexto;
+    if (texto.trim().isEmpty) return;
+    state = state.copyWith(analizando: true, clearError: true);
+    try {
+      final result = await ref.read(iaAnalizarTextoProvider)(texto.trim());
+      state = state.copyWith(
+        analizando: false,
+        analisisEntidades: result.entidades,
+      );
+    } on Failure catch (f) {
+      state = state.copyWith(analizando: false, errorMessage: f.message);
+    } catch (e) {
+      state = state.copyWith(
+        analizando: false,
+        errorMessage: 'Error al analizar texto: $e',
+      );
     }
   }
 
