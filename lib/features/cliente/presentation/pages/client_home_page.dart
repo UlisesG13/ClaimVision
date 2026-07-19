@@ -250,7 +250,7 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
+              onPressed: () => Future.microtask(() => Navigator.pop(ctx, false)),
               child: const Text('Omitir'),
             ),
             TextButton(
@@ -301,7 +301,7 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
 
     if (!acepto || !mounted) return;
 
-    String? pass = password;
+      String? pass = password;
     if (pass == null) {
       final passCtrl = TextEditingController();
       final ok = await showDialog<bool>(
@@ -311,13 +311,14 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
           final t = Theme.of(ctx);
           return AlertDialog(
             title: Text('Confirma tu contraseña', style: t.textTheme.titleLarge),
-            content: AppTextField(
+            content: TextField(
               controller: passCtrl,
-              hintText: 'Contraseña actual',
-              prefixIcon: Icons.lock_outline,
-              obscure: true,
-              validator: (v) =>
-                  (v == null || v.isEmpty) ? 'Ingresa tu contraseña' : null,
+              obscureText: true,
+              decoration: const InputDecoration(
+                hintText: 'Contraseña actual',
+                prefixIcon: Icon(Icons.lock_outline),
+              ),
+              textInputAction: TextInputAction.done,
             ),
             actions: [
               TextButton(
