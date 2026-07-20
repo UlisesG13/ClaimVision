@@ -22,7 +22,7 @@ class OcrRemoteDataSource {
       });
 
       final response = await _dio.post(
-        ApiConstants.iaOcrExtractAndValidate,
+        ApiConstants.iaBridgeOcrExtractAndValidate,
         data: form,
         options: Options(contentType: 'multipart/form-data'),
       );

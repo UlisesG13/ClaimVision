@@ -21,6 +21,7 @@ class RoutePaths {
   static const String reportarAnalisis = '/reportar-analisis'; // #9
 
   static const String notificaciones = '/notificaciones';
+  static const String configuracion = '/configuracion';
 
   /// Detalle de un siniestro. Usar [detalleSiniestroDe] para construir la ruta.
   static const String detalleSiniestro = '/siniestro/:id';

@@ -55,6 +55,10 @@ class OnboardingRepositoryImpl implements OnboardingRepository {
           numeroPoliza: data.numeroPoliza,
           vigenciaPoliza: data.vigenciaPoliza,
           curpRfc: data.curpRfc,
+          vehiculoMarca: data.vehiculoMarca,
+          vehiculoModelo: data.vehiculoModelo,
+          vehiculoAnio: data.vehiculoAnio,
+          vehiculoPlacas: data.vehiculoPlacas,
         ),
       );
     } on AppException catch (e) {

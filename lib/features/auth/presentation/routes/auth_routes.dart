@@ -4,6 +4,7 @@ import '../../../../core/routes/route_paths.dart';
 import '../pages/login_page.dart';
 import '../pages/onboarding_page.dart';
 import '../pages/profile_page.dart';
+import '../pages/settings_page.dart';
 
 List<GoRoute> authRoutes = [
   GoRoute(
@@ -17,5 +18,9 @@ List<GoRoute> authRoutes = [
   GoRoute(
     path: RoutePaths.perfil,
     builder: (_, _) => const ProfilePage(),
+  ),
+  GoRoute(
+    path: RoutePaths.configuracion,
+    builder: (_, _) => const SettingsPage(),
   ),
 ];

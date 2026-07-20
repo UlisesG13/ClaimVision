@@ -199,6 +199,10 @@ class OnboardingController extends Notifier<OnboardingState> {
           numeroPoliza: state.numeroPoliza.trim(),
           vigenciaPoliza: state.vigenciaPoliza.trim(),
           curpRfc: state.curpRfc.trim(),
+          vehiculoMarca: state.vehiculoMarca.trim(),
+          vehiculoModelo: state.vehiculoModelo.trim(),
+          vehiculoAnio: int.tryParse(state.vehiculoAnio.trim()) ?? 0,
+          vehiculoPlacas: state.vehiculoPlacas.trim(),
         ),
       );
       state = state.copyWith(submitting: false, completed: true);

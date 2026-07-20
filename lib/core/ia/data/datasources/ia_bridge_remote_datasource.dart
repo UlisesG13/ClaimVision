@@ -2,28 +2,28 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
-import '../../../constants/api_constants.dart';
-import '../../../network/api_error_mapper.dart';
+import '../../../../../core/constants/api_constants.dart';
+import '../../../../../core/network/api_error_mapper.dart';
 import '../dtos/ia_nlp_dto.dart';
 import '../dtos/ia_ocr_dto.dart';
 import '../dtos/ia_predict_dto.dart';
 import '../dtos/ia_v2_dto.dart';
 
-class IaRemoteDataSource {
-  IaRemoteDataSource(this._dio);
+class IaBridgeRemoteDataSource {
+  IaBridgeRemoteDataSource(this._dio);
 
   final Dio _dio;
 
   String _fileName(File f) => f.path.split(RegExp(r'[\\/]')).last;
 
-  // ── OCR ────────────────────────────────────────────────────────────────
+  // ── OCR ────────────────────────────────────────────────────────────
 
   Future<IaOcrResponseDto> ocr({required File file}) async {
     try {
       final form = FormData.fromMap({
         'file': await MultipartFile.fromFile(file.path, filename: _fileName(file)),
       });
-      final response = await _dio.post(ApiConstants.iaOcr, data: form);
+      final response = await _dio.post(ApiConstants.iaBridgeOcr, data: form);
       _ensureSuccess(response);
       return IaOcrResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -34,7 +34,7 @@ class IaRemoteDataSource {
   Future<Map<String, dynamic>> ocrHistory({int page = 1, int limit = 20}) async {
     try {
       final response = await _dio.get(
-        ApiConstants.iaOcrHistory,
+        ApiConstants.iaBridgeOcrHistory,
         queryParameters: {'page': page, 'limit': limit},
       );
       _ensureSuccess(response);
@@ -49,7 +49,7 @@ class IaRemoteDataSource {
       final form = FormData.fromMap({
         'file': await MultipartFile.fromFile(file.path, filename: _fileName(file)),
       });
-      final response = await _dio.post(ApiConstants.iaOcrExtractPoliza, data: form);
+      final response = await _dio.post(ApiConstants.iaBridgeOcrExtractPoliza, data: form);
       _ensureSuccess(response);
       return IaPolizaExtractedDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -62,7 +62,7 @@ class IaRemoteDataSource {
       final form = FormData.fromMap({
         'file': await MultipartFile.fromFile(file.path, filename: _fileName(file)),
       });
-      final response = await _dio.post(ApiConstants.iaOcrExtractIne, data: form);
+      final response = await _dio.post(ApiConstants.iaBridgeOcrExtractIne, data: form);
       _ensureSuccess(response);
       return IaIneExtractedDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -80,7 +80,7 @@ class IaRemoteDataSource {
         'ine': await MultipartFile.fromFile(ine.path, filename: _fileName(ine)),
       });
       final response = await _dio.post(
-        ApiConstants.iaOcrExtractAndValidate,
+        ApiConstants.iaBridgeOcrExtractAndValidate,
         data: form,
       );
       _ensureSuccess(response);
@@ -97,7 +97,7 @@ class IaRemoteDataSource {
       final form = FormData.fromMap({
         'file': await MultipartFile.fromFile(file.path, filename: _fileName(file)),
       });
-      final response = await _dio.post(ApiConstants.iaPredict, data: form);
+      final response = await _dio.post(ApiConstants.iaBridgePredict, data: form);
       _ensureSuccess(response);
       return IaPredictResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -108,7 +108,7 @@ class IaRemoteDataSource {
   Future<Map<String, dynamic>> history({int page = 1, int limit = 20}) async {
     try {
       final response = await _dio.get(
-        ApiConstants.iaHistory,
+        ApiConstants.iaBridgeHistory,
         queryParameters: {'page': page, 'limit': limit},
       );
       _ensureSuccess(response);
@@ -129,7 +129,7 @@ class IaRemoteDataSource {
           files.map((f) => MultipartFile.fromFile(f.path, filename: _fileName(f))),
         ),
       });
-      final response = await _dio.post(ApiConstants.iaRetrain, data: form);
+      final response = await _dio.post(ApiConstants.iaBridgeRetrain, data: form);
       _ensureSuccess(response);
       return IaRetrainResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -139,7 +139,7 @@ class IaRemoteDataSource {
 
   Future<IaHealthResponseDto> health() async {
     try {
-      final response = await _dio.get(ApiConstants.iaHealth);
+      final response = await _dio.get(ApiConstants.iaBridgeHealth);
       _ensureSuccess(response);
       return IaHealthResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -154,7 +154,7 @@ class IaRemoteDataSource {
       final form = FormData.fromMap({
         'file': await MultipartFile.fromFile(file.path, filename: _fileName(file)),
       });
-      final response = await _dio.post(ApiConstants.iaV2Predict, data: form);
+      final response = await _dio.post(ApiConstants.iaBridgeV2Predict, data: form);
       _ensureSuccess(response);
       return IaV2PredictResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -177,7 +177,7 @@ class IaRemoteDataSource {
           files.map((f) => MultipartFile.fromFile(f.path, filename: _fileName(f))),
         ),
       });
-      final response = await _dio.post(ApiConstants.iaV2Retrain, data: form);
+      final response = await _dio.post(ApiConstants.iaBridgeV2Retrain, data: form);
       _ensureSuccess(response);
       return IaV2RetrainResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -187,7 +187,7 @@ class IaRemoteDataSource {
 
   Future<IaV2RetrainStatusResponseDto> retrainV2Status(String jobId) async {
     try {
-      final response = await _dio.get(ApiConstants.iaV2RetrainStatus(jobId));
+      final response = await _dio.get(ApiConstants.iaBridgeV2RetrainStatus(jobId));
       _ensureSuccess(response);
       return IaV2RetrainStatusResponseDto.fromJson(
         response.data as Map<String, dynamic>,
@@ -200,7 +200,7 @@ class IaRemoteDataSource {
   Future<Map<String, dynamic>> historyV2({int page = 1, int limit = 20}) async {
     try {
       final response = await _dio.get(
-        ApiConstants.iaV2History,
+        ApiConstants.iaBridgeV2History,
         queryParameters: {'page': page, 'limit': limit},
       );
       _ensureSuccess(response);
@@ -212,7 +212,7 @@ class IaRemoteDataSource {
 
   Future<IaV2HealthResponseDto> healthV2() async {
     try {
-      final response = await _dio.get(ApiConstants.iaV2Health);
+      final response = await _dio.get(ApiConstants.iaBridgeV2Health);
       _ensureSuccess(response);
       return IaV2HealthResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
@@ -227,7 +227,7 @@ class IaRemoteDataSource {
       final form = FormData.fromMap({
         'file': await MultipartFile.fromFile(file.path, filename: _fileName(file)),
       });
-      final response = await _dio.post(ApiConstants.iaNlpTranscribir, data: form);
+      final response = await _dio.post(ApiConstants.iaBridgeNlpTranscribir, data: form);
       _ensureSuccess(response);
       return IaTranscribirJobResponseDto.fromJson(
         response.data as Map<String, dynamic>,
@@ -239,7 +239,7 @@ class IaRemoteDataSource {
 
   Future<IaTranscribirJobStatusResponseDto> transcribirStatus(String jobId) async {
     try {
-      final response = await _dio.get(ApiConstants.iaNlpTranscribirStatus(jobId));
+      final response = await _dio.get(ApiConstants.iaBridgeNlpTranscribirStatus(jobId));
       _ensureSuccess(response);
       return IaTranscribirJobStatusResponseDto.fromJson(
         response.data as Map<String, dynamic>,
@@ -252,7 +252,7 @@ class IaRemoteDataSource {
   Future<IaAnalizarResponseDto> analizar(String texto) async {
     try {
       final response = await _dio.post(
-        ApiConstants.iaNlpAnalizar,
+        ApiConstants.iaBridgeNlpAnalizar,
         data: IaAnalizarRequestDto(texto: texto).toJson(),
       );
       _ensureSuccess(response);
@@ -265,7 +265,7 @@ class IaRemoteDataSource {
   Future<Map<String, dynamic>> nlpHistory({int page = 1, int limit = 20}) async {
     try {
       final response = await _dio.get(
-        ApiConstants.iaNlpHistory,
+        ApiConstants.iaBridgeNlpHistory,
         queryParameters: {'page': page, 'limit': limit},
       );
       _ensureSuccess(response);
@@ -277,7 +277,7 @@ class IaRemoteDataSource {
 
   Future<IaTranscribirResponseDto> nlpDetail(String id) async {
     try {
-      final response = await _dio.get(ApiConstants.iaNlpDetail(id));
+      final response = await _dio.get(ApiConstants.iaBridgeNlpDetail(id));
       _ensureSuccess(response);
       return IaTranscribirResponseDto.fromJson(
         response.data as Map<String, dynamic>,

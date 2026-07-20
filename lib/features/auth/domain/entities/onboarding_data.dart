@@ -5,6 +5,10 @@ class OnboardingData {
     required this.numeroPoliza,
     required this.vigenciaPoliza,
     required this.curpRfc,
+    this.vehiculoMarca = '',
+    this.vehiculoModelo = '',
+    this.vehiculoAnio = 0,
+    this.vehiculoPlacas = '',
   });
 
   final String numeroPoliza;
@@ -14,16 +18,28 @@ class OnboardingData {
   final String vigenciaPoliza;
 
   final String curpRfc;
+  final String vehiculoMarca;
+  final String vehiculoModelo;
+  final int vehiculoAnio;
+  final String vehiculoPlacas;
 
   OnboardingData copyWith({
     String? numeroPoliza,
     String? vigenciaPoliza,
     String? curpRfc,
+    String? vehiculoMarca,
+    String? vehiculoModelo,
+    int? vehiculoAnio,
+    String? vehiculoPlacas,
   }) {
     return OnboardingData(
       numeroPoliza: numeroPoliza ?? this.numeroPoliza,
       vigenciaPoliza: vigenciaPoliza ?? this.vigenciaPoliza,
       curpRfc: curpRfc ?? this.curpRfc,
+      vehiculoMarca: vehiculoMarca ?? this.vehiculoMarca,
+      vehiculoModelo: vehiculoModelo ?? this.vehiculoModelo,
+      vehiculoAnio: vehiculoAnio ?? this.vehiculoAnio,
+      vehiculoPlacas: vehiculoPlacas ?? this.vehiculoPlacas,
     );
   }
 }

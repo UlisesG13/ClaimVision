@@ -47,14 +47,7 @@ import '../ocr/data/datasources/ocr_remote_datasource.dart';
 import '../ocr/data/ocr_repository_impl.dart';
 import '../ocr/domain/image_validator.dart';
 import '../ocr/domain/ocr_repository.dart';
-import '../services/biometric_service.dart';
-import '../services/device_inspector_service.dart';
-import '../services/image_picker_service.dart';
-import '../services/image_quality_service.dart';
-import '../services/location_service.dart';
-import '../services/notification_service.dart';
-import '../services/secure_storage_service.dart';
-import '../ia/data/datasources/ia_remote_datasource.dart';
+import '../ia/data/datasources/ia_bridge_remote_datasource.dart';
 import '../ia/data/ia_repository_impl.dart';
 import '../ia/domain/ia_repository.dart';
 import '../ia/domain/usecases/ia_check_health.dart';
@@ -62,7 +55,13 @@ import '../ia/domain/usecases/ia_history_uc.dart';
 import '../ia/domain/usecases/ia_nlp_uc.dart';
 import '../ia/domain/usecases/ia_ocr_uc.dart';
 import '../ia/domain/usecases/ia_predict_uc.dart';
-import '../constants/api_constants.dart';
+import '../services/biometric_service.dart';
+import '../services/device_inspector_service.dart';
+import '../services/image_picker_service.dart';
+import '../services/image_quality_service.dart';
+import '../services/location_service.dart';
+import '../services/notification_service.dart';
+import '../services/secure_storage_service.dart';
 
 final secureStorageProvider = Provider<SecureStorageService>((ref) {
   return SecureStorageService(const FlutterSecureStorage());
@@ -95,7 +94,7 @@ final imageValidatorProvider = Provider<ImageValidator>((ref) {
 });
 
 final ocrRemoteDataSourceProvider = Provider<OcrRemoteDataSource>((ref) {
-  return OcrRemoteDataSource(ref.watch(iaDioProvider));
+  return OcrRemoteDataSource(ref.watch(dioProvider));
 });
 
 final ocrRepositoryProvider = Provider<OcrRepository>((ref) {
@@ -259,25 +258,14 @@ final vehiculosClienteProvider = FutureProvider<List<VehiculoCliente>>((ref) {
   return ref.watch(siniestroRepositoryProvider).obtenerVehiculos();
 });
 
-// ── IA Service ──────────────────────────────────────────────────────────────
+// ── IA Bridge (Backend Proxy) ────────────────────────────────────────────
 
-final iaDioProvider = Provider<Dio>((ref) {
-  return Dio(
-    BaseOptions(
-      baseUrl: ApiConstants.iaBaseUrl,
-      connectTimeout: ApiConstants.connectTimeout,
-      receiveTimeout: ApiConstants.receiveTimeout,
-      validateStatus: (status) => status != null && status < 500,
-    ),
-  );
-});
-
-final iaRemoteDataSourceProvider = Provider<IaRemoteDataSource>((ref) {
-  return IaRemoteDataSource(ref.watch(iaDioProvider));
+final iaBridgeRemoteDataSourceProvider = Provider<IaBridgeRemoteDataSource>((ref) {
+  return IaBridgeRemoteDataSource(ref.watch(dioProvider));
 });
 
 final iaRepositoryProvider = Provider<IaRepository>((ref) {
-  return IaRepositoryImpl(ref.watch(iaRemoteDataSourceProvider));
+  return IaRepositoryImpl(ref.watch(iaBridgeRemoteDataSourceProvider));
 });
 
 // ── IA: use cases ──────────────────────────────────────────────────────────

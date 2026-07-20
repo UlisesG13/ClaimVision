@@ -37,38 +37,35 @@ class ApiConstants {
   static String ajustadorEditarPeritaje(String id) => '/v1/ajustador/peritajes/$id';
   static String ajustadorPeritajeDanos(String id) => '/v1/ajustador/peritajes/$id/danos';
 
-  // ── IA Service ─────────────────────────────────────────────────────────
-  static const String iaBaseUrl = String.fromEnvironment(
-    'IA_BASE_URL',
-    defaultValue: 'https://ia.actividades.icu',
-  );
+  // ── IA Bridge (Backend → IA Service) ──────────────────────────────────
+  // Todos los endpoints IA se acceden vía backend proxy: /api/v1/ia/*
 
-  // ── IA: OCR ────────────────────────────────────────────────────────────
-  static const String iaOcr = '/api/v1/ocr';
-  static const String iaOcrExtractIne = '/api/v1/ocr/extract-ine';
-  static const String iaOcrExtractPoliza = '/api/v1/ocr/extract-poliza';
-  static const String iaOcrExtractAndValidate = '/api/v1/ocr/extract-and-validate';
-  static const String iaOcrHistory = '/api/v1/ocr/history';
+  // IA: OCR
+  static const String iaBridgeOcr = '/v1/ia/ocr';
+  static const String iaBridgeOcrExtractIne = '/v1/ia/ocr/extract-ine';
+  static const String iaBridgeOcrExtractPoliza = '/v1/ia/ocr/extract-poliza';
+  static const String iaBridgeOcrExtractAndValidate = '/v1/ia/ocr/extract-and-validate';
+  static const String iaBridgeOcrHistory = '/v1/ia/ocr/history';
 
-  // ── IA: Predict (No Supervised v1) ─────────────────────────────────────
-  static const String iaPredict = '/api/v1/predict';
-  static const String iaHistory = '/api/v1/history';
-  static const String iaRetrain = '/api/v1/retrain';
-  static const String iaHealth = '/api/v1/health';
+  // IA: Predict v1 (No Supervised)
+  static const String iaBridgePredict = '/v1/ia/predict';
+  static const String iaBridgeHistory = '/v1/ia/predict/history';
+  static const String iaBridgeRetrain = '/v1/ia/predict/retrain';
+  static const String iaBridgeHealth = '/v1/ia/predict/health';
 
-  // ── IA: Supervised v2 ──────────────────────────────────────────────────
-  static const String iaV2Predict = '/api/v2/predict';
-  static const String iaV2Retrain = '/api/v2/retrain';
-  static String iaV2RetrainStatus(String jobId) => '/api/v2/retrain/$jobId';
-  static const String iaV2History = '/api/v2/history';
-  static const String iaV2Health = '/api/v2/health';
+  // IA: Predict v2 (Supervised / ResNet18)
+  static const String iaBridgeV2Predict = '/v1/ia/v2/predict';
+  static const String iaBridgeV2Retrain = '/v1/ia/v2/retrain';
+  static String iaBridgeV2RetrainStatus(String jobId) => '/v1/ia/v2/retrain/$jobId/status';
+  static const String iaBridgeV2History = '/v1/ia/v2/history';
+  static const String iaBridgeV2Health = '/v1/ia/v2/health';
 
-  // ── IA: NLP ────────────────────────────────────────────────────────────
-  static const String iaNlpAnalizar = '/api/v1/nlp/analizar';
-  static const String iaNlpTranscribir = '/api/v1/nlp/transcribir';
-  static String iaNlpTranscribirStatus(String jobId) => '/api/v1/nlp/transcribir/status/$jobId';
-  static const String iaNlpHistory = '/api/v1/nlp/history';
-  static String iaNlpDetail(String id) => '/api/v1/nlp/$id';
+  // IA: NLP
+  static const String iaBridgeNlpAnalizar = '/v1/ia/nlp/analizar';
+  static const String iaBridgeNlpTranscribir = '/v1/ia/nlp/transcribir';
+  static String iaBridgeNlpTranscribirStatus(String jobId) => '/v1/ia/nlp/transcribir/status/$jobId';
+  static const String iaBridgeNlpHistory = '/v1/ia/nlp/history';
+  static String iaBridgeNlpDetail(String id) => '/v1/ia/nlp/$id';
 
   // Tiempos de espera de la red.
   static const Duration connectTimeout = Duration(seconds: 20);

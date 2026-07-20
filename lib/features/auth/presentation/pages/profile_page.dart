@@ -122,7 +122,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             const Gap(AppSpacing.lg),
             _MenuCard(
               onVehiculos: () => context.push(RoutePaths.vehiculos),
-              onConfiguracion: () => _proximamente(context, 'Configuración'),
+              onConfiguracion: () => context.push(RoutePaths.configuracion),
             ),
             const Gap(AppSpacing.lg),
           ],
@@ -166,12 +166,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         .where((w) => w.isNotEmpty)
         .map((w) => w[0].toUpperCase() + w.substring(1))
         .join(' ');
-  }
-
-  void _proximamente(BuildContext context, String que) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text('$que — próximamente.')));
   }
 
   Future<void> _showPasswordDialog(String? userId) async {

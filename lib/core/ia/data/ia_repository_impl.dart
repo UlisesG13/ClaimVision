@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import '../domain/ia_repository.dart';
-import 'datasources/ia_remote_datasource.dart';
+import 'datasources/ia_bridge_remote_datasource.dart';
 import 'dtos/ia_nlp_dto.dart';
 import 'dtos/ia_ocr_dto.dart';
 import 'dtos/ia_predict_dto.dart';
@@ -10,7 +10,7 @@ import 'dtos/ia_v2_dto.dart';
 class IaRepositoryImpl implements IaRepository {
   IaRepositoryImpl(this._remote);
 
-  final IaRemoteDataSource _remote;
+  final IaBridgeRemoteDataSource _remote;
 
   @override
   Future<IaOcrResponseDto> ocr({required File file}) => _remote.ocr(file: file);
