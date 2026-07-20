@@ -14,7 +14,6 @@ import '../../features/auth/domain/usecases/get_stored_session.dart';
 import '../../features/auth/domain/usecases/change_password.dart';
 import '../../features/auth/domain/usecases/login_user.dart';
 import '../../features/auth/domain/usecases/logout_user.dart';
-import '../../features/auth/domain/usecases/register_user.dart';
 import '../../features/auth/domain/usecases/register_device_token.dart';
 import '../../features/auth/domain/entities/auth_session.dart';
 import '../../features/auth/domain/usecases/send_consent.dart';
@@ -43,10 +42,6 @@ import '../network/dio_client.dart';
 import '../security/domain/repositories/security_repository.dart';
 import '../security/data/repositories/security_repository_impl.dart';
 import '../security/domain/services/device_inspector.dart';
-import '../ocr/data/datasources/ocr_remote_datasource.dart';
-import '../ocr/data/ocr_repository_impl.dart';
-import '../ocr/domain/image_validator.dart';
-import '../ocr/domain/ocr_repository.dart';
 import '../ia/data/datasources/ia_bridge_remote_datasource.dart';
 import '../ia/data/ia_repository_impl.dart';
 import '../ia/domain/ia_repository.dart';
@@ -58,7 +53,6 @@ import '../ia/domain/usecases/ia_predict_uc.dart';
 import '../services/biometric_service.dart';
 import '../services/device_inspector_service.dart';
 import '../services/image_picker_service.dart';
-import '../services/image_quality_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
 import '../services/secure_storage_service.dart';
@@ -86,19 +80,6 @@ final imagePickerServiceProvider = Provider<ImagePickerService>((ref) {
 
 final locationServiceProvider = Provider<LocationService>((ref) {
   return const LocationService();
-});
-
-// ── OCR ─────────────────────────────────────────────────────────────────────
-final imageValidatorProvider = Provider<ImageValidator>((ref) {
-  return ImageQualityService();
-});
-
-final ocrRemoteDataSourceProvider = Provider<OcrRemoteDataSource>((ref) {
-  return OcrRemoteDataSource(ref.watch(dioProvider));
-});
-
-final ocrRepositoryProvider = Provider<OcrRepository>((ref) {
-  return OcrRepositoryImpl(ref.watch(ocrRemoteDataSourceProvider));
 });
 
 // ── Security ────────────────────────────────────────────────────────────────
@@ -134,10 +115,6 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 // ── Auth: casos de uso ─────────────────────────────────────────────────────
 final loginUserProvider = Provider<LoginUser>((ref) {
   return LoginUser(ref.watch(authRepositoryProvider));
-});
-
-final registerUserProvider = Provider<RegisterUser>((ref) {
-  return RegisterUser(ref.watch(authRepositoryProvider));
 });
 
 final getStoredSessionProvider = Provider<GetStoredSession>((ref) {
@@ -269,10 +246,6 @@ final iaRepositoryProvider = Provider<IaRepository>((ref) {
 });
 
 // ── IA: use cases ──────────────────────────────────────────────────────────
-
-final iaPredictDamageProvider = Provider<IaPredictDamage>((ref) {
-  return IaPredictDamage(ref.watch(iaRepositoryProvider));
-});
 
 final iaPredictDamageV2Provider = Provider<IaPredictDamageV2>((ref) {
   return IaPredictDamageV2(ref.watch(iaRepositoryProvider));

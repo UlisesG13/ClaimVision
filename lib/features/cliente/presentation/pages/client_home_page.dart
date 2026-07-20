@@ -178,7 +178,6 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
 
     final session = ref.read(currentSessionProvider);
     final userId = session?.usuarioId;
-    print('[FLOW] _checkPrimerInicio: userId=$userId');
     if (userId == null) return;
 
     final storage = ref.read(secureStorageProvider);
@@ -301,7 +300,6 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
     );
 
     if (!acepto || !mounted) return;
-    print('[FLOW] _mostrarDialogoBiometrico: acepto=true');
 
     String? pass = password;
     if (pass == null) {
@@ -344,13 +342,10 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
 
     if (pass == null || pass.isEmpty) return;
 
-    print('[FLOW] _mostrarDialogoBiometrico: password=$pass');
-
     final biometricService = ref.read(biometricServiceProvider);
     final autenticado = await biometricService.authenticate(
       reason: 'Registra tu huella para acceder más rápido',
     );
-    print('[FLOW] _mostrarDialogoBiometrico: autenticado=$autenticado');
     if (!autenticado) return;
 
     if (!mounted) return;

@@ -17,11 +17,10 @@ class DioClient {
   DioClient._();
 
   /// Rutas donde un 401 es esperado/manejado por la propia pantalla y NO debe
-  /// disparar el cierre de sesión global (login/registro fallido, validación
-  /// de sesión en el arranque).
+  /// disparar el cierre de sesión global (login fallido, validación de sesión
+  /// en el arranque).
   static const Set<String> _skipAuthBounce = {
     ApiConstants.login,
-    ApiConstants.register,
     ApiConstants.me,
   };
 

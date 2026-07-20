@@ -13,7 +13,6 @@ import '../datasources/remote/auth_remote_datasource.dart';
 import '../dtos/change_password_request_dto.dart';
 import '../dtos/device_token_request_dto.dart';
 import '../dtos/login_request_dto.dart';
-import '../dtos/register_request_dto.dart';
 import '../mappers/auth_mapper.dart';
 
 /// Implementación del contrato de autenticación.
@@ -39,24 +38,6 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final dto = await _remote.login(
         LoginRequestDto(email: email, password: password),
-      );
-      final session = AuthMapper.toEntity(dto);
-      await _local.cacheSession(session);
-      return session;
-    } on AppException catch (e) {
-      throw _toFailure(e);
-    }
-  }
-
-  @override
-  Future<AuthSession> register({
-    required String nombre,
-    required String email,
-    required String password,
-  }) async {
-    try {
-      final dto = await _remote.register(
-        RegisterRequestDto(nombre: nombre, email: email, password: password),
       );
       final session = AuthMapper.toEntity(dto);
       await _local.cacheSession(session);

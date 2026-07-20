@@ -5,7 +5,6 @@ class RoutePaths {
 
   static const String splash = '/';
   static const String login = '/login';
-  static const String register = '/registro';
 
   // Cliente
   static const String onboarding = '/onboarding';
@@ -38,9 +37,6 @@ class RoutePaths {
   static const String peritajeConfirmado = '/caso/:id/confirmado';
   static String peritajeConfirmadoDe(String id) => '/caso/$id/confirmado';
   static const String notificacionesAjustador = '/ajustador/notificaciones';
-
-  // ── OCR / Documentos ────────────────────────────────────────────────────
-  static const String capturaDocumentos = '/captura-documentos';
 
   // ── Seguridad ───────────────────────────────────────────────────────────
   static const String bloqueado = '/bloqueado';

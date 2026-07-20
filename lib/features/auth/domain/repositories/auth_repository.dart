@@ -12,14 +12,6 @@ abstract interface class AuthRepository {
     required String password,
   });
 
-  /// Registra un nuevo usuario. El backend devuelve un token (auto-login), por
-  /// lo que la sesión queda iniciada y persistida al terminar.
-  Future<AuthSession> register({
-    required String nombre,
-    required String email,
-    required String password,
-  });
-
   /// Recupera la sesión guardada en el dispositivo, o `null` si no hay ninguna.
   Future<AuthSession?> getStoredSession();
 

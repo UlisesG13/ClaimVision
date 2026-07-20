@@ -1,12 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/di/providers.dart';
+import '../../../../core/errors/failures.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/feedback/app_dialog.dart';
 import '../../../../shared/widgets/feedback/app_snackbar.dart';
 import '../../../../shared/widgets/feedback/app_toast.dart';
 import '../../domain/entities/damage_adjusted.dart';
@@ -98,16 +104,34 @@ class ValidacionPeritajePage extends ConsumerWidget {
                 ),
               ),
           const Gap(AppSpacing.sm),
-          OutlinedButton.icon(
-            onPressed: () async {
-              final nuevo = await _editarDano(context, null);
-              if (nuevo != null && context.mounted) {
-                controller.agregarDano(nuevo);
-                AppToast.success(context, 'Daño agregado');
-              }
-            },
-            icon: const Icon(Icons.add),
-            label: const Text('Agregar daño'),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () async {
+                    final nuevo = await _editarDano(context, null);
+                    if (nuevo != null && context.mounted) {
+                      controller.agregarDano(nuevo);
+                      AppToast.success(context, 'Daño agregado');
+                    }
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Agregar daño'),
+                ),
+              ),
+              const Gap(AppSpacing.sm),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => _analizarConIA(context, ref),
+                  icon: const Icon(Icons.auto_fix_high),
+                  label: const Text('Analizar con IA'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.blueprint,
+                    side: const BorderSide(color: AppColors.blueprint),
+                  ),
+                ),
+              ),
+            ],
           ),
           const Gap(AppSpacing.lg),
           Text('Observaciones de campo',
@@ -147,6 +171,85 @@ class ValidacionPeritajePage extends ConsumerWidget {
       ),
     );
   }
+
+  Future<void> _analizarConIA(BuildContext context, WidgetRef ref) async {
+    final picker = ref.read(imagePickerServiceProvider);
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: context.surfaceColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Analizar daño con IA',
+                style: TextStyle(fontWeight: FontWeight.w600)),
+            const Gap(AppSpacing.lg),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Tomar foto'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Seleccionar de galería'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (source == null || !context.mounted) return;
+
+    AppDialog.showLoading(context, title: 'Analizando…');
+    File? file;
+    try {
+      file = source == ImageSource.camera
+          ? await picker.fromCamera()
+          : await picker.fromGallery();
+    } catch (_) {}
+    if (file == null || !context.mounted) {
+      if (context.mounted) AppDialog.hideLoading(context);
+      return;
+    }
+
+    try {
+      final result = await ref.read(iaPredictDamageV2Provider)(file: file);
+      if (!context.mounted) return;
+      AppDialog.hideLoading(context);
+
+      final dano = DamageAdjusted(
+        zonaVehiculo: 'Área detectada',
+        tipo: DamageType.fromApi(result.tipoDano),
+        severidad: DamageSeverity.fromApi(result.severidad),
+        costoRealReparacion: _costoPorSeveridad(
+          DamageSeverity.fromApi(result.severidad),
+        ),
+      );
+      ref.read(peritajeEditorControllerProvider.notifier).agregarDano(dano);
+      AppToast.success(context,
+          'Daño detectado: ${dano.tipo.label} (${(result.confianza * 100).toStringAsFixed(0)}% confianza)');
+    } on Failure catch (e) {
+      if (context.mounted) {
+        AppDialog.hideLoading(context);
+        AppSnackbar.error(context, e.message);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppDialog.hideLoading(context);
+        AppSnackbar.error(context, 'Error al analizar la imagen.');
+      }
+    }
+  }
+
+  double _costoPorSeveridad(DamageSeverity s) => switch (s) {
+        DamageSeverity.bajo => 2000,
+        DamageSeverity.medio => 5000,
+        DamageSeverity.alto => 12000,
+      };
 
   /// Bottom sheet para crear/editar un daño. Devuelve `null` si se cancela.
   Future<DamageAdjusted?> _editarDano(

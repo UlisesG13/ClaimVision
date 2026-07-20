@@ -52,20 +52,6 @@ class AuthController extends AsyncNotifier<AuthSession?> {
     });
   }
 
-  Future<void> register({
-    required String nombre,
-    required String email,
-    required String password,
-  }) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final registerUser = ref.read(registerUserProvider);
-      final session = registerUser(nombre: nombre, email: email, password: password);
-      _registerDeviceToken();
-      return session;
-    });
-  }
-
   Future<void> _registerDeviceToken() async {
     try {
       final messaging = FirebaseMessaging.instance;

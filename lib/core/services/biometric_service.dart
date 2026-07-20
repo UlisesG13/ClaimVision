@@ -6,10 +6,8 @@ class BiometricService {
   Future<bool> canCheckBiometrics() async {
     try {
       final result = await _auth.canCheckBiometrics || await _auth.isDeviceSupported();
-      print('[BIOMETRIC] canCheckBiometrics: $result');
       return result;
     } catch (e) {
-      print('[BIOMETRIC] canCheckBiometrics error: $e');
       return false;
     }
   }
@@ -23,10 +21,8 @@ class BiometricService {
           biometricOnly: true,
         ),
       );
-      print('[BIOMETRIC] authenticate result: $result');
       return result;
     } catch (e) {
-      print('[BIOMETRIC] authenticate error: $e');
       return false;
     }
   }

@@ -377,12 +377,6 @@ class ReportController extends Notifier<ReportState> {
       );
     }
   }
-
-  Future<bool> guardarNarracion() async {
-    if (state.siniestro == null) return false;
-    if (state.submitting) return true;
-    return true;
-  }
 }
 
 final reportControllerProvider =

@@ -7,12 +7,8 @@ class ApiConstants {
   );
 
   // ── Auth ──────────────────────────────────────────────────────────────
-  static const String register = '/v1/auth/register';
   static const String login = '/v1/auth/login';
   static const String me = '/v1/auth/me';
-  static const String recoveryRequest = '/v1/auth/recovery/request';
-  static const String recoveryVerify = '/v1/auth/recovery/verify';
-  static const String recoveryReset = '/v1/auth/recovery/reset';
   static const String consentimiento = '/v1/auth/consentimiento';
   static const String cambiarPassword = '/v1/auth/password';
   static const String deviceToken = '/v1/auth/device-token';
@@ -27,7 +23,6 @@ class ApiConstants {
   static String clienteSiniestro(String id) => '/v1/cliente/siniestros/$id';
   static String clienteSiniestroImagenes(String id) => '/v1/cliente/siniestros/$id/imagenes';
   static const String clienteVehiculos = '/v1/cliente/vehiculos';
-  static const String clienteConsentimientos = '/v1/cliente/consentimientos';
 
   // ── Ajustador v1 ─────────────────────────────────────────────────────
   static const String ajustadorPerfil = '/v1/ajustador/perfil';

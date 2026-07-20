@@ -116,7 +116,7 @@ class _ReportNarrationPageState extends ConsumerState<ReportNarrationPage> {
     }
     final controller = ref.read(reportControllerProvider.notifier);
     controller.setNarracion(texto);
-    final ok = await controller.guardarNarracion();
+    final ok = await controller.crearSiniestro();
     if (ok && mounted) context.push(RoutePaths.reportarDano);
   }
 

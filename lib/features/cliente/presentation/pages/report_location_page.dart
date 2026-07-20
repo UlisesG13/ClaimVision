@@ -58,8 +58,7 @@ class _ReportLocationPageState extends ConsumerState<ReportLocationPage> {
   }
 
   Future<void> _continuar() async {
-    final ok = await ref.read(reportControllerProvider.notifier).crearSiniestro();
-    if (ok && mounted) context.push(RoutePaths.reportarNarracion);
+    if (mounted) context.push(RoutePaths.reportarNarracion);
   }
 
   @override

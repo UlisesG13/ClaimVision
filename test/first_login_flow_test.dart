@@ -89,33 +89,16 @@ class _FakeAuthRepository implements AuthRepository {
   Future<void> logout() async {}
 
   @override
-  Future<void> clearSession() async {}
-
-  @override
-  Future<void> saveSession(AuthSession session) async {}
-
-  @override
   Future<void> changePassword({
     required String oldPassword,
     required String newPassword,
   }) async {}
 
   @override
-  Future<void> deleteDeviceToken(String token) async {}
-
-  @override
   Future<void> registerDeviceToken(String token) async {}
 
   @override
   Future<AuthSession> login({
-    required String email,
-    required String password,
-  }) =>
-      throw UnimplementedError();
-
-  @override
-  Future<AuthSession> register({
-    required String nombre,
     required String email,
     required String password,
   }) =>

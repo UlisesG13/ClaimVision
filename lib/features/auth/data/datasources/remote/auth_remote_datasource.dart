@@ -6,7 +6,6 @@ import '../../dtos/auth_response_dto.dart';
 import '../../dtos/change_password_request_dto.dart';
 import '../../dtos/device_token_request_dto.dart';
 import '../../dtos/login_request_dto.dart';
-import '../../dtos/register_request_dto.dart';
 
 /// Llamadas REST de autenticación al backend (FastAPI).
 /// Recibe el cliente [Dio] por inyección desde `core/di/`; no crea el suyo.
@@ -15,7 +14,6 @@ import '../../dtos/register_request_dto.dart';
 /// el repositorio las traduce a `Failure`.
 abstract interface class AuthRemoteDataSource {
   Future<AuthResponseDto> login(LoginRequestDto body);
-  Future<AuthResponseDto> register(RegisterRequestDto body);
 
   /// Verifica el token actual contra `GET /auth/me`. Lanza
   /// [UnauthorizedException] si el token es inválido o expiró.
@@ -39,11 +37,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<AuthResponseDto> login(LoginRequestDto body) {
     return _post(ApiConstants.login, body.toJson());
-  }
-
-  @override
-  Future<AuthResponseDto> register(RegisterRequestDto body) {
-    return _post(ApiConstants.register, body.toJson());
   }
 
   @override
@@ -98,7 +91,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
-  /// POST que devuelve un `LoginResponseDTO` (login y register comparten forma).
+  /// POST que devuelve un `LoginResponseDTO`.
   Future<AuthResponseDto> _post(String path, Map<String, dynamic> data) async {
     try {
       final response = await _dio.post(path, data: data);

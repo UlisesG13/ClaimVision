@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../../core/biometric/presentation/providers/biometric_providers.dart';
+import '../../../../core/constants/app_info.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -406,7 +407,7 @@ class _Footer extends StatelessWidget {
       children: [
         Text('Acceso restringido a personal autorizado.',
             textAlign: TextAlign.center, style: infoStyle),
-        Text('v2.4.1 (Build 809)',
+        Text(AppInfo.displayVersion,
             textAlign: TextAlign.center, style: infoStyle),
       ],
     );
