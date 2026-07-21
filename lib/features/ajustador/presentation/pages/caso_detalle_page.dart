@@ -1,8 +1,10 @@
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
+import 'package:claimvision/shared/domain/entities/siniestro_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -28,6 +30,7 @@ class CasoDetallePage extends ConsumerWidget {
     final Siniestro? siniestro = casosAsync.asData?.value
         .where((s) => s.id == siniestroId)
         .firstOrNull;
+    final puedeValidar = siniestro?.estatus == SiniestroStatus.asignadoAjustador;
 
     return Scaffold(
       backgroundColor: context.scaffoldBgColor,
@@ -57,18 +60,22 @@ class CasoDetallePage extends ConsumerWidget {
               child: SizedBox(
                 height: 50,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    ref
-                        .read(peritajeEditorControllerProvider.notifier)
-                        .iniciar(siniestro.id);
-                    context.push(RoutePaths.validacionPeritajeDe(siniestro.id));
-                  },
+                  onPressed: puedeValidar
+                      ? () {
+                          ref
+                              .read(peritajeEditorControllerProvider.notifier)
+                              .iniciar(siniestro.id);
+                          context.push(RoutePaths.validacionPeritajeDe(siniestro.id));
+                        }
+                      : null,
                   icon: const Icon(Icons.fact_check_outlined, size: 18),
-                  label: const Text('Iniciar Validación'),
+                  label: Text(puedeValidar ? 'Iniciar Validación' : siniestro.estatus.label),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.amber,
-                    foregroundColor: AppColors.blueprint,
+                    backgroundColor: puedeValidar ? AppColors.amber : context.textHintColor,
+                    foregroundColor: puedeValidar ? AppColors.blueprint : AppColors.white,
                     elevation: 0,
+                    disabledBackgroundColor: context.textHintColor,
+                    disabledForegroundColor: AppColors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                     ),
@@ -103,11 +110,14 @@ class CasoDetallePage extends ConsumerWidget {
                     if ((siniestro.vehiculoVin ?? '').isNotEmpty)
                       ('VIN', siniestro.vehiculoVin!),
                     ('Fecha', DateFormatEs.fechaHora(siniestro.fechaSiniestro)),
-                    ('Ubicación',
-                        '${siniestro.latitud.toStringAsFixed(5)}, ${siniestro.longitud.toStringAsFixed(5)}'),
                     ('Daño interno reportado',
                         siniestro.indicacionesDanoInterno ? 'Sí' : 'No'),
                   ],
+                ),
+                const Gap(AppSpacing.lg),
+                _MapLink(
+                  latitud: siniestro.latitud,
+                  longitud: siniestro.longitud,
                 ),
                 if ((siniestro.narracionTexto ?? '').isNotEmpty) ...[
                   const Gap(AppSpacing.lg),
@@ -190,6 +200,64 @@ class _NarracionCard extends StatelessWidget {
           const Gap(AppSpacing.sm),
           Text(texto, style: theme.textTheme.bodyMedium),
         ],
+      ),
+    );
+  }
+}
+
+class _MapLink extends StatelessWidget {
+  const _MapLink({required this.latitud, required this.longitud});
+
+  final double latitud;
+  final double longitud;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: context.cardColor,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: context.borderColor),
+      ),
+      child: InkWell(
+        onTap: () => launchUrl(
+          Uri.parse('https://www.google.com/maps?q=$latitud,$longitud'),
+          mode: LaunchMode.externalApplication,
+        ),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        child: Row(
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: AppColors.blueprint.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              ),
+              child: const Icon(Icons.map_outlined, color: AppColors.blueprint),
+            ),
+            const Gap(AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Ubicación del siniestro',
+                      style: theme.textTheme.labelLarge),
+                  const Gap(2),
+                  Text(
+                    '${latitud.toStringAsFixed(5)}, ${longitud.toStringAsFixed(5)}',
+                    style: theme.textTheme.bodySmall
+                        ?.copyWith(color: context.textSecondaryColor),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.open_in_new, size: 18, color: AppColors.blueprint),
+          ],
+        ),
       ),
     );
   }

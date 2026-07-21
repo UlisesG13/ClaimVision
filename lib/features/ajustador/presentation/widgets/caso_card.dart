@@ -1,4 +1,5 @@
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
+import 'package:claimvision/shared/domain/entities/siniestro_status.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -17,6 +18,7 @@ class CasoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final puedeValidar = siniestro.estatus == SiniestroStatus.asignadoAjustador;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
@@ -54,13 +56,15 @@ class CasoCard extends StatelessWidget {
             width: double.infinity,
             height: 46,
             child: ElevatedButton.icon(
-              onPressed: onValidar,
+              onPressed: puedeValidar ? onValidar : null,
               icon: const Icon(Icons.fact_check_outlined, size: 18),
-              label: const Text('Iniciar Validación'),
+              label: Text(puedeValidar ? 'Iniciar Validación' : siniestro.estatus.label),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.amber,
-                foregroundColor: AppColors.blueprint,
+                backgroundColor: puedeValidar ? AppColors.amber : context.textHintColor,
+                foregroundColor: puedeValidar ? AppColors.blueprint : AppColors.white,
                 elevation: 0,
+                disabledBackgroundColor: context.textHintColor,
+                disabledForegroundColor: AppColors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
