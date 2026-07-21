@@ -12,9 +12,10 @@ import 'package:claimvision/features/auth/domain/entities/user_role.dart';
 import 'package:claimvision/features/auth/domain/repositories/auth_repository.dart';
 import 'package:claimvision/features/auth/domain/usecases/change_password.dart';
 import 'package:claimvision/features/auth/presentation/state/onboarding_controller.dart';
+import 'package:claimvision/features/auth/presentation/state/providers.dart';
 import 'package:claimvision/features/cliente/presentation/state/mis_siniestros_controller.dart';
-import 'package:claimvision/features/cliente/presentation/state/notificaciones_controller.dart';
 import 'package:claimvision/features/cliente/presentation/state/report_controller.dart';
+import 'package:claimvision/shared/state/notificaciones_controller.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -117,7 +118,7 @@ class _FakeOnboardingController extends OnboardingController {
 
 class _FakeNotificacionesController extends NotificacionesController {
   @override
-  Set<String> build() => {};
+  NotificacionesState build() => const NotificacionesState();
 }
 
 class _FakeReportController extends ReportController {

@@ -15,6 +15,7 @@ import '../../../../shared/widgets/feedback/app_dialog.dart';
 import '../../../../shared/widgets/theme_mode_toggle.dart';
 import '../state/auth_controller.dart';
 import '../state/onboarding_controller.dart';
+import '../state/providers.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});

@@ -12,6 +12,15 @@ class IaTranscribirAudio {
   }
 }
 
+class IaTranscribirStatus {
+  const IaTranscribirStatus(this._repository);
+  final IaRepository _repository;
+
+  Future<IaTranscribirJobStatusResponseDto> call(String jobId) {
+    return _repository.transcribirStatus(jobId);
+  }
+}
+
 class IaAnalizarTexto {
   const IaAnalizarTexto(this._repository);
   final IaRepository _repository;

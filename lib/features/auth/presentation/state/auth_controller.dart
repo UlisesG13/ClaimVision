@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-import '../../../../core/di/providers.dart';
+import 'providers.dart';
 import '../../domain/entities/auth_session.dart';
 
 /// Controlador de la sesión de autenticación (flujo complejo → Riverpod).

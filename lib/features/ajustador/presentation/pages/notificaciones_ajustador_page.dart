@@ -7,10 +7,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/state/notificaciones_controller.dart';
 import '../../../../shared/utils/date_format.dart';
 import '../../../../shared/widgets/ajustador_bottom_nav.dart';
 import '../state/casos_asignados_controller.dart';
-import '../state/notificaciones_ajustador_controller.dart';
 
 /// Notificaciones - Ajustador (Figma node 79:5270).
 ///
@@ -23,7 +23,7 @@ class NotificacionesAjustadorPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final casosAsync = ref.watch(casosAsignadosControllerProvider);
-    final leidas = ref.watch(notificacionesAjustadorControllerProvider);
+    final leidas = ref.watch(notificacionesLeidasProvider);
     final casos = casosAsync.asData?.value ?? const <Siniestro>[];
     final hayNoLeidas = casos.any((c) => !leidas.contains('caso_${c.id}'));
 
@@ -37,7 +37,7 @@ class NotificacionesAjustadorPage extends ConsumerWidget {
           if (hayNoLeidas)
             TextButton.icon(
               onPressed: () => ref
-                      .read(notificacionesAjustadorControllerProvider.notifier)
+                      .read(notificacionesControllerProvider.notifier)
                   .marcarLeidas(casos.map((c) => 'caso_${c.id}')),
               icon: const Icon(Icons.done_all, size: 18),
               label: const Text('Leer todo'),
@@ -73,7 +73,7 @@ class NotificacionesAjustadorPage extends ConsumerWidget {
                 leida: leidas.contains(id),
                 onTap: () {
                   ref
-                  .read(notificacionesAjustadorControllerProvider.notifier)
+                  .read(notificacionesControllerProvider.notifier)
                       .marcarLeida(id);
                   context.push(RoutePaths.casoDetalleDe(s.id));
                 },

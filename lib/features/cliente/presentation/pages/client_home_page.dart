@@ -16,8 +16,9 @@ import '../../../../shared/widgets/feedback/app_dialog.dart';
 import '../../../../shared/widgets/feedback/app_snackbar.dart';
 import '../../../auth/presentation/state/auth_controller.dart';
 import '../../../auth/presentation/state/onboarding_controller.dart';
+import '../../../auth/presentation/state/providers.dart';
 import '../state/mis_siniestros_controller.dart';
-import '../state/notificaciones_controller.dart';
+import '../state/notificaciones_cliente_providers.dart';
 import '../state/report_controller.dart';
 import '../widgets/siniestro_card.dart';
 

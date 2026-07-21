@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
-import '../../../../core/di/providers.dart';
+import 'providers.dart';
 
 class MisSiniestrosController extends AsyncNotifier<List<Siniestro>> {
   @override

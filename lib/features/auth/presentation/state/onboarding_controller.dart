@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
+import 'providers.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/onboarding_data.dart';
 

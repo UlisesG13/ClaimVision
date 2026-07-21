@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
+import 'package:claimvision/shared/state/notificaciones_controller.dart';
 import 'mis_siniestros_controller.dart';
 
 /// Tipo de notificación (la UI lo mapea a un ícono/color).
@@ -25,33 +26,15 @@ class Notificacion {
   final bool leida;
 }
 
-/// Conjunto de ids de notificaciones marcadas como leídas (estado local).
-class NotificacionesController extends Notifier<Set<String>> {
-  @override
-  Set<String> build() => <String>{};
-
-  void marcarLeidas(Iterable<String> ids) {
-    state = {...state, ...ids};
-  }
-
-  void marcarLeida(String id) {
-    state = {...state, id};
-  }
-}
-
-final notificacionesControllerProvider =
-    NotifierProvider<NotificacionesController, Set<String>>(
-        NotificacionesController.new);
-
 /// Notificaciones del cliente derivadas de SUS siniestros.
 ///
-  /// Se alimenta de [misSiniestrosControllerProvider] (que obtiene la lista desde la API).
+/// Se alimenta de [misSiniestrosControllerProvider] (que obtiene la lista desde la API).
 /// Mientras el backend no exponga un endpoint de notificaciones, generamos
 /// notificaciones reales a partir de los siniestros del cliente.
 final notificacionesProvider = Provider<List<Notificacion>>((ref) {
   final siniestrosAsync = ref.watch(misSiniestrosControllerProvider);
   final siniestros = siniestrosAsync.asData?.value ?? const [];
-  final leidas = ref.watch(notificacionesControllerProvider);
+  final leidas = ref.watch(notificacionesLeidasProvider);
 
   final lista = <Notificacion>[
     for (final Siniestro s in siniestros)

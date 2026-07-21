@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/di/providers.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/feedback/app_dialog.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../../domain/entities/vehiculo_cliente.dart';
+import '../state/providers.dart';
 import '../state/report_controller.dart';
 import '../widgets/report_step_header.dart';
 
