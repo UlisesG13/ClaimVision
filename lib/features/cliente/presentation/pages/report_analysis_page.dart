@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/ia/data/dtos/ia_batch_dto.dart';
 import '../../../../core/ia/data/dtos/ia_nlp_dto.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -75,6 +76,11 @@ class _ReportAnalysisPageState extends ConsumerState<ReportAnalysisPage> {
                     siniestro: siniestro,
                     fotosValidas: state.evidenciasValidas,
                     danoInterno: state.danoInterno,
+                  ),
+                  const Gap(AppSpacing.lg),
+                  _CostSummaryCard(
+                    resumen: state.resumenCosto,
+                    loading: state.analizando && state.resumenCosto == null,
                   ),
                   const Gap(AppSpacing.lg),
                   const _AdjusterNote(),
@@ -301,6 +307,78 @@ class _Row extends StatelessWidget {
                   ?.copyWith(fontWeight: FontWeight.w600, color: context.textPrimaryColor),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CostSummaryCard extends StatelessWidget {
+  const _CostSummaryCard({required this.resumen, required this.loading});
+
+  final IaResumenResponseDto? resumen;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.blueprint.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: Border.all(color: AppColors.blueprint.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.receipt_long, color: AppColors.blueprint, size: 20),
+              const Gap(AppSpacing.sm),
+              Text('Costo estimado de reparación',
+                  style: theme.textTheme.labelLarge
+                      ?.copyWith(color: AppColors.blueprint)),
+            ],
+          ),
+          const Gap(AppSpacing.md),
+          if (loading)
+            const Center(child: CircularProgressIndicator(strokeWidth: 2.5)),
+          if (resumen == null && !loading)
+            Text(
+              'Completa la predicción de daños para ver el costo estimado.',
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: context.textSecondaryColor),
+            ),
+          if (resumen != null) ...[
+            Text(
+              '${resumen!.precioTotal.toStringAsFixed(2)} ${resumen!.moneda}',
+              style: theme.textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold, color: AppColors.blueprint),
+            ),
+            const Gap(AppSpacing.sm),
+            ...resumen!.danos.map(
+              (d) => Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${d.tipo} · ${d.severidad}',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                    Text(
+                      '\$${d.costoReparacion.toStringAsFixed(2)}',
+                      style: theme.textTheme.bodyMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

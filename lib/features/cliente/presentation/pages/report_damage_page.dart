@@ -101,6 +101,31 @@ class ReportDamagePage extends ConsumerWidget {
                         _AddTile(onTap: () => _capturar(context, ref)),
                       ],
                     ),
+                    if (state.evidencias.any((e) => e.tipoDano == null && !e.predicting)) ...[
+                      const Gap(AppSpacing.lg),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: state.predictandoBatch
+                              ? null
+                              : () => ref
+                                  .read(reportControllerProvider.notifier)
+                                  .predecirTodasLasFotos(),
+                          icon: state.predictandoBatch
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.auto_awesome),
+                          label: Text(
+                            state.predictandoBatch
+                                ? 'Analizando…'
+                                : 'Analizar todo con IA',
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                   const Gap(AppSpacing.lg),
                   _StatusLine(

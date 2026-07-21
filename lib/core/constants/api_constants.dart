@@ -50,6 +50,8 @@ class ApiConstants {
 
   // IA: Predict v2 (Supervised / ResNet18)
   static const String iaBridgeV2Predict = '/v1/ia/v2/predict';
+  static const String iaBridgeV2PredictAll = '/v1/ia/v2/predict-all';
+  static const String iaBridgeV2Resumen = '/v1/ia/v2/obtener-resumen';
   static const String iaBridgeV2Retrain = '/v1/ia/v2/retrain';
   static String iaBridgeV2RetrainStatus(String jobId) => '/v1/ia/v2/retrain/$jobId/status';
   static const String iaBridgeV2History = '/v1/ia/v2/history';

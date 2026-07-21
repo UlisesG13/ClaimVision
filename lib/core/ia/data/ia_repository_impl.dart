@@ -2,6 +2,7 @@ import 'dart:io';
 
 import '../domain/ia_repository.dart';
 import 'datasources/ia_bridge_remote_datasource.dart';
+import 'dtos/ia_batch_dto.dart';
 import 'dtos/ia_nlp_dto.dart';
 import 'dtos/ia_ocr_dto.dart';
 import 'dtos/ia_predict_dto.dart';
@@ -75,6 +76,16 @@ class IaRepositoryImpl implements IaRepository {
 
   @override
   Future<IaV2HealthResponseDto> healthV2() => _remote.healthV2();
+
+  @override
+  Future<IaPredictAllResponseDto> predictAll({required List<File> files}) =>
+      _remote.predictAll(files: files);
+
+  @override
+  Future<IaResumenResponseDto> obtenerResumen({
+    required List<({String tipo, String severidad})> danos,
+  }) =>
+      _remote.obtenerResumen(danos: danos);
 
   @override
   Future<IaTranscribirJobResponseDto> transcribir({required File file}) =>

@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 
 import '../../../../../core/constants/api_constants.dart';
 import '../../../../../core/network/api_error_mapper.dart';
+import '../dtos/ia_batch_dto.dart';
 import '../dtos/ia_nlp_dto.dart';
 import '../dtos/ia_ocr_dto.dart';
 import '../dtos/ia_predict_dto.dart';
@@ -215,6 +216,43 @@ class IaBridgeRemoteDataSource {
       final response = await _dio.get(ApiConstants.iaBridgeV2Health);
       _ensureSuccess(response);
       return IaV2HealthResponseDto.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiErrorMapper.fromDioException(e);
+    }
+  }
+
+  // ── Predict v2: batch + resumen ─────────────────────────────────────────
+
+  Future<IaPredictAllResponseDto> predictAll({required List<File> files}) async {
+    try {
+      final form = FormData.fromMap({
+        'files': await Future.wait(
+          files.map((f) => MultipartFile.fromFile(f.path, filename: _fileName(f))),
+        ),
+      });
+      final response = await _dio.post(
+        ApiConstants.iaBridgeV2PredictAll,
+        data: form,
+        options: Options(receiveTimeout: const Duration(seconds: 120)),
+      );
+      _ensureSuccess(response);
+      return IaPredictAllResponseDto.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw ApiErrorMapper.fromDioException(e);
+    }
+  }
+
+  Future<IaResumenResponseDto> obtenerResumen({
+    required List<({String tipo, String severidad})> danos,
+  }) async {
+    try {
+      final body = IaResumenRequestDto(danos).toJson();
+      final response = await _dio.post(
+        ApiConstants.iaBridgeV2Resumen,
+        data: body,
+      );
+      _ensureSuccess(response);
+      return IaResumenResponseDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw ApiErrorMapper.fromDioException(e);
     }

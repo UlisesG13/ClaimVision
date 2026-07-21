@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/ia/data/dtos/ia_batch_dto.dart';
 import '../../../../core/ia/data/dtos/ia_nlp_dto.dart';
 import '../../domain/entities/vehiculo_cliente.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
@@ -82,6 +83,8 @@ class ReportState {
     this.analizando = false,
     this.analisisEntidades = const [],
     this.prediccionesFotos = const [],
+    this.predictandoBatch = false,
+    this.resumenCosto,
     this.errorMessage,
   });
 
@@ -105,6 +108,8 @@ class ReportState {
   final bool analizando;
   final List<IaDamageEntityDto> analisisEntidades;
   final List<IaDamageEntityDto> prediccionesFotos;
+  final bool predictandoBatch;
+  final IaResumenResponseDto? resumenCosto;
   final String? errorMessage;
 
   bool get vehiculoCompleto =>
@@ -145,6 +150,8 @@ class ReportState {
     bool? analizando,
     List<IaDamageEntityDto>? analisisEntidades,
     List<IaDamageEntityDto>? prediccionesFotos,
+    bool? predictandoBatch,
+    IaResumenResponseDto? resumenCosto,
     String? errorMessage,
     bool clearError = false,
   }) {
@@ -169,6 +176,8 @@ class ReportState {
       analizando: analizando ?? this.analizando,
       analisisEntidades: analisisEntidades ?? this.analisisEntidades,
       prediccionesFotos: prediccionesFotos ?? this.prediccionesFotos,
+      predictandoBatch: predictandoBatch ?? this.predictandoBatch,
+      resumenCosto: resumenCosto ?? this.resumenCosto,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
@@ -255,6 +264,53 @@ class ReportController extends Notifier<ReportState> {
     } catch (_) {
       _reemplazar(conPrediccion, conPrediccion.copyWith(predicting: false));
     }
+  }
+
+  Future<void> predecirTodasLasFotos() async {
+    final pendientes =
+        state.evidencias.where((e) => e.tipoDano == null && !e.predicting).toList();
+    if (pendientes.isEmpty) return;
+    state = state.copyWith(predictandoBatch: true);
+    try {
+      final result = await ref.read(iaPredictAllDamageProvider)(
+        files: pendientes.map((e) => e.file).toList(),
+      );
+      for (final item in result.predicciones) {
+        final match = state.evidencias.where(
+          (e) => e.file.path.split(RegExp(r'[\\/]')).last == item.filename,
+        );
+        for (final ev in match) {
+          _reemplazar(
+            ev,
+            ev.copyWith(
+              tipoDano: item.tipoDano,
+              severidad: item.severidad,
+              confianza: item.confianza,
+            ),
+          );
+        }
+      }
+    } catch (_) {
+      // silencioso — cada foto se puede procesar individualmente después
+    } finally {
+      state = state.copyWith(predictandoBatch: false);
+    }
+  }
+
+  Future<void> obtenerResumenCosto() async {
+    final danos = <({String tipo, String severidad})>{};
+    for (final e in state.evidencias) {
+      if (e.tipoDano != null && e.severidad != null) {
+        danos.add((tipo: e.tipoDano!, severidad: e.severidad!));
+      }
+    }
+    if (danos.isEmpty) return;
+    try {
+      final resumen = await ref.read(iaObtenerResumenProvider)(
+        danos: danos.toList(),
+      );
+      state = state.copyWith(resumenCosto: resumen);
+    } catch (_) {}
   }
 
   void quitarEvidencia(Evidencia evidencia) {
@@ -368,6 +424,7 @@ class ReportController extends Notifier<ReportState> {
         analizando: false,
         analisisEntidades: result.entidades,
       );
+      obtenerResumenCosto();
     } on Failure catch (f) {
       state = state.copyWith(analizando: false, errorMessage: f.message);
     } catch (e) {

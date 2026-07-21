@@ -49,6 +49,7 @@ import '../ia/domain/usecases/ia_check_health.dart';
 import '../ia/domain/usecases/ia_history_uc.dart';
 import '../ia/domain/usecases/ia_nlp_uc.dart';
 import '../ia/domain/usecases/ia_ocr_uc.dart';
+import '../ia/domain/usecases/ia_batch_uc.dart';
 import '../ia/domain/usecases/ia_predict_uc.dart';
 import '../services/biometric_service.dart';
 import '../services/device_inspector_service.dart';
@@ -249,6 +250,14 @@ final iaRepositoryProvider = Provider<IaRepository>((ref) {
 
 final iaPredictDamageV2Provider = Provider<IaPredictDamageV2>((ref) {
   return IaPredictDamageV2(ref.watch(iaRepositoryProvider));
+});
+
+final iaPredictAllDamageProvider = Provider<IaPredictAllDamage>((ref) {
+  return IaPredictAllDamage(ref.watch(iaRepositoryProvider));
+});
+
+final iaObtenerResumenProvider = Provider<IaObtenerResumen>((ref) {
+  return IaObtenerResumen(ref.watch(iaRepositoryProvider));
 });
 
 final iaExtractAndValidateProvider = Provider<IaExtractAndValidate>((ref) {

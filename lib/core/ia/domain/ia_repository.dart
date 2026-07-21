@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import '../data/dtos/ia_batch_dto.dart';
 import '../data/dtos/ia_nlp_dto.dart';
 import '../data/dtos/ia_ocr_dto.dart';
 import '../data/dtos/ia_predict_dto.dart';
@@ -36,6 +37,12 @@ abstract interface class IaRepository {
   Future<IaV2RetrainStatusResponseDto> retrainV2Status(String jobId);
   Future<Map<String, dynamic>> historyV2({int page, int limit});
   Future<IaV2HealthResponseDto> healthV2();
+
+  // ── Predict v2: batch + resumen ─────────────────────────────────────────
+  Future<IaPredictAllResponseDto> predictAll({required List<File> files});
+  Future<IaResumenResponseDto> obtenerResumen({
+    required List<({String tipo, String severidad})> danos,
+  });
 
   // ── NLP ────────────────────────────────────────────────────────────────
   Future<IaTranscribirJobResponseDto> transcribir({required File file});
