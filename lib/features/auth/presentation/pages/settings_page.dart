@@ -3,16 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/biometric/presentation/providers/biometric_providers.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/routes/route_paths.dart';
-import '../../../../core/theme/theme_notifier.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/ajustador_bottom_nav.dart';
+import '../../../../shared/widgets/biometric_toggle.dart';
 import '../../../../shared/widgets/brand_app_bar.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 import '../../../../shared/widgets/feedback/app_dialog.dart';
+import '../../../../shared/widgets/theme_mode_toggle.dart';
 import '../state/auth_controller.dart';
 import '../state/onboarding_controller.dart';
 
@@ -24,38 +24,14 @@ class SettingsPage extends ConsumerStatefulWidget {
 }
 
 class _SettingsPageState extends ConsumerState<SettingsPage> {
-  bool _biometricEnabled = false;
-  bool _biometricDisponible = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _cargarEstadoBiometrico();
-  }
-
-  Future<void> _cargarEstadoBiometrico() async {
-    final biometricRepo = ref.read(biometricRepositoryProvider);
-    final enabled = await biometricRepo.isEnabled();
-    final service = ref.read(biometricServiceProvider);
-    final disponible = await service.canCheckBiometrics();
-    if (mounted) {
-      setState(() {
-        _biometricEnabled = enabled;
-        _biometricDisponible = disponible;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final session = ref.watch(currentSessionProvider);
-    final themeMode = ref.watch(themeModeProvider);
 
     final email = session?.email ?? '';
     final nombre = _nombreDesdeEmail(email);
     final rol = session?.rol.label ?? 'Cliente';
-    final userId = session?.usuarioId;
 
     final esCliente = session?.rol.isCliente ?? true;
 
@@ -113,21 +89,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 trailing: Icon(Icons.chevron_right, color: context.textHintColor),
                 onTap: _mostrarDialogoCambiarPassword,
               ),
-              if (_biometricDisponible) ...[
-                Divider(height: 1, color: context.borderColor),
-                _BiometricTile(
-                  enabled: _biometricEnabled,
-                  onChanged: (v) {
-                    if (v) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) _mostrarDialogoBiometria(userId);
-                      });
-                    } else {
-                      _desactivarBiometria();
-                    }
-                  },
-                ),
-              ],
+              const BiometricToggle(),
             ],
           ),
           const Gap(AppSpacing.lg),
@@ -154,10 +116,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const Gap(AppSpacing.lg),
 
           // ─── Apariencia ─────────────────────────────────────────────
-          _ThemeCard(
-            themeMode: themeMode,
-            onChanged: (mode) => ref.read(themeModeProvider.notifier).setThemeMode(mode),
-          ),
+          const ThemeModeToggle(),
           const Gap(AppSpacing.lg),
 
           // ─── Información ────────────────────────────────────────────
@@ -286,70 +245,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     }
   }
 
-  Future<void> _mostrarDialogoBiometria(String? userId) async {
-    if (userId == null) return;
-
-    final email = ref.read(currentSessionProvider)?.email;
-    final biometricService = ref.read(biometricServiceProvider);
-    final biometricRepo = ref.read(biometricRepositoryProvider);
-    String captured = '';
-
-    final ok = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        final theme = Theme.of(ctx);
-        return AlertDialog(
-          title: Text('Confirma tu contraseña', style: theme.textTheme.titleLarge),
-          content: TextField(
-            obscureText: true,
-            decoration: const InputDecoration(
-              hintText: 'Contraseña actual',
-              prefixIcon: Icon(Icons.lock_outline),
-            ),
-            textInputAction: TextInputAction.done,
-            onChanged: (v) => captured = v,
-            onSubmitted: (_) => Future.microtask(() => Navigator.pop(ctx, true)),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Future.microtask(() => Navigator.pop(ctx, false)),
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(foregroundColor: AppColors.blueprint),
-              onPressed: () => Future.microtask(() => Navigator.pop(ctx, true)),
-              child: const Text('Confirmar'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (ok != true || captured.isEmpty || !mounted || email == null) return;
-
-    final autenticado = await biometricService.authenticate(
-      reason: 'Registra tu huella para acceder más rápido',
-    );
-    if (!autenticado || !mounted) return;
-
-    await biometricRepo.enable(
-      userId: userId,
-      email: email,
-      password: captured,
-    );
-
-    Future.microtask(() {
-      if (mounted) setState(() => _biometricEnabled = true);
-    });
-  }
-
-  Future<void> _desactivarBiometria() async {
-    final biometricRepo = ref.read(biometricRepositoryProvider);
-    await biometricRepo.disable();
-    if (mounted) setState(() => _biometricEnabled = false);
-  }
-
   void _mostrarConsentimientos() {
     final onboarding = ref.read(onboardingControllerProvider);
     showModalBottomSheet(
@@ -471,61 +366,6 @@ class _SectionCard extends StatelessWidget {
           Text(titulo, style: theme.textTheme.titleMedium?.copyWith(fontSize: 15)),
           const Gap(AppSpacing.md),
           ...children,
-        ],
-      ),
-    );
-  }
-}
-
-class _BiometricTile extends StatelessWidget {
-  const _BiometricTile({required this.enabled, required this.onChanged});
-  final bool enabled;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return SwitchListTile(
-      title: const Text('Usar huella digital'),
-      subtitle: const Text('Accede sin escribir contraseña'),
-      secondary: Icon(
-        enabled ? Icons.fingerprint : Icons.fingerprint_outlined,
-        color: enabled ? AppColors.amber : context.textHintColor,
-      ),
-      value: enabled,
-      onChanged: onChanged,
-    );
-  }
-}
-
-class _ThemeCard extends StatelessWidget {
-  const _ThemeCard({required this.themeMode, required this.onChanged});
-  final ThemeMode themeMode;
-  final ValueChanged<ThemeMode> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: context.cardColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        side: BorderSide(color: context.borderColor),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SwitchListTile(
-            title: const Text('Modo oscuro'),
-            subtitle: const Text('Cambiar entre tema claro y oscuro'),
-            secondary: Icon(
-              themeMode == ThemeMode.dark ? Icons.dark_mode : Icons.light_mode,
-              color: AppColors.blueprint,
-            ),
-            value: themeMode == ThemeMode.dark,
-            onChanged: (dark) {
-              onChanged(dark ? ThemeMode.dark : ThemeMode.light);
-            },
-          ),
         ],
       ),
     );

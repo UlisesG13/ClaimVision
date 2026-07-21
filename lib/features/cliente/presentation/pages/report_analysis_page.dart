@@ -9,6 +9,7 @@ import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/date_format.dart';
+import '../../../../shared/widgets/feedback/app_snackbar.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import '../state/report_controller.dart';
@@ -24,10 +25,23 @@ class _ReportAnalysisPageState extends ConsumerState<ReportAnalysisPage> {
   bool _analisisIniciado = false;
 
   @override
+  void initState() {
+    super.initState();
+    Future.microtask(() => ref.read(reportControllerProvider.notifier).predecirTodasLasFotos());
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final state = ref.watch(reportControllerProvider);
     final siniestro = state.siniestro;
+
+    ref.listen(reportControllerProvider.select((s) => s.errorMessage),
+        (prev, msg) {
+      if (msg != null && msg.isNotEmpty) {
+        AppSnackbar.error(context, msg);
+      }
+    });
 
     if (!_analisisIniciado && siniestro != null) {
       _analisisIniciado = true;
@@ -35,6 +49,10 @@ class _ReportAnalysisPageState extends ConsumerState<ReportAnalysisPage> {
         () => ref.read(reportControllerProvider.notifier).analizarTexto(),
       );
     }
+
+    final analisisVacio = !state.analizando &&
+        state.analisisEntidades.isEmpty &&
+        _analisisIniciado;
 
     return Scaffold(
       backgroundColor: context.scaffoldBgColor,
@@ -62,12 +80,16 @@ class _ReportAnalysisPageState extends ConsumerState<ReportAnalysisPage> {
                     analizando: state.analizando,
                     entidades: state.analisisEntidades,
                     titulo: 'Análisis del relato (IA)',
+                    onRetry: analisisVacio
+                        ? () => ref
+                            .read(reportControllerProvider.notifier)
+                            .analizarTexto()
+                        : null,
                   ),
                   const Gap(AppSpacing.lg),
                   _AnalysisCard(
                     theme: theme,
-                    analizando: state.subiendoAlguna ||
-                        state.evidencias.any((e) => e.predicting),
+                    analizando: state.predictandoBatch,
                     entidades: state.prediccionesFotos,
                     titulo: 'Predicción de daños (IA)',
                   ),
@@ -80,7 +102,7 @@ class _ReportAnalysisPageState extends ConsumerState<ReportAnalysisPage> {
                   const Gap(AppSpacing.lg),
                   _CostSummaryCard(
                     resumen: state.resumenCosto,
-                    loading: state.analizando && state.resumenCosto == null,
+                    loading: state.calculandoCosto,
                   ),
                   const Gap(AppSpacing.lg),
                   const _AdjusterNote(),
@@ -140,12 +162,14 @@ class _AnalysisCard extends StatelessWidget {
     required this.analizando,
     required this.entidades,
     required this.titulo,
+    this.onRetry,
   });
 
   final ThemeData theme;
   final bool analizando;
   final List<IaDamageEntityDto> entidades;
   final String titulo;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -183,10 +207,29 @@ class _AnalysisCard extends StatelessWidget {
               ],
             ),
           if (entidades.isEmpty && !analizando)
-            Text(
-              'No se detectaron daños específicos en la narración.',
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: AppColors.white.withValues(alpha: 0.75)),
+            Column(
+              children: [
+                Text(
+                  'No se detectaron daños específicos en la narración.',
+                  style: theme.textTheme.bodyMedium
+                      ?.copyWith(color: AppColors.white.withValues(alpha: 0.75)),
+                ),
+                if (onRetry != null) ...[
+                  const Gap(AppSpacing.md),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: onRetry,
+                      icon: const Icon(Icons.refresh, color: AppColors.amber, size: 18),
+                      label: const Text('Reintentar'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.amber,
+                        side: const BorderSide(color: AppColors.amber),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ...entidades.map((e) => _EntityRow(entity: e)),
         ],

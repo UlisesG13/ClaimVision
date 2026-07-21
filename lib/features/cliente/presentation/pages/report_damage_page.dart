@@ -101,31 +101,22 @@ class ReportDamagePage extends ConsumerWidget {
                         _AddTile(onTap: () => _capturar(context, ref)),
                       ],
                     ),
-                    if (state.evidencias.any((e) => e.tipoDano == null && !e.predicting)) ...[
-                      const Gap(AppSpacing.lg),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: state.predictandoBatch
-                              ? null
-                              : () => ref
-                                  .read(reportControllerProvider.notifier)
-                                  .predecirTodasLasFotos(),
-                          icon: state.predictandoBatch
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Icon(Icons.auto_awesome),
-                          label: Text(
-                            state.predictandoBatch
-                                ? 'Analizando…'
-                                : 'Analizar todo con IA',
-                          ),
+                    if (state.predictandoBatch)
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.md),
+                        child: Row(
+                          children: [
+                            const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            const Gap(AppSpacing.sm),
+                            Text('Analizando fotos con IA…',
+                                style: theme.textTheme.bodySmall),
+                          ],
                         ),
                       ),
-                    ],
                   ],
                   const Gap(AppSpacing.lg),
                   _StatusLine(
@@ -210,7 +201,6 @@ class _Thumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return SizedBox(
       width: 90,
       height: 90,
@@ -221,23 +211,19 @@ class _Thumb extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             child: Image.file(evidencia.file, fit: BoxFit.cover),
           ),
-          if (evidencia.subiendo || evidencia.predicting)
+          if (evidencia.subiendo)
             Container(
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.35),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
               ),
-              child: Center(
-                child: evidencia.predicting
-                    ? Text('IA…',
-                        style: theme.textTheme.bodySmall
-                            ?.copyWith(color: AppColors.white))
-                    : const SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2.5, color: AppColors.white),
-                      ),
+              child: const Center(
+                child: SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                      strokeWidth: 2.5, color: AppColors.white),
+                ),
               ),
             )
           else ...[

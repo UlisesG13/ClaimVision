@@ -84,6 +84,7 @@ class ReportState {
     this.analisisEntidades = const [],
     this.prediccionesFotos = const [],
     this.predictandoBatch = false,
+    this.calculandoCosto = false,
     this.resumenCosto,
     this.errorMessage,
   });
@@ -109,6 +110,7 @@ class ReportState {
   final List<IaDamageEntityDto> analisisEntidades;
   final List<IaDamageEntityDto> prediccionesFotos;
   final bool predictandoBatch;
+  final bool calculandoCosto;
   final IaResumenResponseDto? resumenCosto;
   final String? errorMessage;
 
@@ -151,6 +153,7 @@ class ReportState {
     List<IaDamageEntityDto>? analisisEntidades,
     List<IaDamageEntityDto>? prediccionesFotos,
     bool? predictandoBatch,
+    bool? calculandoCosto,
     IaResumenResponseDto? resumenCosto,
     String? errorMessage,
     bool clearError = false,
@@ -177,6 +180,7 @@ class ReportState {
       analisisEntidades: analisisEntidades ?? this.analisisEntidades,
       prediccionesFotos: prediccionesFotos ?? this.prediccionesFotos,
       predictandoBatch: predictandoBatch ?? this.predictandoBatch,
+      calculandoCosto: calculandoCosto ?? this.calculandoCosto,
       resumenCosto: resumenCosto ?? this.resumenCosto,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
@@ -184,8 +188,13 @@ class ReportState {
 }
 
 class ReportController extends Notifier<ReportState> {
+  Timer? _debounceBatch;
+
   @override
-  ReportState build() => const ReportState();
+  ReportState build() {
+    ref.onDispose(() => _debounceBatch?.cancel());
+    return const ReportState();
+  }
 
   void reset() => state = const ReportState();
 
@@ -240,35 +249,20 @@ class ReportController extends Notifier<ReportState> {
         clearError: true,
       );
       _reemplazar(nueva, actualizada);
-      _predecirDano(actualizada, file);
+      _programarBatchAuto();
     } on Failure catch (f) {
       _reemplazar(nueva, nueva.copyWith(subiendo: false, error: f.message));
     }
   }
 
-  Future<void> _predecirDano(Evidencia evidencia, File file) async {
-    final conPrediccion =
-        evidencia.copyWith(predicting: true);
-    _reemplazar(evidencia, conPrediccion);
-    try {
-      final result = await ref.read(iaPredictDamageV2Provider)(file: file);
-      _reemplazar(
-        conPrediccion,
-        conPrediccion.copyWith(
-          predicting: false,
-          tipoDano: result.tipoDano,
-          severidad: result.severidad,
-          confianza: result.confianza,
-        ),
-      );
-    } catch (_) {
-      _reemplazar(conPrediccion, conPrediccion.copyWith(predicting: false));
-    }
+  void _programarBatchAuto() {
+    _debounceBatch?.cancel();
+    _debounceBatch = Timer(const Duration(milliseconds: 1500), predecirTodasLasFotos);
   }
 
   Future<void> predecirTodasLasFotos() async {
     final pendientes =
-        state.evidencias.where((e) => e.tipoDano == null && !e.predicting).toList();
+        state.evidencias.where((e) => e.tipoDano == null).toList();
     if (pendientes.isEmpty) return;
     state = state.copyWith(predictandoBatch: true);
     try {
@@ -304,13 +298,24 @@ class ReportController extends Notifier<ReportState> {
         danos.add((tipo: e.tipoDano!, severidad: e.severidad!));
       }
     }
+    for (final ent in state.analisisEntidades) {
+      danos.add((tipo: ent.tipoDano, severidad: ent.severidad));
+    }
     if (danos.isEmpty) return;
+    state = state.copyWith(calculandoCosto: true, clearError: true);
     try {
       final resumen = await ref.read(iaObtenerResumenProvider)(
         danos: danos.toList(),
       );
-      state = state.copyWith(resumenCosto: resumen);
-    } catch (_) {}
+      state = state.copyWith(calculandoCosto: false, resumenCosto: resumen);
+    } on Failure catch (f) {
+      state = state.copyWith(calculandoCosto: false, errorMessage: f.message);
+    } catch (e) {
+      state = state.copyWith(
+        calculandoCosto: false,
+        errorMessage: 'Error al calcular costo: $e',
+      );
+    }
   }
 
   void quitarEvidencia(Evidencia evidencia) {
@@ -415,7 +420,9 @@ class ReportController extends Notifier<ReportState> {
   }
 
   Future<void> analizarTexto() async {
-    final texto = state.transcripcion ?? state.narracionTexto;
+    final texto = (state.transcripcion?.isNotEmpty == true)
+        ? state.transcripcion!
+        : state.narracionTexto;
     if (texto.trim().isEmpty) return;
     state = state.copyWith(analizando: true, clearError: true);
     try {
@@ -424,7 +431,7 @@ class ReportController extends Notifier<ReportState> {
         analizando: false,
         analisisEntidades: result.entidades,
       );
-      obtenerResumenCosto();
+      await obtenerResumenCosto();
     } on Failure catch (f) {
       state = state.copyWith(analizando: false, errorMessage: f.message);
     } catch (e) {
