@@ -9,6 +9,7 @@ import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/date_format.dart';
+import '../state/casos_asignados_controller.dart';
 import '../state/peritaje_editor_controller.dart';
 
 /// Peritaje Confirmado (Figma node 73:1285).
@@ -27,6 +28,9 @@ class PeritajeConfirmadoPage extends ConsumerWidget {
     final Siniestro? siniestro = state.resultado;
     final session = ref.watch(currentSessionProvider);
     final ajustador = _nombre(session?.email);
+
+    // Refresca la bandeja al montar para que el estatus del caso esté actualizado.
+    ref.invalidate(casosAsignadosControllerProvider);
 
     return Scaffold(
       backgroundColor: context.scaffoldBgColor,

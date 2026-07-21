@@ -1,0 +1,26 @@
+# Flujo de login. Usa variables para no dejar credenciales en el archivo.
+# Ejecuta con:
+#   maestro test .maestro/02-login.yaml -e EMAIL=usuario@test.com -e PASSWORD=tuPass
+appId: com.CynderDigital.claimvision
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Iniciar Sesión"
+
+# Escribir el correo
+- tapOn: "Correo Electrónico"
+- inputText: "${EMAIL}"
+
+# Escribir la contraseña
+- tapOn: "Contraseña"
+- inputText: "${PASSWORD}"
+
+# Ocultar teclado y entrar
+- hideKeyboard
+- tapOn: "Entrar"
+
+# Verificar que salimos del login (ajusta este texto a algo de tu pantalla principal)
+- extendedWaitUntil:
+    notVisible: "Iniciar Sesión"
+    timeout: 15000
+- takeScreenshot: post-login

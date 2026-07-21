@@ -1,0 +1,10 @@
+# Smoke test: la app arranca y muestra la pantalla de login
+appId: com.CynderDigital.claimvision
+---
+- launchApp:
+    clearState: true          # arranca "limpio" (sin sesión previa)
+- assertVisible: "Iniciar Sesión"
+- assertVisible: "Correo Electrónico"
+- assertVisible: "Contraseña"
+- assertVisible: "Entrar"
+- takeScreenshot: pantalla-login

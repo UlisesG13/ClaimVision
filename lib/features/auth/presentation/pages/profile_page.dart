@@ -100,6 +100,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               onConfiguracion: () => context.push(RoutePaths.configuracion),
             ),
             const Gap(AppSpacing.lg),
+          ] else ...[
+            _SettingsCard(
+              onConfiguracion: () => context.push(RoutePaths.configuracion),
+            ),
+            const Gap(AppSpacing.lg),
           ],
           _LogoutButton(onTap: () => _confirmarLogout(context, ref)),
           const Gap(AppSpacing.lg),
@@ -500,6 +505,31 @@ class _ConsentRow extends StatelessWidget {
             color: value ? AppColors.success : context.textHintColor,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SettingsCard extends StatelessWidget {
+  const _SettingsCard({required this.onConfiguracion});
+  final VoidCallback onConfiguracion;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: context.cardColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        side: BorderSide(color: context.borderColor),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        leading: const Icon(Icons.settings_outlined,
+            color: AppColors.blueprint),
+        title: const Text('Configuración'),
+        trailing: Icon(Icons.chevron_right,
+            color: context.textHintColor),
+        onTap: onConfiguracion,
       ),
     );
   }

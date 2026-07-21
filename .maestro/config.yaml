@@ -1,0 +1,6 @@
+# Configuración del set de pruebas Maestro.
+# Al correr `maestro test .maestro/` se ejecutan los flujos en orden.
+flows:
+  - "*.yaml"
+# Excluir este archivo de config de ser tratado como flujo:
+# (Maestro ignora config.yaml automáticamente)

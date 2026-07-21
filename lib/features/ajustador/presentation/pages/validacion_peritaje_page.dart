@@ -1,23 +1,20 @@
-import 'dart:io';
-
+import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../core/di/providers.dart';
-import '../../../../core/errors/failures.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../shared/widgets/feedback/app_dialog.dart';
 import '../../../../shared/widgets/feedback/app_snackbar.dart';
 import '../../../../shared/widgets/feedback/app_toast.dart';
 import '../../domain/entities/damage_adjusted.dart';
 import '../../domain/entities/damage_severity.dart';
 import '../../domain/entities/damage_type.dart';
+import '../state/casos_asignados_controller.dart';
 import '../state/peritaje_editor_controller.dart';
 
 /// Validación de Peritaje (Figma node 76:4615).
@@ -35,6 +32,10 @@ class ValidacionPeritajePage extends ConsumerWidget {
     final theme = Theme.of(context);
     final state = ref.watch(peritajeEditorControllerProvider);
     final controller = ref.read(peritajeEditorControllerProvider.notifier);
+    final casosAsync = ref.watch(casosAsignadosControllerProvider);
+    final Siniestro? siniestro = casosAsync.asData?.value
+        .where((s) => s.id == siniestroId)
+        .firstOrNull;
 
     return Scaffold(
       backgroundColor: context.scaffoldBgColor,
@@ -79,6 +80,12 @@ class ValidacionPeritajePage extends ConsumerWidget {
             style: theme.textTheme.bodySmall,
           ),
           const Gap(AppSpacing.lg),
+          if (siniestro != null)
+            _MiniMapLink(
+              latitud: siniestro.latitud,
+              longitud: siniestro.longitud,
+            ),
+          const Gap(AppSpacing.lg),
           if (state.danos.isEmpty)
             _SinDanos()
           else
@@ -104,34 +111,19 @@ class ValidacionPeritajePage extends ConsumerWidget {
                 ),
               ),
           const Gap(AppSpacing.sm),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () async {
-                    final nuevo = await _editarDano(context, null);
-                    if (nuevo != null && context.mounted) {
-                      controller.agregarDano(nuevo);
-                      AppToast.success(context, 'Daño agregado');
-                    }
-                  },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Agregar daño'),
-                ),
-              ),
-              const Gap(AppSpacing.sm),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: () => _analizarConIA(context, ref),
-                  icon: const Icon(Icons.auto_fix_high),
-                  label: const Text('Analizar con IA'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.blueprint,
-                    side: const BorderSide(color: AppColors.blueprint),
-                  ),
-                ),
-              ),
-            ],
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: () async {
+                final nuevo = await _editarDano(context, null);
+                if (nuevo != null && context.mounted) {
+                  controller.agregarDano(nuevo);
+                  AppToast.success(context, 'Daño agregado');
+                }
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Agregar daño'),
+            ),
           ),
           const Gap(AppSpacing.lg),
           Text('Observaciones de campo',
@@ -171,85 +163,6 @@ class ValidacionPeritajePage extends ConsumerWidget {
       ),
     );
   }
-
-  Future<void> _analizarConIA(BuildContext context, WidgetRef ref) async {
-    final picker = ref.read(imagePickerServiceProvider);
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      backgroundColor: context.surfaceColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Analizar daño con IA',
-                style: TextStyle(fontWeight: FontWeight.w600)),
-            const Gap(AppSpacing.lg),
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Tomar foto'),
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Seleccionar de galería'),
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (source == null || !context.mounted) return;
-
-    AppDialog.showLoading(context, title: 'Analizando…');
-    File? file;
-    try {
-      file = source == ImageSource.camera
-          ? await picker.fromCamera()
-          : await picker.fromGallery();
-    } catch (_) {}
-    if (file == null || !context.mounted) {
-      if (context.mounted) AppDialog.hideLoading(context);
-      return;
-    }
-
-    try {
-      final result = await ref.read(iaPredictDamageV2Provider)(file: file);
-      if (!context.mounted) return;
-      AppDialog.hideLoading(context);
-
-      final dano = DamageAdjusted(
-        zonaVehiculo: 'Área detectada',
-        tipo: DamageType.fromApi(result.tipoDano),
-        severidad: DamageSeverity.fromApi(result.severidad),
-        costoRealReparacion: _costoPorSeveridad(
-          DamageSeverity.fromApi(result.severidad),
-        ),
-      );
-      ref.read(peritajeEditorControllerProvider.notifier).agregarDano(dano);
-      AppToast.success(context,
-          'Daño detectado: ${dano.tipo.label} (${(result.confianza * 100).toStringAsFixed(0)}% confianza)');
-    } on Failure catch (e) {
-      if (context.mounted) {
-        AppDialog.hideLoading(context);
-        AppSnackbar.error(context, e.message);
-      }
-    } catch (e) {
-      if (context.mounted) {
-        AppDialog.hideLoading(context);
-        AppSnackbar.error(context, 'Error al analizar la imagen.');
-      }
-    }
-  }
-
-  double _costoPorSeveridad(DamageSeverity s) => switch (s) {
-        DamageSeverity.bajo => 2000,
-        DamageSeverity.medio => 5000,
-        DamageSeverity.alto => 12000,
-      };
 
   /// Bottom sheet para crear/editar un daño. Devuelve `null` si se cancela.
   Future<DamageAdjusted?> _editarDano(
@@ -591,6 +504,51 @@ class _DanoFormState extends State<_DanoForm> {
                 child: const Text('Guardar daño'),
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniMapLink extends StatelessWidget {
+  const _MiniMapLink({required this.latitud, required this.longitud});
+
+  final double latitud;
+  final double longitud;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    if (latitud == 0 && longitud == 0) return const SizedBox.shrink();
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.blueprint.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.blueprint.withValues(alpha: 0.15)),
+      ),
+      child: InkWell(
+        onTap: () => launchUrl(
+          Uri.parse('https://www.google.com/maps?q=$latitud,$longitud'),
+          mode: LaunchMode.externalApplication,
+        ),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        child: Row(
+          children: [
+            Icon(Icons.map_outlined, size: 18, color: AppColors.blueprint),
+            const Gap(AppSpacing.sm),
+            Expanded(
+              child: Text(
+                '${latitud.toStringAsFixed(5)}, ${longitud.toStringAsFixed(5)}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.blueprint,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Icon(Icons.open_in_new, size: 14, color: AppColors.blueprint),
           ],
         ),
       ),
