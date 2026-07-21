@@ -9,6 +9,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/validators.dart';
+import '../../../../shared/widgets/app_logo.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/feedback/app_dialog.dart';
 import '../../../../shared/widgets/feedback/app_snackbar.dart';
@@ -221,25 +222,7 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: AppColors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-            border: Border.all(
-              color: AppColors.borderLight.withValues(alpha: 0.2),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.blueprint.withValues(alpha: 0.4),
-                blurRadius: 20,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Icon(Icons.shield_outlined, color: AppColors.amber, size: 30),
-        ),
+        const AppLogo(size: 56, glow: true),
         const Gap(AppSpacing.sm),
         Text(
           'ClaimVision',

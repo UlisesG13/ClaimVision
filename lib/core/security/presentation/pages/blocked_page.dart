@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/security_status.dart';
@@ -55,7 +56,7 @@ class BlockedPage extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.shield_outlined, size: 80, color: AppColors.amber),
+                  SvgPicture.asset('assets/images/logo.svg', width: 80, height: 80),
                   const SizedBox(height: 24),
                   Text(
                     _titulo,

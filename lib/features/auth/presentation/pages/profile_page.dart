@@ -10,6 +10,7 @@ import '../../../../core/theme/theme_notifier.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/ajustador_bottom_nav.dart';
+import '../../../../shared/widgets/brand_app_bar.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 import '../../../../shared/widgets/feedback/app_dialog.dart';
 import '../state/auth_controller.dart';
@@ -68,7 +69,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
     return Scaffold(
       backgroundColor: context.scaffoldBgColor,
-      appBar: AppBar(
+      appBar: BrandAppBar(
         title: Text('Mi Perfil',
             style: theme.textTheme.titleLarge?.copyWith(
               color: context.textPrimaryColor,

@@ -97,6 +97,7 @@ class AppTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         ),
+        shadowColor: AppColors.blueprint.withValues(alpha: 0.08),
       ),
       dividerTheme: const DividerThemeData(
         color: AppColors.borderLight,

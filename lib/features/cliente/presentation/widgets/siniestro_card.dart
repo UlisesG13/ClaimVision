@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/date_format.dart';
+import '../../../../shared/widgets/app_card.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import 'package:claimvision/shared/domain/entities/siniestro_status.dart';
 
@@ -18,37 +19,35 @@ class SiniestroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return InkWell(
+    final accentColor = switch (siniestro.estatus.tono) {
+      SiniestroStatusTono.neutro => null,
+      SiniestroStatusTono.proceso => AppColors.amber,
+      SiniestroStatusTono.info => AppColors.blueprint,
+      SiniestroStatusTono.exito => AppColors.success,
+    };
+    return AppCard(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: context.cardColor,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          border: Border.all(color: context.borderColor),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Siniestro ${siniestro.folioCorto}',
-                    style: theme.textTheme.titleMedium?.copyWith(fontSize: 15)),
-                SiniestroStatusChip(estatus: siniestro.estatus),
-              ],
-            ),
-            const Gap(AppSpacing.md),
-            _IconLine(
-                icon: Icons.directions_car_outlined,
-                text: siniestro.vehiculoResumen),
-            const Gap(AppSpacing.xs),
-            _IconLine(
-                icon: Icons.schedule,
-                text: DateFormatEs.fechaHora(siniestro.fechaSiniestro)),
-          ],
-        ),
+      accentColor: accentColor,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Siniestro ${siniestro.folioCorto}',
+                  style: theme.textTheme.titleMedium?.copyWith(fontSize: 15)),
+              SiniestroStatusChip(estatus: siniestro.estatus),
+            ],
+          ),
+          const Gap(AppSpacing.md),
+          _IconLine(
+              icon: Icons.directions_car_outlined,
+              text: siniestro.vehiculoResumen),
+          const Gap(AppSpacing.xs),
+          _IconLine(
+              icon: Icons.schedule,
+              text: DateFormatEs.fechaHora(siniestro.fechaSiniestro)),
+        ],
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/domain/entities/auth_session.dart';
@@ -15,16 +17,9 @@ import '../security/presentation/providers/security_providers.dart';
 import '../services/notification_payload.dart';
 import '../services/notification_service.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_spacing.dart';
 import 'route_paths.dart';
 
-/// Router de la app con guard de acceso por sesión.
-///
-/// Las rutas de cada feature se registran en archivos separados:
-///   - [authRoutes] — login, registro, onboarding, perfil
-///   - [clienteRoutes] — inicio, historial, reporte, detalle
-///   - [ajustadorRoutes] — casos, peritaje, firmas
-///
-/// El redirect centralizado en este router decide a dónde va cada rol.
 final routerProvider = Provider<GoRouter>((ref) {
   final refresh = _AuthRefreshNotifier();
   ref.onDispose(refresh.dispose);
@@ -151,15 +146,89 @@ class _AuthRefreshNotifier extends ChangeNotifier {
   void bump() => notifyListeners();
 }
 
-class _SplashScreen extends StatelessWidget {
+class _SplashScreen extends StatefulWidget {
   const _SplashScreen();
 
   @override
+  State<_SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<_SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fade;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
+    _scale = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: AppColors.blueprint,
       body: Center(
-        child: CircularProgressIndicator(color: AppColors.amber),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FadeTransition(
+              opacity: _fade,
+              child: ScaleTransition(
+                scale: _scale,
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: AppColors.white.withValues(alpha: 0.1),
+                    borderRadius:
+                        BorderRadius.circular(AppSpacing.radiusLg),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.amber.withValues(alpha: 0.25),
+                        blurRadius: 30,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: SvgPicture.asset(
+                    'assets/images/logo.svg',
+                    width: 68,
+                    height: 68,
+                  ),
+                ),
+              ),
+            ),
+            const Gap(AppSpacing.xl),
+            FadeTransition(
+              opacity: _fade,
+              child: const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: AppColors.amber,
+                  strokeWidth: 2.5,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
