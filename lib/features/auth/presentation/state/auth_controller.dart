@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+import '../../../../core/constants/api_constants.dart';
+import '../../../../shared/services/sse_service.dart';
+import '../../../../shared/state/sse_providers.dart';
 import 'providers.dart';
 import '../../domain/entities/auth_session.dart';
 
@@ -46,8 +49,9 @@ class AuthController extends AsyncNotifier<AuthSession?> {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
       final loginUser = ref.read(loginUserProvider);
-      final session = loginUser(email: email, password: password);
+      final session = await loginUser(email: email, password: password);
       _registerDeviceToken();
+      _initSse(session);
       return session;
     });
   }
@@ -69,9 +73,23 @@ class AuthController extends AsyncNotifier<AuthSession?> {
   }
 
   Future<void> logout() async {
+    _disposeSse();
     final logoutUser = ref.read(logoutUserProvider);
     await logoutUser();
     state = const AsyncData(null);
+  }
+
+  void _initSse(AuthSession session) {
+    _disposeSse();
+    final url = '${ApiConstants.baseUrl}${ApiConstants.eventsStream}';
+    final service = SseService(url: url, token: session.token);
+    ref.read(sseServiceProvider.notifier).setService(service);
+  }
+
+  void _disposeSse() {
+    final existing = ref.read(sseServiceProvider);
+    existing?.disconnect();
+    ref.read(sseServiceProvider.notifier).setService(null);
   }
 
   /// Invocado por el interceptor de red cuando una llamada protegida devuelve
@@ -80,6 +98,7 @@ class AuthController extends AsyncNotifier<AuthSession?> {
   /// redirija al login.
   void handleUnauthorized() {
     if (state.asData?.value != null || state.isLoading) {
+      _disposeSse();
       state = const AsyncData(null);
     }
   }

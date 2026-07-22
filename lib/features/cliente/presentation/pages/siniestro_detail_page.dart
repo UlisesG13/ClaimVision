@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/state/sse_providers.dart';
 import '../../../../shared/utils/date_format.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import 'package:claimvision/shared/domain/entities/siniestro_status.dart';
@@ -18,6 +19,13 @@ class SiniestroDetailPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+
+    ref.listen(siniestroSseProvider(siniestroId), (_, next) {
+      next.whenData((_) {
+        ref.invalidate(misSiniestrosControllerProvider);
+      });
+    });
+
     final siniestrosAsync = ref.watch(misSiniestrosControllerProvider);
     final siniestro = siniestrosAsync.asData?.value
         .where((s) => s.id == siniestroId)

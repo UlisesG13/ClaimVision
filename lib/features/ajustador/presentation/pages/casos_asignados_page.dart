@@ -9,6 +9,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/state/sse_providers.dart';
 import '../../../../shared/widgets/ajustador_bottom_nav.dart';
 import '../state/casos_asignados_controller.dart';
 import '../widgets/caso_card.dart';
@@ -47,6 +48,14 @@ class _CasosAsignadosPageState extends ConsumerState<CasosAsignadosPage> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(sseEventStreamProvider, (_, next) {
+      next.whenData((event) {
+        if (event.isSiniestro || event.isPeritaje) {
+          ref.invalidate(casosAsignadosControllerProvider);
+        }
+      });
+    });
+
     final session = ref.watch(currentSessionProvider);
     final casosAsync = ref.watch(casosAsignadosControllerProvider);
     final nombre = _nombre(session?.email);

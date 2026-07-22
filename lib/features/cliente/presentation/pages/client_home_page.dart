@@ -10,6 +10,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/state/sse_providers.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 import '../../../../shared/widgets/feedback/app_dialog.dart';
@@ -52,6 +53,14 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
     );
 
     final nombre = _nombreDesdeEmail(session?.email);
+
+    ref.listen(sseEventStreamProvider, (_, next) {
+      next.whenData((event) {
+        if (event.isSiniestro && event.esStatusChange) {
+          ref.invalidate(misSiniestrosControllerProvider);
+        }
+      });
+    });
 
     return Scaffold(
       backgroundColor: context.scaffoldBgColor,

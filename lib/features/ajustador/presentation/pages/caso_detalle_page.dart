@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/state/sse_providers.dart';
 import '../../../../shared/utils/date_format.dart';
 import '../../../cliente/presentation/widgets/siniestro_card.dart';
 import '../state/casos_asignados_controller.dart';
@@ -26,6 +27,13 @@ class CasoDetallePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+
+    ref.listen(siniestroSseProvider(siniestroId), (_, next) {
+      next.whenData((_) {
+        ref.invalidate(casosAsignadosControllerProvider);
+      });
+    });
+
     final casosAsync = ref.watch(casosAsignadosControllerProvider);
     final Siniestro? siniestro = casosAsync.asData?.value
         .where((s) => s.id == siniestroId)

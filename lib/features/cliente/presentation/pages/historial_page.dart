@@ -9,6 +9,7 @@ import '../../../../core/ia/data/dtos/ia_v2_dto.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/state/sse_providers.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 import '../state/mis_siniestros_controller.dart';
 import '../widgets/siniestro_card.dart';
@@ -20,6 +21,14 @@ class HistorialPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+
+    ref.listen(sseEventStreamProvider, (_, next) {
+      next.whenData((event) {
+        if (event.isSiniestro && event.esStatusChange) {
+          ref.invalidate(misSiniestrosControllerProvider);
+        }
+      });
+    });
 
     return DefaultTabController(
       length: 2,

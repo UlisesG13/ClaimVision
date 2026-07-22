@@ -64,6 +64,10 @@ class ApiConstants {
   static const String iaBridgeNlpHistory = '/v1/ia/nlp/history';
   static String iaBridgeNlpDetail(String id) => '/v1/ia/nlp/$id';
 
+  // ── SSE Events (Server-Sent Events) ──────────────────────────────────────
+  static const String eventsStream = '/v1/events/stream';
+  static String eventsStreamSiniestro(String id) => '/v1/events/stream/siniestro/$id';
+
   // Tiempos de espera de la red.
   static const Duration connectTimeout = Duration(seconds: 20);
   static const Duration receiveTimeout = Duration(seconds: 30);
