@@ -6,18 +6,14 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/biometric/presentation/providers/biometric_providers.dart';
 import '../../../../core/constants/storage_keys.dart';
 import '../../../../core/di/providers.dart';
-import '../../../../core/errors/failures.dart';
 import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/state/sse_providers.dart';
-import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 import '../../../../shared/widgets/feedback/app_dialog.dart';
-import '../../../../shared/widgets/feedback/app_snackbar.dart';
 import '../../../auth/presentation/state/auth_controller.dart';
 import '../../../auth/presentation/state/onboarding_controller.dart';
-import '../../../auth/presentation/state/providers.dart';
 import '../state/mis_siniestros_controller.dart';
 import '../state/notificaciones_cliente_providers.dart';
 import '../state/report_controller.dart';
@@ -194,111 +190,26 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
     final yaVisto = await storage.read(StorageKeys.primerInicioPara(userId));
     if (yaVisto == 'true') return;
 
-    if (!mounted) return;
-    final nuevaPassword = await _mostrarDialogoCambioPassword();
-    if (!mounted) return;
-    if (nuevaPassword != null) {
-      await AppDialog.info(
-        context,
-        title: 'Contraseña actualizada',
-        message: 'Tu contraseña ha sido cambiada correctamente.',
-        icon: Icons.check_circle,
-        accent: AppColors.success,
-      );
+    // Si el onboarding (documentos + póliza) no se completó, redirigir ahí.
+    final onboardingDone =
+        ref.read(onboardingControllerProvider.select((s) => s.completed));
+    if (!onboardingDone && mounted) {
+      context.go(RoutePaths.onboarding);
+      return;
     }
 
     if (!mounted) return;
     final biometricService = ref.read(biometricServiceProvider);
     final disponible = await biometricService.canCheckBiometrics();
     if (disponible && mounted) {
-      await _mostrarDialogoBiometrico(password: nuevaPassword);
+      await _mostrarDialogoBiometrico();
     }
 
     if (!mounted) return;
     await storage.write(StorageKeys.primerInicioPara(userId), 'true');
   }
 
-  Future<String?> _mostrarDialogoCambioPassword() async {
-    final currentCtrl = TextEditingController();
-    final newCtrl = TextEditingController();
-
-    String? nuevaPassword;
-    final cambioRealizado = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        final theme = Theme.of(ctx);
-        return AlertDialog(
-          title: Text('Actualiza tu contraseña',
-              style: theme.textTheme.titleLarge),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Por seguridad, te recomendamos cambiar tu contraseña por una que recuerdes fácilmente.',
-                style: theme.textTheme.bodyMedium,
-              ),
-              const Gap(AppSpacing.lg),
-              AppTextField(
-                controller: currentCtrl,
-                hintText: 'Contraseña actual',
-                prefixIcon: Icons.lock_outline,
-                obscure: true,
-                validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Ingresa tu contraseña actual' : null,
-              ),
-              const Gap(AppSpacing.md),
-              AppTextField(
-                controller: newCtrl,
-                hintText: 'Nueva contraseña',
-                prefixIcon: Icons.lock,
-                obscure: true,
-                validator: (v) =>
-                    (v == null || v.length < 6) ? 'Mínimo 6 caracteres' : null,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Future.microtask(() => Navigator.pop(ctx, false)),
-              child: const Text('Omitir'),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(foregroundColor: AppColors.blueprint),
-              onPressed: () async {
-                if (currentCtrl.text.isEmpty || newCtrl.text.length < 6) return;
-                AppDialog.showLoading(ctx, title: 'Actualizando contraseña…');
-                try {
-                  await ref.read(changePasswordProvider)(
-                    oldPassword: currentCtrl.text,
-                    newPassword: newCtrl.text,
-                  );
-                  if (ctx.mounted) {
-                    AppDialog.hideLoading(ctx);
-                    nuevaPassword = newCtrl.text;
-                    Navigator.pop(ctx, true);
-                  }
-                } on Failure catch (e) {
-                  if (ctx.mounted) {
-                    AppDialog.hideLoading(ctx);
-                    AppSnackbar.error(ctx, e.message);
-                  }
-                }
-              },
-              child: const Text('Guardar'),
-            ),
-          ],
-        );
-      },
-    );
-
-    currentCtrl.dispose();
-    newCtrl.dispose();
-    if (cambioRealizado == true && nuevaPassword != null) return nuevaPassword;
-    return null;
-  }
-
-  Future<void> _mostrarDialogoBiometrico({String? password}) async {
+  Future<void> _mostrarDialogoBiometrico() async {
     final acepto = await AppDialog.permission(
       context,
       icon: Icons.fingerprint,
@@ -311,8 +222,9 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
 
     if (!acepto || !mounted) return;
 
-    String? pass = password;
-    if (pass == null) {
+    // Sin password previo: pedir la contraseña actual para registrar biometría.
+    String? pass;
+    {
       String captured = '';
       final ok = await showDialog<bool>(
         context: context,

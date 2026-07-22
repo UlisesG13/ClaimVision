@@ -126,8 +126,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             children: [
               _InfoRow(label: 'Versión', value: '1.0.0'),
               _InfoRow(label: 'Entorno', value: 'Producción'),
-              _InfoRow(label: 'Términos y condiciones', value: '', onTap: () {}),
-              _InfoRow(label: 'Política de privacidad', value: '', onTap: () {}),
+              _InfoRow(
+                label: 'Términos y condiciones',
+                value: '',
+                onTap: () => context.push(RoutePaths.terminos),
+              ),
+              _InfoRow(
+                label: 'Aviso de privacidad',
+                value: '',
+                onTap: () => context.push(RoutePaths.avisoPrivacidad),
+              ),
             ],
           ),
           const Gap(AppSpacing.lg),
@@ -255,7 +263,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLg)),
       ),
-      builder: (_) {
+      builder: (sheetContext) {
         final theme = Theme.of(context);
         return Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -266,6 +274,20 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               Text('Consentimientos (ARCO)', style: theme.textTheme.titleLarge),
               const Gap(AppSpacing.md),
               _ConsentRow(label: 'Aviso de privacidad', value: onboarding.avisoPrivacidad),
+              Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () => sheetContext.push(RoutePaths.avisoPrivacidad),
+                  child: Text(
+                    'Ver documento completo',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.blueprint,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const Gap(AppSpacing.sm),
               _ConsentRow(label: 'Datos biométricos', value: onboarding.biometria),
               _ConsentRow(label: 'Transferencia a talleres', value: onboarding.transferenciaTalleres),
             ],

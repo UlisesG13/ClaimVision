@@ -40,4 +40,8 @@ class RoutePaths {
 
   // ── Seguridad ───────────────────────────────────────────────────────────
   static const String bloqueado = '/bloqueado';
+
+  // ── Legal (públicas, accesibles sin sesión) ──────────────────────────────
+  static const String avisoPrivacidad = '/legal/aviso-privacidad';
+  static const String terminos = '/legal/terminos';
 }

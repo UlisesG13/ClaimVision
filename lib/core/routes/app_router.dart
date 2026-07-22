@@ -46,7 +46,11 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       final AuthSession? session = auth.asData?.value;
       final isAuthed = session != null;
-      final authScreens = {RoutePaths.login};
+      final authScreens = {
+        RoutePaths.login,
+        RoutePaths.avisoPrivacidad,
+        RoutePaths.terminos,
+      };
 
       if (!isAuthed) {
         return authScreens.contains(location) ? null : RoutePaths.login;

@@ -56,21 +56,28 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         borderRadius:
             BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLg)),
       ),
-      builder: (_) => const _SourceSheet(),
+      builder: (_) => _SourceSheet(soloPdf: !isCedula),
     );
     if (source == null) return;
 
-    final picker = ref.read(imagePickerServiceProvider);
-    final File? file = source == _PickSource.camera
-        ? await picker.fromCamera()
-        : await picker.fromGallery();
+    final controller = ref.read(onboardingControllerProvider.notifier);
+    final File? file;
+
+    if (source == _PickSource.pdf) {
+      final picker = ref.read(filePickerServiceProvider);
+      file = await picker.pickPdf();
+    } else {
+      final picker = ref.read(imagePickerServiceProvider);
+      file = source == _PickSource.camera
+          ? await picker.fromCamera()
+          : await picker.fromGallery();
+    }
     if (file == null) return;
 
-    final controller = ref.read(onboardingControllerProvider.notifier);
     if (isCedula) {
-      controller.setCedula(file);
+      controller.setIdentificacion(file, isPdf: source == _PickSource.pdf);
     } else {
-      controller.setPoliza(file);
+      controller.setPoliza(file, isPdf: true);
     }
   }
 
@@ -140,14 +147,18 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     ),
                     const Gap(AppSpacing.lg),
                     _DocumentSlot(
-                      label: 'Cédula / Identificación',
+                      label: 'Identificación oficial',
                       file: state.cedula,
+                      isPdf: state.identificacionIsPdf,
+                      hint: 'Toca para agregar (foto, imagen o PDF)',
                       onTap: () => _pickDocument(isCedula: true),
                     ),
                     const Gap(AppSpacing.md),
                     _DocumentSlot(
                       label: 'Póliza del seguro',
                       file: state.poliza,
+                      isPdf: state.polizaIsPdf,
+                      hint: 'Toca para agregar archivo PDF',
                       onTap: () => _pickDocument(isCedula: false),
                     ),
                     const Gap(AppSpacing.lg),
@@ -157,7 +168,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                         icon: Icons.document_scanner_outlined,
                         isLoading: state.ocrLoading,
                         onPressed:
-                            state.hasBothImages ? controller.runOcr : null,
+                            state.hasBothDocuments ? controller.runOcr : null,
                         foregroundColor: const Color(0xFF6D4400),
                       ),
                     if (state.hasDetected) ...[
@@ -237,7 +248,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 }
 
-enum _PickSource { camera, gallery }
+enum _PickSource { camera, gallery, pdf }
 
 class _Header extends StatelessWidget {
   const _Header({required this.onBack});
@@ -323,10 +334,17 @@ class _ScanStatusCard extends StatelessWidget {
 }
 
 class _DocumentSlot extends StatelessWidget {
-  const _DocumentSlot(
-      {required this.label, required this.file, required this.onTap});
+  const _DocumentSlot({
+    required this.label,
+    required this.file,
+    required this.isPdf,
+    required this.hint,
+    required this.onTap,
+  });
   final String label;
   final File? file;
+  final bool isPdf;
+  final String hint;
   final VoidCallback onTap;
 
   @override
@@ -348,7 +366,16 @@ class _DocumentSlot extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
               child: hasFile
-                  ? Image.file(file!, width: 44, height: 44, fit: BoxFit.cover)
+                  ? (isPdf
+                      ? Container(
+                          width: 44,
+                          height: 44,
+                          color: AppColors.alert.withValues(alpha: 0.1),
+                          child: const Icon(Icons.picture_as_pdf,
+                              color: AppColors.alert, size: 28),
+                        )
+                      : Image.file(file!,
+                          width: 44, height: 44, fit: BoxFit.cover))
                   : Container(
                       width: 44,
                       height: 44,
@@ -364,9 +391,7 @@ class _DocumentSlot extends StatelessWidget {
                 children: [
                   Text(label, style: theme.textTheme.labelLarge),
                   Text(
-                    hasFile
-                        ? 'Documento agregado'
-                        : 'Toca para agregar (cámara o galería)',
+                    hasFile ? 'Documento agregado' : hint,
                     style: theme.textTheme.bodySmall,
                   ),
                 ],
@@ -586,7 +611,10 @@ class _ConsentRow extends StatelessWidget {
 }
 
 class _SourceSheet extends StatelessWidget {
-  const _SourceSheet();
+  const _SourceSheet({this.soloPdf = false});
+
+  /// Si es `true`, solo muestra la opción de PDF (para la póliza).
+  final bool soloPdf;
 
   @override
   Widget build(BuildContext context) {
@@ -595,17 +623,25 @@ class _SourceSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Gap(AppSpacing.sm),
+          if (!soloPdf) ...[
+            ListTile(
+              leading: const Icon(Icons.photo_camera_outlined,
+                  color: AppColors.blueprint),
+              title: const Text('Tomar foto'),
+              onTap: () => Navigator.pop(context, _PickSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined,
+                  color: AppColors.blueprint),
+              title: const Text('Subir desde galería'),
+              onTap: () => Navigator.pop(context, _PickSource.gallery),
+            ),
+          ],
           ListTile(
-            leading: const Icon(Icons.photo_camera_outlined,
+            leading: const Icon(Icons.picture_as_pdf_outlined,
                 color: AppColors.blueprint),
-            title: const Text('Tomar foto'),
-            onTap: () => Navigator.pop(context, _PickSource.camera),
-          ),
-          ListTile(
-            leading: const Icon(Icons.photo_library_outlined,
-                color: AppColors.blueprint),
-            title: const Text('Subir desde galería'),
-            onTap: () => Navigator.pop(context, _PickSource.gallery),
+            title: const Text('Seleccionar PDF'),
+            onTap: () => Navigator.pop(context, _PickSource.pdf),
           ),
           const Gap(AppSpacing.sm),
         ],

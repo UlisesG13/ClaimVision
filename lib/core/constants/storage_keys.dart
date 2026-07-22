@@ -13,6 +13,12 @@ class StorageKeys {
 
   static String primerInicioPara(String userId) => 'cv_primer_inicio_$userId';
 
+  /// Último usuario que inició sesión (para pre-cargar flags del login).
+  static const String ultimoUsuarioId = 'cv_ultimo_usuario_id';
+
+  /// Aviso de privacidad aceptado en el login por usuario.
+  static String avisoAceptadoPara(String userId) => 'cv_aviso_aceptado_$userId';
+
   // ── Biometría ──────────────────────────────────────────────────────────
   static const String biometricEnabled = 'cv_biometric_enabled';
   static const String biometricEmail = 'cv_biometric_email';

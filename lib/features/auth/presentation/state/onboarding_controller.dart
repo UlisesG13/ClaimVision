@@ -12,6 +12,8 @@ class OnboardingState {
   const OnboardingState({
     this.cedula,
     this.poliza,
+    this.identificacionIsPdf = false,
+    this.polizaIsPdf = false,
     this.ocrLoading = false,
     this.submitting = false,
     this.completed = false,
@@ -33,6 +35,13 @@ class OnboardingState {
 
   final File? cedula;
   final File? poliza;
+
+  /// `true` si el archivo de identificación es un PDF (no una foto/imagen).
+  final bool identificacionIsPdf;
+
+  /// `true` si el archivo de póliza es un PDF (siempre debería serlo).
+  final bool polizaIsPdf;
+
   final bool ocrLoading;
   final bool submitting;
   final bool completed;
@@ -56,7 +65,7 @@ class OnboardingState {
 
   final String? errorMessage;
 
-  bool get hasBothImages => cedula != null && poliza != null;
+  bool get hasBothDocuments => cedula != null && poliza != null;
 
   /// El botón "Confirmar y Vincular" se habilita cuando hay datos y el aviso de
   /// privacidad está aceptado (gate obligatorio del dominio).
@@ -70,6 +79,8 @@ class OnboardingState {
   OnboardingState copyWith({
     File? cedula,
     File? poliza,
+    bool? identificacionIsPdf,
+    bool? polizaIsPdf,
     bool? ocrLoading,
     bool? submitting,
     bool? completed,
@@ -92,6 +103,8 @@ class OnboardingState {
     return OnboardingState(
       cedula: cedula ?? this.cedula,
       poliza: poliza ?? this.poliza,
+      identificacionIsPdf: identificacionIsPdf ?? this.identificacionIsPdf,
+      polizaIsPdf: polizaIsPdf ?? this.polizaIsPdf,
       ocrLoading: ocrLoading ?? this.ocrLoading,
       submitting: submitting ?? this.submitting,
       completed: completed ?? this.completed,
@@ -118,11 +131,21 @@ class OnboardingController extends Notifier<OnboardingState> {
   @override
   OnboardingState build() => const OnboardingState();
 
-  void setCedula(File file) =>
-      state = state.copyWith(cedula: file, clearError: true);
+  /// Asigna la identificación oficial (foto o PDF).
+  void setIdentificacion(File file, {bool isPdf = false}) =>
+      state = state.copyWith(
+        cedula: file,
+        identificacionIsPdf: isPdf,
+        clearError: true,
+      );
 
-  void setPoliza(File file) =>
-      state = state.copyWith(poliza: file, clearError: true);
+  /// Asigna la póliza (siempre PDF).
+  void setPoliza(File file, {bool isPdf = true}) =>
+      state = state.copyWith(
+        poliza: file,
+        polizaIsPdf: isPdf,
+        clearError: true,
+      );
 
   void toggleAviso(bool value) =>
       state = state.copyWith(avisoPrivacidad: value);

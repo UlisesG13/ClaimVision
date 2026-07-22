@@ -19,6 +19,7 @@ import '../ia/domain/usecases/ia_batch_uc.dart';
 import '../ia/domain/usecases/ia_predict_uc.dart';
 import '../services/biometric_service.dart';
 import '../services/device_inspector_service.dart';
+import '../services/file_picker_service.dart';
 import '../services/image_picker_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
@@ -44,6 +45,10 @@ final dioProvider = Provider<Dio>((ref) {
 
 final imagePickerServiceProvider = Provider<ImagePickerService>((ref) {
   return ImagePickerService();
+});
+
+final filePickerServiceProvider = Provider<FilePickerService>((ref) {
+  return FilePickerService();
 });
 
 final locationServiceProvider = Provider<LocationService>((ref) {

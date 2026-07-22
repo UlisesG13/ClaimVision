@@ -113,7 +113,7 @@ class _FakeMisSiniestrosController extends MisSiniestrosController {
 
 class _FakeOnboardingController extends OnboardingController {
   @override
-  OnboardingState build() => const OnboardingState();
+  OnboardingState build() => const OnboardingState(completed: true);
 }
 
 class _FakeNotificacionesController extends NotificacionesController {
@@ -152,18 +152,14 @@ Widget _buildTestApp() {
 }
 
 void main() {
-  group('Flujo primer inicio (Omitir)', () {
-    testWidgets('Omitir cambio de contraseña y biometrico "Ahora no"',
+  group('Flujo primer inicio (sin contraseña obligatoria)', () {
+    testWidgets('Omitir biometrico "Ahora no" llega al home',
         (WidgetTester tester) async {
       await tester.pumpWidget(_buildTestApp());
       await tester.pumpAndSettle(const Duration(seconds: 5));
 
-      expect(find.text('Actualiza tu contraseña'), findsOneWidget);
-      expect(find.text('Omitir'), findsOneWidget);
-
-      await tester.tap(find.text('Omitir'));
-      await tester.pumpAndSettle(const Duration(seconds: 3));
-
+      // Sin diálogo de contraseña: va directo al diálogo de biometría.
+      expect(find.text('Actualiza tu contraseña'), findsNothing);
       expect(find.text('¿Usar huella digital?'), findsOneWidget);
       expect(find.text('Ahora no'), findsOneWidget);
 
@@ -174,16 +170,15 @@ void main() {
     });
 
     testWidgets(
-        'Omitir cambio de contraseña, activar huella y confirmar contraseña',
+        'Activar huella y confirmar contraseña registra biometría',
         (WidgetTester tester) async {
       await tester.pumpWidget(_buildTestApp());
       await tester.pumpAndSettle(const Duration(seconds: 5));
 
-      expect(find.text('Actualiza tu contraseña'), findsOneWidget);
-      await tester.tap(find.text('Omitir'));
-      await tester.pumpAndSettle(const Duration(seconds: 3));
-
+      // Sin diálogo de contraseña: va directo al diálogo de biometría.
+      expect(find.text('Actualiza tu contraseña'), findsNothing);
       expect(find.text('¿Usar huella digital?'), findsOneWidget);
+
       await tester.tap(find.text('Activar'));
       await tester.pumpAndSettle(const Duration(seconds: 3));
 
