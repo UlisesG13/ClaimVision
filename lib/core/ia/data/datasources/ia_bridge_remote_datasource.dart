@@ -1,5 +1,6 @@
-import 'dart:developer' as developer;
 import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 
 import 'package:dio/dio.dart';
 
@@ -77,8 +78,9 @@ class IaBridgeRemoteDataSource {
     required File ine,
   }) async {
     try {
-      developer.log(
-        '[OCR-DS] Enviando extractAndValidate: poliza=${poliza.path} (${poliza.lengthSync()} bytes), ine=${ine.path} (${ine.lengthSync()} bytes)',
+      debugPrint('[OCR-HTTP] POST ${ApiConstants.iaBridgeOcrExtractAndValidate}');
+      debugPrint(
+        '[OCR-HTTP] poliza=${poliza.path} (${poliza.lengthSync()} B), ine=${ine.path} (${ine.lengthSync()} B)',
       );
       final form = FormData.fromMap({
         'poliza': await MultipartFile.fromFile(poliza.path, filename: _fileName(poliza)),
@@ -88,11 +90,18 @@ class IaBridgeRemoteDataSource {
         ApiConstants.iaBridgeOcrExtractAndValidate,
         data: form,
       );
-      developer.log('[OCR-DS] Respuesta status=${response.statusCode}');
+      debugPrint('[OCR-HTTP] Response: status=${response.statusCode}');
+      debugPrint('[OCR-HTTP] Response body: ${response.data}');
       _ensureSuccess(response);
       return IaExtractAndValidateDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
-      developer.log('[OCR-DS] DioException: ${e.response?.statusCode} ${e.response?.data}');
+      debugPrint('[OCR-HTTP] DioException type=${e.type} message=${e.message}');
+      debugPrint('[OCR-HTTP] DioException request: ${e.requestOptions.uri}');
+      if (e.response != null) {
+        debugPrint('[OCR-HTTP] Error response status=${e.response!.statusCode} body=${e.response!.data}');
+      } else {
+        debugPrint('[OCR-HTTP] No response from server');
+      }
       throw ApiErrorMapper.fromDioException(e);
     }
   }
@@ -334,6 +343,7 @@ class IaBridgeRemoteDataSource {
   void _ensureSuccess(Response response) {
     final status = response.statusCode ?? 500;
     if (status >= 400) {
+      debugPrint('[HTTP] Error ${response.requestOptions.uri}: status=$status body=${response.data}');
       throw ApiErrorMapper.fromResponse(response);
     }
   }

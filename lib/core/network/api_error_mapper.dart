@@ -54,16 +54,20 @@ class ApiErrorMapper {
     };
   }
 
-  /// Extrae el mensaje del campo `detail` del cuerpo del error.
+  /// Extrae el mensaje de los campos `error` o `detail` del cuerpo del error.
   static String _extractDetail(dynamic data, int status) {
-    if (data is Map && data['detail'] != null) {
-      final detail = data['detail'];
-      if (detail is String) return detail;
-      // Errores de validación de Pydantic: lista de {loc, msg, type}.
-      if (detail is List && detail.isNotEmpty) {
-        final first = detail.first;
-        if (first is Map && first['msg'] != null) {
-          return first['msg'].toString();
+    if (data is Map) {
+      // El backend de IA devuelve {error: "..."}
+      if (data['error'] is String) return data['error'] as String;
+      // El backend general devuelve {detail: "..."}
+      if (data['detail'] != null) {
+        final detail = data['detail'];
+        if (detail is String) return detail;
+        if (detail is List && detail.isNotEmpty) {
+          final first = detail.first;
+          if (first is Map && first['msg'] != null) {
+            return first['msg'].toString();
+          }
         }
       }
     }
@@ -75,9 +79,10 @@ class ApiErrorMapper {
       400 || 422 => 'Revisa los datos ingresados.',
       401 => 'Correo o contraseña incorrectos.',
       403 => 'No tienes acceso a este recurso.',
-      404 => 'No se encontró la información solicitada.',
-      409 => 'Ya existe un registro con estos datos.',
-      _ => 'Ocurrió un problema con el servidor. Inténtalo de nuevo.',
+       404 => 'No se encontró la información solicitada.',
+       409 => 'Ya existe un registro con estos datos.',
+       413 => 'El archivo es demasiado grande. Comprime las imágenes antes de subirlas.',
+       _ => 'Ocurrió un problema con el servidor. Inténtalo de nuevo.',
     };
   }
 }

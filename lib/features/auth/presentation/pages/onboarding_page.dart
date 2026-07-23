@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -37,6 +38,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   final _anioController = TextEditingController();
   final _placasController = TextEditingController();
   final _screenshotProtection = ScreenshotProtectionService();
+  bool _generatingPdf = false;
 
   @override
   void initState() {
@@ -57,12 +59,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     super.dispose();
   }
 
-  Future<void> _pickPdf(void Function(File) onSelected) async {
-    final file = await ref.read(filePickerServiceProvider).pickPdf();
-    if (file != null) onSelected(file);
-  }
-
-  Future<void> _pickImage(void Function(File) onSelected) async {
+  Future<void> _pickInes() async {
     final source = await showModalBottomSheet<_PickSource>(
       context: context,
       backgroundColor: context.surfaceColor,
@@ -74,15 +71,114 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     );
     if (source == null) return;
 
-    final File? file;
-    if (source == _PickSource.camera) {
-      final picker = ref.read(imagePickerServiceProvider);
-      file = await picker.fromCamera();
-    } else {
-      final picker = ref.read(imagePickerServiceProvider);
-      file = await picker.fromGallery();
+    if (source == _PickSource.pdf) {
+      final file = await ref.read(filePickerServiceProvider).pickPdf();
+      if (file != null) {
+        ref.read(onboardingControllerProvider.notifier).setIdentificacion(file);
+      }
+      return;
     }
-    if (file != null) onSelected(file);
+
+    setState(() => _generatingPdf = true);
+    try {
+      final picker = ref.read(imagePickerServiceProvider);
+      File frente;
+      File reverso;
+
+      if (source == _PickSource.camera) {
+        final f = await picker.fromCamera();
+        if (f == null) return;
+        frente = f;
+
+        if (!mounted) return;
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: const Text('INE Reverso'),
+            content: const Text('Ahora toma la foto del reverso de tu INE.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('Continuar'),
+              ),
+            ],
+          ),
+        );
+
+        if (!mounted) return;
+        final r = await picker.fromCamera();
+        if (r == null) return;
+        reverso = r;
+      } else {
+        final images = await picker.pickMultipleFromGallery();
+        if (images.length < 2) {
+          if (mounted) {
+            AppSnackbar.error(context, 'Selecciona ambas caras de la INE (frente y reverso).');
+          }
+          return;
+        }
+        frente = images[0];
+        reverso = images[1];
+      }
+
+      if (!mounted) return;
+      final pdf = await ref.read(inePdfServiceProvider).combine(
+            frente: frente,
+            reverso: reverso,
+          );
+      if (!mounted) return;
+      ref.read(onboardingControllerProvider.notifier).setIdentificacion(pdf);
+    } catch (e) {
+      if (mounted) {
+        AppSnackbar.error(context, 'Error al procesar las imágenes.');
+      }
+    } finally {
+      if (mounted) setState(() => _generatingPdf = false);
+    }
+  }
+
+  /// Póliza: siempre se envía como PDF (requisito del backend). El usuario puede
+  /// cargar el PDF digital del asegurador, o fotografiarla y la envolvemos en un
+  /// PDF de 1 página.
+  Future<void> _pickPoliza() async {
+    final source = await showModalBottomSheet<_PickSource>(
+      context: context,
+      backgroundColor: context.surfaceColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLg)),
+      ),
+      builder: (_) => const _SourceSheet(),
+    );
+    if (source == null) return;
+
+    if (source == _PickSource.pdf) {
+      final file = await ref.read(filePickerServiceProvider).pickPdf();
+      if (file != null) {
+        ref.read(onboardingControllerProvider.notifier).setPoliza(file);
+      }
+      return;
+    }
+
+    setState(() => _generatingPdf = true);
+    try {
+      final picker = ref.read(imagePickerServiceProvider);
+      final foto = source == _PickSource.camera
+          ? await picker.fromCamera()
+          : await picker.fromGallery();
+      if (foto == null) return;
+
+      final pdf = await ref.read(inePdfServiceProvider).fromImage(foto);
+      if (!mounted) return;
+      ref.read(onboardingControllerProvider.notifier).setPoliza(pdf);
+    } catch (e) {
+      if (mounted) {
+        AppSnackbar.error(context, 'Error al procesar la foto de la póliza.');
+      }
+    } finally {
+      if (mounted) setState(() => _generatingPdf = false);
+    }
   }
 
   @override
@@ -147,32 +243,24 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   children: [
                     _ScanStatusCard(
                       ocrLoading: state.ocrLoading,
-                      generatingPdf: state.generatingPdf,
+                      generatingPdf: _generatingPdf,
                       hasDetected: state.hasDetected,
                     ),
                     const Gap(AppSpacing.lg),
                     _DocumentSlot(
-                      label: 'INE Frente',
-                      file: state.cedulaFrente,
-                      isPdf: false,
-                      hint: 'Toca para tomar foto o elegir de galería',
-                      onTap: () => _pickImage(controller.setIdentificacionFrente),
-                    ),
-                    const Gap(AppSpacing.md),
-                    _DocumentSlot(
-                      label: 'INE Reverso',
-                      file: state.cedulaReverso,
-                      isPdf: false,
-                      hint: 'Toca para tomar foto o elegir de galería',
-                      onTap: () => _pickImage(controller.setIdentificacionReverso),
+                      label: 'INE (Frente y Reverso)',
+                      file: state.cedula,
+                      isPdf: true,
+                      hint: 'Toca para capturar o seleccionar ambas caras',
+                      onTap: _pickInes,
                     ),
                     const Gap(AppSpacing.md),
                     _DocumentSlot(
                       label: 'Póliza del seguro',
                       file: state.poliza,
                       isPdf: true,
-                      hint: 'Toca para agregar archivo PDF',
-                      onTap: () => _pickPdf(controller.setPoliza),
+                      hint: 'Toca para capturar, elegir de galería o subir PDF',
+                      onTap: _pickPoliza,
                     ),
                     const Gap(AppSpacing.lg),
                     if (!state.hasDetected)
@@ -240,13 +328,16 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                         onPressed: state.canConfirm ? controller.confirm : null,
                         foregroundColor: const Color(0xFF6D4400),
                       ),
-                      if (!state.avisoPrivacidad)
+                      if (!state.canConfirm && !state.submitting)
                         Padding(
                           padding: const EdgeInsets.only(top: AppSpacing.sm),
                           child: Text(
-                            'Debes aceptar el Aviso de Privacidad para continuar.',
+                            'Completa para continuar: '
+                            '${state.missingToConfirm.join(', ')}.',
                             textAlign: TextAlign.center,
-                            style: theme.textTheme.bodySmall,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: AppColors.alert,
+                            ),
                           ),
                         ),
                     ],
@@ -261,7 +352,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 }
 
-enum _PickSource { camera, gallery }
+enum _PickSource { camera, gallery, pdf }
 
 class _SourceSheet extends StatelessWidget {
   const _SourceSheet();
@@ -284,6 +375,12 @@ class _SourceSheet extends StatelessWidget {
                 color: AppColors.blueprint),
             title: const Text('Subir desde galería'),
             onTap: () => Navigator.pop(context, _PickSource.gallery),
+          ),
+          ListTile(
+            leading: const Icon(Icons.picture_as_pdf_outlined,
+                color: AppColors.blueprint),
+            title: const Text('Seleccionar PDF'),
+            onTap: () => Navigator.pop(context, _PickSource.pdf),
           ),
           const Gap(AppSpacing.sm),
         ],
@@ -334,7 +431,7 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _ScanStatusCard extends StatelessWidget {
+class _ScanStatusCard extends StatefulWidget {
   const _ScanStatusCard({
     required this.ocrLoading,
     required this.generatingPdf,
@@ -345,44 +442,156 @@ class _ScanStatusCard extends StatelessWidget {
   final bool hasDetected;
 
   @override
+  State<_ScanStatusCard> createState() => _ScanStatusCardState();
+}
+
+class _ScanStatusCardState extends State<_ScanStatusCard>
+    with SingleTickerProviderStateMixin {
+  static const _steps = <String>[
+    'Leyendo tu INE…',
+    'Extrayendo datos de la póliza…',
+    'Validando la calidad de las imágenes…',
+    'Verificando número de póliza y vigencia…',
+    'Cruzando datos de INE y póliza…',
+    'Casi listo…',
+  ];
+
+  late final AnimationController _progress;
+  Timer? _cycler;
+  int _step = 0;
+
+  bool get _analyzing => widget.ocrLoading;
+
+  @override
+  void initState() {
+    super.initState();
+    // Progreso "simulado": avanza hacia ~92% mientras esperamos la respuesta y
+    // se completa al terminar. El OCR es una sola llamada sin progreso real.
+    _progress = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 7),
+    );
+    if (_analyzing) _startAnalyzing();
+  }
+
+  @override
+  void didUpdateWidget(covariant _ScanStatusCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_analyzing && !oldWidget.ocrLoading) {
+      _startAnalyzing();
+    } else if (!_analyzing && oldWidget.ocrLoading) {
+      _stopAnalyzing(completed: widget.hasDetected);
+    }
+  }
+
+  void _startAnalyzing() {
+    _step = 0;
+    _progress
+      ..reset()
+      ..forward();
+    _cycler?.cancel();
+    _cycler = Timer.periodic(const Duration(milliseconds: 1600), (_) {
+      if (!mounted) return;
+      setState(() => _step = (_step + 1) % _steps.length);
+    });
+  }
+
+  void _stopAnalyzing({required bool completed}) {
+    _cycler?.cancel();
+    _cycler = null;
+    if (completed) {
+      _progress.animateTo(1, duration: const Duration(milliseconds: 400));
+    } else {
+      _progress.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _cycler?.cancel();
+    _progress.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final (IconData icon, String text) = switch ((
-      generatingPdf,
-      ocrLoading,
-      hasDetected,
-    )) {
-      (true, _, _) => (
-          Icons.picture_as_pdf,
-          'Generando PDF de la INE…'
-        ),
-      (_, true, _) => (
-          Icons.document_scanner_outlined,
-          'Analizando tus documentos…'
-        ),
-      (_, _, true) => (Icons.check_circle_outline, 'Documentos analizados'),
-      _ => (Icons.qr_code_scanner, 'Agrega tus documentos para comenzar'),
-    };
+    final textStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: const Color(0xFFB4C7EC),
+        );
+
     return Container(
       height: 170,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       decoration: BoxDecoration(
         color: const Color(0xFF000616),
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (ocrLoading)
-            const CircularProgressIndicator(color: AppColors.amber)
-          else
-            Icon(icon, size: 48, color: AppColors.amber),
-          const Gap(AppSpacing.md),
-          Text(
-            text,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0xFFB4C7EC),
-                ),
-          ),
+          if (widget.generatingPdf) ...[
+            const Icon(Icons.picture_as_pdf, size: 44, color: AppColors.amber),
+            const Gap(AppSpacing.md),
+            Text('Generando PDF de la INE…',
+                textAlign: TextAlign.center, style: textStyle),
+            const Gap(AppSpacing.md),
+            _bar(null),
+          ] else if (_analyzing) ...[
+            const Icon(Icons.document_scanner_outlined,
+                size: 44, color: AppColors.amber),
+            const Gap(AppSpacing.md),
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 350),
+              child: Text(
+                _steps[_step],
+                key: ValueKey(_step),
+                textAlign: TextAlign.center,
+                style: textStyle,
+              ),
+            ),
+            const Gap(AppSpacing.md),
+            AnimatedBuilder(
+              animation: _progress,
+              builder: (_, _) {
+                final value = Curves.easeOut.transform(_progress.value) * 0.92;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _bar(value),
+                    const Gap(AppSpacing.xs),
+                    Text('${(value * 100).round()}%',
+                        textAlign: TextAlign.right,
+                        style: textStyle?.copyWith(fontSize: 11)),
+                  ],
+                );
+              },
+            ),
+          ] else if (widget.hasDetected) ...[
+            const Icon(Icons.check_circle_outline,
+                size: 48, color: AppColors.amber),
+            const Gap(AppSpacing.md),
+            Text('Documentos analizados',
+                textAlign: TextAlign.center, style: textStyle),
+          ] else ...[
+            const Icon(Icons.qr_code_scanner, size: 48, color: AppColors.amber),
+            const Gap(AppSpacing.md),
+            Text('Agrega tus documentos para comenzar',
+                textAlign: TextAlign.center, style: textStyle),
+          ],
         ],
+      ),
+    );
+  }
+
+  Widget _bar(double? value) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      child: LinearProgressIndicator(
+        value: value,
+        minHeight: 6,
+        backgroundColor: const Color(0xFF1B2440),
+        valueColor: const AlwaysStoppedAnimation(AppColors.amber),
       ),
     );
   }
