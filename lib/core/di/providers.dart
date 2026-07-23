@@ -21,6 +21,7 @@ import '../services/biometric_service.dart';
 import '../services/device_inspector_service.dart';
 import '../services/file_picker_service.dart';
 import '../services/image_picker_service.dart';
+import '../services/ine_pdf_service.dart';
 import '../services/location_service.dart';
 import '../services/notification_service.dart';
 import '../services/secure_storage_service.dart';
@@ -49,6 +50,10 @@ final imagePickerServiceProvider = Provider<ImagePickerService>((ref) {
 
 final filePickerServiceProvider = Provider<FilePickerService>((ref) {
   return FilePickerService();
+});
+
+final inePdfServiceProvider = Provider<InePdfService>((ref) {
+  return InePdfService();
 });
 
 final locationServiceProvider = Provider<LocationService>((ref) {

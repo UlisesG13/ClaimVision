@@ -62,6 +62,29 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
     if (file != null) onSelected(file);
   }
 
+  Future<void> _pickImage(void Function(File) onSelected) async {
+    final source = await showModalBottomSheet<_PickSource>(
+      context: context,
+      backgroundColor: context.surfaceColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLg)),
+      ),
+      builder: (_) => const _SourceSheet(),
+    );
+    if (source == null) return;
+
+    final File? file;
+    if (source == _PickSource.camera) {
+      final picker = ref.read(imagePickerServiceProvider);
+      file = await picker.fromCamera();
+    } else {
+      final picker = ref.read(imagePickerServiceProvider);
+      file = await picker.fromGallery();
+    }
+    if (file != null) onSelected(file);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -124,15 +147,24 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                   children: [
                     _ScanStatusCard(
                       ocrLoading: state.ocrLoading,
+                      generatingPdf: state.generatingPdf,
                       hasDetected: state.hasDetected,
                     ),
                     const Gap(AppSpacing.lg),
                     _DocumentSlot(
-                      label: 'INE (Frente y Reverso)',
-                      file: state.cedula,
-                      isPdf: true,
-                      hint: 'Toca para agregar PDF',
-                      onTap: () => _pickPdf(controller.setIdentificacion),
+                      label: 'INE Frente',
+                      file: state.cedulaFrente,
+                      isPdf: false,
+                      hint: 'Toca para tomar foto o elegir de galería',
+                      onTap: () => _pickImage(controller.setIdentificacionFrente),
+                    ),
+                    const Gap(AppSpacing.md),
+                    _DocumentSlot(
+                      label: 'INE Reverso',
+                      file: state.cedulaReverso,
+                      isPdf: false,
+                      hint: 'Toca para tomar foto o elegir de galería',
+                      onTap: () => _pickImage(controller.setIdentificacionReverso),
                     ),
                     const Gap(AppSpacing.md),
                     _DocumentSlot(
@@ -229,6 +261,37 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   }
 }
 
+enum _PickSource { camera, gallery }
+
+class _SourceSheet extends StatelessWidget {
+  const _SourceSheet();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Gap(AppSpacing.sm),
+          ListTile(
+            leading: const Icon(Icons.photo_camera_outlined,
+                color: AppColors.blueprint),
+            title: const Text('Tomar foto'),
+            onTap: () => Navigator.pop(context, _PickSource.camera),
+          ),
+          ListTile(
+            leading: const Icon(Icons.photo_library_outlined,
+                color: AppColors.blueprint),
+            title: const Text('Subir desde galería'),
+            onTap: () => Navigator.pop(context, _PickSource.gallery),
+          ),
+          const Gap(AppSpacing.sm),
+        ],
+      ),
+    );
+  }
+}
+
 class _Header extends StatelessWidget {
   const _Header({required this.onBack});
   final VoidCallback onBack;
@@ -272,18 +335,31 @@ class _Header extends StatelessWidget {
 }
 
 class _ScanStatusCard extends StatelessWidget {
-  const _ScanStatusCard({required this.ocrLoading, required this.hasDetected});
+  const _ScanStatusCard({
+    required this.ocrLoading,
+    required this.generatingPdf,
+    required this.hasDetected,
+  });
   final bool ocrLoading;
+  final bool generatingPdf;
   final bool hasDetected;
 
   @override
   Widget build(BuildContext context) {
-    final (IconData icon, String text) = switch ((ocrLoading, hasDetected)) {
-      (true, _) => (
+    final (IconData icon, String text) = switch ((
+      generatingPdf,
+      ocrLoading,
+      hasDetected,
+    )) {
+      (true, _, _) => (
+          Icons.picture_as_pdf,
+          'Generando PDF de la INE…'
+        ),
+      (_, true, _) => (
           Icons.document_scanner_outlined,
           'Analizando tus documentos…'
         ),
-      (_, true) => (Icons.check_circle_outline, 'Documentos analizados'),
+      (_, _, true) => (Icons.check_circle_outline, 'Documentos analizados'),
       _ => (Icons.qr_code_scanner, 'Agrega tus documentos para comenzar'),
     };
     return Container(

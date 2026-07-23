@@ -12,8 +12,11 @@ import 'providers.dart';
 
 class OnboardingState {
   const OnboardingState({
+    this.cedulaFrente,
+    this.cedulaReverso,
     this.cedula,
     this.poliza,
+    this.generatingPdf = false,
     this.ocrLoading = false,
     this.submitting = false,
     this.completed = false,
@@ -33,9 +36,12 @@ class OnboardingState {
     this.errorMessage,
   });
 
+  final File? cedulaFrente;
+  final File? cedulaReverso;
   final File? cedula;
   final File? poliza;
 
+  final bool generatingPdf;
   final bool ocrLoading;
   final bool submitting;
   final bool completed;
@@ -56,7 +62,8 @@ class OnboardingState {
 
   final String? errorMessage;
 
-  bool get hasRequiredDocuments => cedula != null && poliza != null;
+  bool get hasRequiredDocuments =>
+      cedulaFrente != null && cedulaReverso != null && poliza != null;
 
   bool get canConfirm =>
       avisoPrivacidad &&
@@ -66,8 +73,11 @@ class OnboardingState {
       !submitting;
 
   OnboardingState copyWith({
+    File? cedulaFrente,
+    File? cedulaReverso,
     File? cedula,
     File? poliza,
+    bool? generatingPdf,
     bool? ocrLoading,
     bool? submitting,
     bool? completed,
@@ -88,8 +98,11 @@ class OnboardingState {
     bool clearError = false,
   }) {
     return OnboardingState(
+      cedulaFrente: cedulaFrente ?? this.cedulaFrente,
+      cedulaReverso: cedulaReverso ?? this.cedulaReverso,
       cedula: cedula ?? this.cedula,
       poliza: poliza ?? this.poliza,
+      generatingPdf: generatingPdf ?? this.generatingPdf,
       ocrLoading: ocrLoading ?? this.ocrLoading,
       submitting: submitting ?? this.submitting,
       completed: completed ?? this.completed,
@@ -116,8 +129,11 @@ class OnboardingController extends Notifier<OnboardingState> {
   @override
   OnboardingState build() => const OnboardingState();
 
-  void setIdentificacion(File file) =>
-      state = state.copyWith(cedula: file, clearError: true);
+  void setIdentificacionFrente(File file) =>
+      state = state.copyWith(cedulaFrente: file, clearError: true);
+
+  void setIdentificacionReverso(File file) =>
+      state = state.copyWith(cedulaReverso: file, clearError: true);
 
   void setPoliza(File file) =>
       state = state.copyWith(poliza: file, clearError: true);
@@ -140,24 +156,52 @@ class OnboardingController extends Notifier<OnboardingState> {
   void editVehiculoPlacas(String v) => state = state.copyWith(vehiculoPlacas: v);
 
   Future<void> runOcr() async {
-    final cedula = state.cedula;
+    final frente = state.cedulaFrente;
+    final reverso = state.cedulaReverso;
     final poliza = state.poliza;
-    if (cedula == null || poliza == null) {
+    if (frente == null || reverso == null || poliza == null) {
       state = state.copyWith(
-        errorMessage: 'Agrega la INE y la póliza.',
+        errorMessage: 'Agrega la INE (frente y reverso) y la póliza.',
       );
       return;
     }
 
+    File inePdf;
+    if (state.cedula != null) {
+      inePdf = state.cedula!;
+    } else {
+      developer.log(
+        '[PDF] Generando PDF desde imágenes: frente=${frente.path}, reverso=${reverso.path}',
+      );
+      state = state.copyWith(generatingPdf: true, clearError: true);
+      try {
+        inePdf = await ref.read(inePdfServiceProvider).combine(
+              frente: frente,
+              reverso: reverso,
+            );
+        developer.log(
+          '[PDF] PDF generado: ${inePdf.path} (${inePdf.lengthSync()} bytes)',
+        );
+        state = state.copyWith(cedula: inePdf, generatingPdf: false);
+      } catch (e) {
+        developer.log('[PDF] Error generando PDF: $e');
+        state = state.copyWith(
+          generatingPdf: false,
+          errorMessage: 'No se pudo generar el PDF de la INE.',
+        );
+        return;
+      }
+    }
+
     developer.log(
-      '[OCR] Enviando: ine=${cedula.path} (${cedula.lengthSync()} bytes), poliza=${poliza.path} (${poliza.lengthSync()} bytes)',
+      '[OCR] Enviando: ine=${inePdf.path} (${inePdf.lengthSync()} bytes), poliza=${poliza.path} (${poliza.lengthSync()} bytes)',
     );
 
     state = state.copyWith(ocrLoading: true, clearError: true);
     try {
       final result = await ref.read(iaExtractAndValidateProvider)(
         poliza: poliza,
-        ine: cedula,
+        ine: inePdf,
       );
       developer.log('[OCR] Resultado recibido: ${result.runtimeType}');
       final p = result.poliza;
@@ -182,7 +226,7 @@ class OnboardingController extends Notifier<OnboardingState> {
       developer.log('[OCR] Error inesperado: $e');
       state = state.copyWith(
         ocrLoading: false,
-        errorMessage: 'No se pudieron analizar los documentos. Verifica que los PDFs sean legibles.',
+        errorMessage: 'No se pudieron analizar los documentos. Verifica que las imágenes sean legibles.',
       );
     }
   }
