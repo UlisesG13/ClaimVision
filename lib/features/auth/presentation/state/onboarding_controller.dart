@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,13 +10,11 @@ import '../../../../core/errors/failures.dart';
 import '../../domain/entities/onboarding_data.dart';
 import 'providers.dart';
 
-/// Estado del onboarding (vincular póliza). Flujo multi-paso con red → Riverpod.
 class OnboardingState {
   const OnboardingState({
-    this.cedula,
+    this.cedulaFrente,
+    this.cedulaReverso,
     this.poliza,
-    this.identificacionIsPdf = false,
-    this.polizaIsPdf = false,
     this.ocrLoading = false,
     this.submitting = false,
     this.completed = false,
@@ -34,20 +34,13 @@ class OnboardingState {
     this.errorMessage,
   });
 
-  final File? cedula;
+  final File? cedulaFrente;
+  final File? cedulaReverso;
   final File? poliza;
-
-  /// `true` si el archivo de identificación es un PDF (no una foto/imagen).
-  final bool identificacionIsPdf;
-
-  /// `true` si el archivo de póliza es un PDF (siempre debería serlo).
-  final bool polizaIsPdf;
 
   final bool ocrLoading;
   final bool submitting;
   final bool completed;
-
-  /// Si ya se ejecutó el OCR y se llenaron los campos detectados.
   final bool hasDetected;
   final String numeroPoliza;
   final String vigenciaPoliza;
@@ -59,17 +52,15 @@ class OnboardingState {
   final String aseguradora;
   final String nombreAsegurado;
 
-  // Consentimientos ARCO.
   final bool avisoPrivacidad;
   final bool biometria;
   final bool transferenciaTalleres;
 
   final String? errorMessage;
 
-  bool get hasBothDocuments => cedula != null && poliza != null;
+  bool get hasRequiredDocuments =>
+      cedulaFrente != null && cedulaReverso != null && poliza != null;
 
-  /// El botón "Confirmar y Vincular" se habilita cuando hay datos y el aviso de
-  /// privacidad está aceptado (gate obligatorio del dominio).
   bool get canConfirm =>
       avisoPrivacidad &&
       numeroPoliza.trim().isNotEmpty &&
@@ -78,10 +69,9 @@ class OnboardingState {
       !submitting;
 
   OnboardingState copyWith({
-    File? cedula,
+    File? cedulaFrente,
+    File? cedulaReverso,
     File? poliza,
-    bool? identificacionIsPdf,
-    bool? polizaIsPdf,
     bool? ocrLoading,
     bool? submitting,
     bool? completed,
@@ -102,10 +92,9 @@ class OnboardingState {
     bool clearError = false,
   }) {
     return OnboardingState(
-      cedula: cedula ?? this.cedula,
+      cedulaFrente: cedulaFrente ?? this.cedulaFrente,
+      cedulaReverso: cedulaReverso ?? this.cedulaReverso,
       poliza: poliza ?? this.poliza,
-      identificacionIsPdf: identificacionIsPdf ?? this.identificacionIsPdf,
-      polizaIsPdf: polizaIsPdf ?? this.polizaIsPdf,
       ocrLoading: ocrLoading ?? this.ocrLoading,
       submitting: submitting ?? this.submitting,
       completed: completed ?? this.completed,
@@ -132,21 +121,14 @@ class OnboardingController extends Notifier<OnboardingState> {
   @override
   OnboardingState build() => const OnboardingState();
 
-  /// Asigna la identificación oficial (foto o PDF).
-  void setIdentificacion(File file, {bool isPdf = false}) =>
-      state = state.copyWith(
-        cedula: file,
-        identificacionIsPdf: isPdf,
-        clearError: true,
-      );
+  void setIdentificacionFrente(File file) =>
+      state = state.copyWith(cedulaFrente: file, clearError: true);
 
-  /// Asigna la póliza (siempre PDF).
-  void setPoliza(File file, {bool isPdf = true}) =>
-      state = state.copyWith(
-        poliza: file,
-        polizaIsPdf: isPdf,
-        clearError: true,
-      );
+  void setIdentificacionReverso(File file) =>
+      state = state.copyWith(cedulaReverso: file, clearError: true);
+
+  void setPoliza(File file) =>
+      state = state.copyWith(poliza: file, clearError: true);
 
   void toggleAviso(bool value) =>
       state = state.copyWith(avisoPrivacidad: value);
@@ -165,23 +147,27 @@ class OnboardingController extends Notifier<OnboardingState> {
   void editVehiculoAnio(String v) => state = state.copyWith(vehiculoAnio: v);
   void editVehiculoPlacas(String v) => state = state.copyWith(vehiculoPlacas: v);
 
-  /// Ejecuta el OCR sobre cédula + póliza vía IA Service y llena los campos.
   Future<void> runOcr() async {
-    final cedula = state.cedula;
+    final frente = state.cedulaFrente;
     final poliza = state.poliza;
-    if (cedula == null || poliza == null) {
+    if (frente == null || state.cedulaReverso == null || poliza == null) {
       state = state.copyWith(
-        errorMessage: 'Agrega la foto de tu cédula y de tu póliza.',
+        errorMessage: 'Agrega la INE (Frente y Reverso) y la póliza.',
       );
       return;
     }
+
+    developer.log(
+      '[OCR] Enviando: frente=${frente.path} (${frente.lengthSync()} bytes), poliza=${poliza.path} (${poliza.lengthSync()} bytes)',
+    );
 
     state = state.copyWith(ocrLoading: true, clearError: true);
     try {
       final result = await ref.read(iaExtractAndValidateProvider)(
         poliza: poliza,
-        ine: cedula,
+        ine: frente,
       );
+      developer.log('[OCR] Resultado recibido: ${result.runtimeType}');
       final p = result.poliza;
       final i = result.ine;
       state = state.copyWith(
@@ -198,18 +184,17 @@ class OnboardingController extends Notifier<OnboardingState> {
         nombreAsegurado: p.nombreAsegurado,
       );
     } on Failure catch (f) {
+      developer.log('[OCR] Failure: ${f.message}');
       state = state.copyWith(ocrLoading: false, errorMessage: f.message);
     } catch (e) {
+      developer.log('[OCR] Error inesperado: $e');
       state = state.copyWith(
         ocrLoading: false,
-        errorMessage: 'No se pudieron analizar los documentos. Verifica que las fotos sean legibles.',
+        errorMessage: 'No se pudieron analizar los documentos. Verifica que los PDFs sean legibles.',
       );
     }
   }
 
-  /// Envía consentimientos, confirma los datos y sube los documentos.
-  /// Marca `completed` al terminar. La subida de documentos es best-effort:
-  /// si falla, el onboarding se completa igual y el usuario sube después.
   Future<void> confirm() async {
     if (!state.canConfirm) return;
     state = state.copyWith(submitting: true, clearError: true);
@@ -232,17 +217,22 @@ class OnboardingController extends Notifier<OnboardingState> {
           vehiculoPlacas: state.vehiculoPlacas.trim(),
         ),
       );
-      // Subir documentos al almacén permanente (best-effort).
-      final cedula = state.cedula;
+      final frente = state.cedulaFrente;
+      final reverso = state.cedulaReverso;
       final poliza = state.poliza;
-      if (cedula != null && poliza != null) {
+      if (frente != null && reverso != null && poliza != null) {
         try {
+          developer.log(
+            '[Upload] Subiendo: frente=${frente.path}, reverso=${reverso.path}, poliza=${poliza.path}',
+          );
           await ref.read(documentoRepositoryProvider).subir(
-                identificacion: cedula,
+                identificacion: frente,
+                identificacionReverso: reverso,
                 poliza: poliza,
               );
-        } catch (_) {
-          // No bloqueamos el onboarding si falla la subida.
+          developer.log('[Upload] Documentos subidos correctamente');
+        } catch (e) {
+          developer.log('[Upload] Falló la subida (best-effort): $e');
         }
       }
       state = state.copyWith(submitting: false, completed: true);

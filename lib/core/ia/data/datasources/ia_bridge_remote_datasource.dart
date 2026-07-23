@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -76,6 +77,9 @@ class IaBridgeRemoteDataSource {
     required File ine,
   }) async {
     try {
+      developer.log(
+        '[OCR-DS] Enviando extractAndValidate: poliza=${poliza.path} (${poliza.lengthSync()} bytes), ine=${ine.path} (${ine.lengthSync()} bytes)',
+      );
       final form = FormData.fromMap({
         'poliza': await MultipartFile.fromFile(poliza.path, filename: _fileName(poliza)),
         'ine': await MultipartFile.fromFile(ine.path, filename: _fileName(ine)),
@@ -84,9 +88,11 @@ class IaBridgeRemoteDataSource {
         ApiConstants.iaBridgeOcrExtractAndValidate,
         data: form,
       );
+      developer.log('[OCR-DS] Respuesta status=${response.statusCode}');
       _ensureSuccess(response);
       return IaExtractAndValidateDto.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
+      developer.log('[OCR-DS] DioException: ${e.response?.statusCode} ${e.response?.data}');
       throw ApiErrorMapper.fromDioException(e);
     }
   }

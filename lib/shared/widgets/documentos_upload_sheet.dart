@@ -10,8 +10,6 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../features/cliente/presentation/state/providers.dart';
 
-enum _DocumentType { identificacion, poliza }
-
 class DocumentosUploadSheet extends ConsumerStatefulWidget {
   const DocumentosUploadSheet({super.key});
 
@@ -22,6 +20,7 @@ class DocumentosUploadSheet extends ConsumerStatefulWidget {
 
 class _DocumentosUploadSheetState extends ConsumerState<DocumentosUploadSheet> {
   File? _identificacion;
+  File? _identificacionReverso;
   File? _poliza;
   bool _subiendo = false;
 
@@ -51,15 +50,21 @@ class _DocumentosUploadSheetState extends ConsumerState<DocumentosUploadSheet> {
                   ?.copyWith(fontWeight: FontWeight.bold)),
           const Gap(AppSpacing.md),
           _DocumentoPickerRow(
-            label: 'Identificación oficial',
+            label: 'INE Frente (PDF)',
             archivo: _identificacion,
-            onPick: () => _pickDocumento(_DocumentType.identificacion),
+            onPick: () => _pickPdf((f) => setState(() => _identificacion = f)),
+          ),
+          const Gap(AppSpacing.md),
+          _DocumentoPickerRow(
+            label: 'INE Reverso (PDF)',
+            archivo: _identificacionReverso,
+            onPick: () => _pickPdf((f) => setState(() => _identificacionReverso = f)),
           ),
           const Gap(AppSpacing.md),
           _DocumentoPickerRow(
             label: 'Póliza del seguro',
             archivo: _poliza,
-            onPick: () => _pickDocumento(_DocumentType.poliza),
+            onPick: () => _pickPdf((f) => setState(() => _poliza = f)),
           ),
           const Gap(AppSpacing.xl),
           SizedBox(
@@ -84,54 +89,24 @@ class _DocumentosUploadSheetState extends ConsumerState<DocumentosUploadSheet> {
   }
 
   bool get _puedeSubir =>
-      _identificacion != null && _poliza != null && !_subiendo;
+      _identificacion != null && _identificacionReverso != null && _poliza != null && !_subiendo;
 
-  Future<void> _pickDocumento(_DocumentType tipo) async {
-    if (tipo == _DocumentType.poliza) {
-      final file = await ref.read(filePickerServiceProvider).pickPdf();
-      if (file != null) setState(() => _poliza = file);
-      return;
-    }
-
-    final source = await showModalBottomSheet<_PickSource>(
-      context: context,
-      showDragHandle: true,
-      backgroundColor: context.surfaceColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(AppSpacing.radiusLg)),
-      ),
-      builder: (_) => _SourceSheet(),
-    );
-
-    if (source == null) return;
-
-    final imagePicker = ref.read(imagePickerServiceProvider);
-    File? file;
-    if (source == _PickSource.camera) {
-      final picked = await imagePicker.fromCamera();
-      if (picked != null) file = File(picked.path);
-    } else if (source == _PickSource.gallery) {
-      final picked = await imagePicker.fromGallery();
-      if (picked != null) file = File(picked.path);
-    } else {
-      final picked = await ref.read(filePickerServiceProvider).pickPdf();
-      if (picked != null) file = picked;
-    }
-    if (file != null) {
-      setState(() => _identificacion = file);
-    }
+  Future<void> _pickPdf(void Function(File) onSelected) async {
+    final file = await ref.read(filePickerServiceProvider).pickPdf();
+    if (file != null) onSelected(file);
   }
 
   Future<void> _subir() async {
     final id = _identificacion;
+    final idRev = _identificacionReverso;
     final pol = _poliza;
-    if (id == null || pol == null) return;
+    if (id == null || idRev == null || pol == null) return;
 
     setState(() => _subiendo = true);
     try {
       await ref.read(documentoRepositoryProvider).subir(
             identificacion: id,
+            identificacionReverso: idRev,
             poliza: pol,
           );
       if (mounted) {
@@ -149,63 +124,6 @@ class _DocumentosUploadSheetState extends ConsumerState<DocumentosUploadSheet> {
     } finally {
       if (mounted) setState(() => _subiendo = false);
     }
-  }
-}
-
-enum _PickSource { camera, gallery, pdf }
-
-class _SourceSheet extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('Seleccionar origen',
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold)),
-          const Gap(AppSpacing.md),
-          _SourceOption(
-            icon: Icons.camera_alt_outlined,
-            label: 'Tomar foto',
-            onTap: () => Navigator.pop(context, _PickSource.camera),
-          ),
-          _SourceOption(
-            icon: Icons.photo_library_outlined,
-            label: 'Subir desde galería',
-            onTap: () => Navigator.pop(context, _PickSource.gallery),
-          ),
-          _SourceOption(
-            icon: Icons.picture_as_pdf,
-            label: 'Seleccionar PDF',
-            onTap: () => Navigator.pop(context, _PickSource.pdf),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SourceOption extends StatelessWidget {
-  const _SourceOption({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon, color: AppColors.blueprint),
-      title: Text(label),
-      trailing: Icon(Icons.chevron_right, color: context.textHintColor),
-      onTap: onTap,
-    );
   }
 }
 
@@ -237,11 +155,7 @@ class _DocumentoPickerRow extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              archivo != null
-                  ? (archivo!.path.contains('.pdf')
-                      ? Icons.picture_as_pdf
-                      : Icons.image)
-                  : Icons.upload_file,
+              archivo != null ? Icons.picture_as_pdf : Icons.upload_file,
               color: archivo != null ? AppColors.success : context.textHintColor,
             ),
             const Gap(AppSpacing.sm),

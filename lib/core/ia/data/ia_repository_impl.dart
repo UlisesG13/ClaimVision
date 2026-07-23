@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'dart:io';
 
 import '../domain/ia_repository.dart';
@@ -32,8 +33,17 @@ class IaRepositoryImpl implements IaRepository {
   Future<IaExtractAndValidateDto> extractAndValidate({
     required File poliza,
     required File ine,
-  }) =>
-      _remote.extractAndValidate(poliza: poliza, ine: ine);
+  }) async {
+    developer.log('[OCR-Repo] extractAndValidate llamado');
+    try {
+      final result = await _remote.extractAndValidate(poliza: poliza, ine: ine);
+      developer.log('[OCR-Repo] Resultado exitoso');
+      return result;
+    } catch (e) {
+      developer.log('[OCR-Repo] Error: $e');
+      rethrow;
+    }
+  }
 
   @override
   Future<IaPredictResponseDto> predict({required File file}) =>
