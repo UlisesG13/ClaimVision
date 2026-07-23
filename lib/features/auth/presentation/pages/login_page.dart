@@ -32,6 +32,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _biometricDisponible = false;
+  bool _biometricGuardado = false;
   bool _autoIntentado = false;
   bool _avisoAceptado = false;
   final _screenshotProtection = ScreenshotProtectionService();
@@ -72,19 +73,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (!disponible) return;
 
     if (!mounted) return;
-    setState(() {
-      _biometricDisponible = true;
-    });
+    setState(() => _biometricDisponible = true);
 
     if (_autoIntentado) return;
-    _autoIntentado = true;
 
     // El aviso de privacidad es gate también para el acceso biométrico.
     if (!_avisoAceptado) return;
 
+    _autoIntentado = true;
+
     final biometricRepo = ref.read(biometricRepositoryProvider);
     final enabled = await biometricRepo.isEnabled();
-    if (!enabled) return;
+    if (!enabled) {
+      if (mounted) setState(() => _biometricGuardado = false);
+      return;
+    }
+    if (mounted) setState(() => _biometricGuardado = true);
 
     await _autenticarConBiometria();
   }
@@ -141,7 +145,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (!mounted) return;
       await ref.read(authControllerProvider.notifier).login(
             email: creds.email,
-            password: creds.encryptedPassword,
+            password: creds.password,
           );
     } catch (_) {
       if (mounted) AppSnackbar.error(context, 'Ocurrió un error al usar la biometría.');
@@ -211,14 +215,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       passwordController: _passwordController,
                       isLoading: isLoading,
                       avisoAceptado: _avisoAceptado,
-                      onToggleAviso: (v) =>
-                          setState(() => _avisoAceptado = v),
+                      onToggleAviso: (v) {
+                        setState(() => _avisoAceptado = v);
+                        if (v) WidgetsBinding.instance.addPostFrameCallback((_) => _revisarBiometria());
+                      },
                       onSubmit: _submit,
                       onForgot: _mostrarModalOlvide,
                     ),
                     const Gap(AppSpacing.lg),
                     const _LegalLinks(),
-                    if (_biometricDisponible) ...[
+                    if (_biometricDisponible && _biometricGuardado) ...[
                       const Gap(AppSpacing.xl),
                       Row(
                         children: [

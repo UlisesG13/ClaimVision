@@ -1,9 +1,9 @@
 class BiometricCredentials {
   final String email;
-  final String encryptedPassword;
+  final String password;
 
   const BiometricCredentials({
     required this.email,
-    required this.encryptedPassword,
+    required this.password,
   });
 }

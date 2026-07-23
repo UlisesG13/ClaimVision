@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'package:encrypt/encrypt.dart' as encrypt_lib;
 
 import '../../../services/secure_storage_service.dart';
@@ -12,7 +13,6 @@ class BiometricLocalDataSource {
   static const _keyEmail = 'cv_biometric_email';
   static const _keyEncryptedPwd = 'cv_biometric_password';
   static const _keyAesKey = 'cv_biometric_aes_key';
-  static const _keyAesIv = 'cv_biometric_aes_iv';
 
   Future<bool> isEnabled() async {
     final v = await _storage.read(_keyEnabled);
@@ -23,11 +23,16 @@ class BiometricLocalDataSource {
     required String email,
     required String password,
   }) async {
-    final key = await _getOrCreateKey();
-    final encrypted = _encrypt(password, key);
-    await _storage.write(_keyEnabled, 'true');
-    await _storage.write(_keyEmail, email);
-    await _storage.write(_keyEncryptedPwd, encrypted);
+    try {
+      final key = await _getOrCreateKey();
+      final encrypted = _encrypt(password, key);
+      await _storage.write(_keyEnabled, 'true');
+      await _storage.write(_keyEmail, email);
+      await _storage.write(_keyEncryptedPwd, encrypted);
+    } catch (e) {
+      developer.log('BiometricLocalDataSource.save error: $e');
+      rethrow;
+    }
   }
 
   Future<String?> getEmail() async {
@@ -35,10 +40,15 @@ class BiometricLocalDataSource {
   }
 
   Future<String?> getDecryptedPassword() async {
-    final raw = await _storage.read(_keyEncryptedPwd);
-    if (raw == null) return null;
-    final key = await _getOrCreateKey();
-    return _decrypt(raw, key);
+    try {
+      final raw = await _storage.read(_keyEncryptedPwd);
+      if (raw == null) return null;
+      final key = await _getOrCreateKey();
+      return _decrypt(raw, key);
+    } catch (e) {
+      developer.log('BiometricLocalDataSource.getDecryptedPassword error: $e');
+      return null;
+    }
   }
 
   Future<void> deleteAll() async {
@@ -46,24 +56,18 @@ class BiometricLocalDataSource {
     await _storage.delete(_keyEmail);
     await _storage.delete(_keyEncryptedPwd);
     await _storage.delete(_keyAesKey);
-    await _storage.delete(_keyAesIv);
   }
 
   Future<void> disable() async {
-    await _storage.delete(_keyEnabled);
-    await _storage.delete(_keyEmail);
-    await _storage.delete(_keyEncryptedPwd);
+    await deleteAll();
   }
 
   Future<encrypt_lib.Key> _getOrCreateKey() async {
     final rawKey = await _storage.read(_keyAesKey);
-    final rawIv = await _storage.read(_keyAesIv);
 
-    if (rawKey == null || rawIv == null) {
+    if (rawKey == null || rawKey.isEmpty) {
       final newKey = encrypt_lib.Key.fromSecureRandom(32);
-      final newIv = encrypt_lib.IV.fromSecureRandom(16);
       await _storage.write(_keyAesKey, newKey.base64);
-      await _storage.write(_keyAesIv, newIv.base64);
       return newKey;
     }
 
@@ -88,7 +92,8 @@ class BiometricLocalDataSource {
       final iv = encrypt_lib.IV.fromBase64(ivB64);
       final encrypter = encrypt_lib.Encrypter(encrypt_lib.AES(key, mode: encrypt_lib.AESMode.cbc));
       return encrypter.decrypt64(dataB64, iv: iv);
-    } catch (_) {
+    } catch (e) {
+      developer.log('BiometricLocalDataSource._decrypt error: $e');
       return null;
     }
   }

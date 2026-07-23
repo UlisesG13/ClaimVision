@@ -5,6 +5,9 @@ import '../../core/biometric/presentation/providers/biometric_providers.dart';
 import '../../core/di/providers.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../features/auth/data/dtos/login_request_dto.dart';
+import '../../features/auth/presentation/state/providers.dart';
+import 'feedback/app_snackbar.dart';
 
 class BiometricToggle extends ConsumerStatefulWidget {
   const BiometricToggle({super.key});
@@ -115,6 +118,18 @@ class _BiometricToggleState extends ConsumerState<BiometricToggle> {
     );
     if (!autenticado || !mounted) return;
 
+    // Validar la contraseña contra el backend antes de guardarla
+    try {
+      final authRemote = ref.read(authRemoteDataSourceProvider);
+      await authRemote.login(LoginRequestDto(email: email, password: captured));
+    } catch (_) {
+      if (mounted) {
+        AppSnackbar.error(context, 'Contraseña incorrecta. No se pudo activar la huella.');
+      }
+      return;
+    }
+
+    if (!mounted) return;
     await biometricRepo.enable(userId: usuarioId, email: email, password: captured);
 
     if (mounted) setState(() => _enabled = true);

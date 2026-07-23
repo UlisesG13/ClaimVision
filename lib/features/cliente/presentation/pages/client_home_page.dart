@@ -12,8 +12,11 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/state/sse_providers.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 import '../../../../shared/widgets/feedback/app_dialog.dart';
+import '../../../../shared/widgets/feedback/app_snackbar.dart';
+import '../../../auth/data/dtos/login_request_dto.dart';
 import '../../../auth/presentation/state/auth_controller.dart';
 import '../../../auth/presentation/state/onboarding_controller.dart';
+import '../../../auth/presentation/state/providers.dart';
 import '../state/mis_siniestros_controller.dart';
 import '../state/notificaciones_cliente_providers.dart';
 import '../state/report_controller.dart';
@@ -266,15 +269,30 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
     if (!autenticado) return;
 
     if (!mounted) return;
-    final biometricRepo = ref.read(biometricRepositoryProvider);
+
     final session = ref.read(currentSessionProvider);
-    if (session?.email != null) {
-      await biometricRepo.enable(
-        userId: session!.usuarioId,
-        email: session.email,
-        password: pass,
-      );
+    final usuarioId = session?.usuarioId;
+    final email = session?.email;
+    if (usuarioId == null || email == null) return;
+
+    // Validar la contraseña contra el backend antes de guardarla
+    try {
+      final authRemote = ref.read(authRemoteDataSourceProvider);
+      await authRemote.login(LoginRequestDto(email: email, password: pass));
+    } catch (_) {
+      if (mounted) {
+        AppSnackbar.error(context, 'Contraseña incorrecta. No se pudo activar la huella.');
+      }
+      return;
     }
+
+    if (!mounted) return;
+    final biometricRepo = ref.read(biometricRepositoryProvider);
+    await biometricRepo.enable(
+      userId: usuarioId,
+      email: email,
+      password: pass,
+    );
   }
 }
 

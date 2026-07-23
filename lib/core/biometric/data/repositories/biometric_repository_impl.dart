@@ -29,7 +29,7 @@ class BiometricRepositoryImpl implements BiometricRepository {
     final email = await _dataSource.getEmail();
     final password = await _dataSource.getDecryptedPassword();
     if (email == null || password == null) return null;
-    return BiometricCredentials(email: email, encryptedPassword: password);
+    return BiometricCredentials(email: email, password: password);
   }
 
   @override

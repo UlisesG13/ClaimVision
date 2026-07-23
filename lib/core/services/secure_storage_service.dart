@@ -19,7 +19,8 @@ class SecureStorageService {
 
   Future<void> delete(String key) => _storage.delete(key: key);
 
-  /// Borra toda la sesión almacenada (logout / expiración de token).
+  /// Borra toda la sesión almacenada (logout / expiración de token),
+  /// incluyendo datos biométricos para evitar reuso entre usuarios.
   Future<void> clearSession() async {
     await Future.wait([
       delete(StorageKeys.token),
@@ -27,6 +28,11 @@ class SecureStorageService {
       delete(StorageKeys.email),
       delete(StorageKeys.rol),
       delete(StorageKeys.aseguradoraId),
+      // Limpiar credenciales biométricas (B1)
+      delete(StorageKeys.biometricEnabled),
+      delete(StorageKeys.biometricEmail),
+      delete(StorageKeys.biometricPassword),
+      delete('cv_biometric_aes_key'),
     ]);
   }
 }
