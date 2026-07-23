@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/routes/route_paths.dart';
+import '../../../../core/services/screenshot_protection_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/ajustador_bottom_nav.dart';
@@ -28,6 +29,20 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
+  final _screenshotProtection = ScreenshotProtectionService();
+
+  @override
+  void initState() {
+    super.initState();
+    _screenshotProtection.enable();
+  }
+
+  @override
+  void dispose() {
+    _screenshotProtection.disable();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

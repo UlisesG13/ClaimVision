@@ -9,6 +9,7 @@ import '../../../../core/constants/storage_keys.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/routes/route_paths.dart';
+import '../../../../core/services/screenshot_protection_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/validators.dart';
@@ -33,14 +34,24 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   bool _biometricDisponible = false;
   bool _autoIntentado = false;
   bool _avisoAceptado = false;
+  final _screenshotProtection = ScreenshotProtectionService();
 
   @override
   void initState() {
     super.initState();
+    _screenshotProtection.enable();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _cargarEstadoAviso();
       await _revisarBiometria();
     });
+  }
+
+  @override
+  void dispose() {
+    _screenshotProtection.disable();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   /// Pre-marca el checkbox si el último usuario de este dispositivo ya aceptó
@@ -53,13 +64,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (aceptado == 'true' && mounted) {
       setState(() => _avisoAceptado = true);
     }
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
   }
 
   Future<void> _revisarBiometria() async {

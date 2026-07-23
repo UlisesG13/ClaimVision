@@ -10,6 +10,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/date_format.dart';
 import '../../../../shared/widgets/feedback/app_snackbar.dart';
+import '../../../../shared/widgets/loading_overlay.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import '../state/report_controller.dart';
@@ -193,19 +194,7 @@ class _AnalysisCard extends StatelessWidget {
           ),
           const Gap(AppSpacing.md),
           if (analizando)
-            const Column(
-              children: [
-                SizedBox(
-                  width: 28,
-                  height: 28,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: AppColors.amber,
-                  ),
-                ),
-                Gap(AppSpacing.sm),
-              ],
-            ),
+            const LoadingOverlay(message: 'Analizando…'),
           if (entidades.isEmpty && !analizando)
             Column(
               children: [
@@ -387,7 +376,7 @@ class _CostSummaryCard extends StatelessWidget {
           ),
           const Gap(AppSpacing.md),
           if (loading)
-            const Center(child: CircularProgressIndicator(strokeWidth: 2.5)),
+            const LoadingOverlay(message: 'Calculando costo…'),
           if (resumen == null && !loading)
             Text(
               'Completa la predicción de daños para ver el costo estimado.',

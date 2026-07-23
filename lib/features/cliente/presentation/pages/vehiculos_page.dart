@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import 'package:claimvision/shared/domain/entities/siniestro.dart';
 import '../state/mis_siniestros_controller.dart';
+import '../../../../shared/widgets/async_value_widget.dart';
 
 class VehiculosPage extends ConsumerWidget {
   const VehiculosPage({super.key});
@@ -26,7 +27,8 @@ class VehiculosPage extends ConsumerWidget {
         ),
         title: Text('Vehículos registrados', style: theme.textTheme.titleLarge),
       ),
-      body: SafeArea(top: false, child: siniestrosAsync.when(
+      body: SafeArea(top: false, child: AsyncValueWidget(
+        value: siniestrosAsync,
         data: (siniestros) {
           final porPlacas = <String, Siniestro>{};
           for (final s in siniestros) {
@@ -42,8 +44,6 @@ class VehiculosPage extends ConsumerWidget {
             itemBuilder: (context, i) => _VehiculoCard(siniestro: vehiculos[i]),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => const _Empty(),
       ),
       ),
     );

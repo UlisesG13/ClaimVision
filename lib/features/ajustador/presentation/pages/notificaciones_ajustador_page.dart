@@ -11,6 +11,7 @@ import '../../../../shared/state/notificaciones_controller.dart';
 import '../../../../shared/utils/date_format.dart';
 import '../../../../shared/widgets/ajustador_bottom_nav.dart';
 import '../state/casos_asignados_controller.dart';
+import '../../../../shared/widgets/async_value_widget.dart';
 
 /// Notificaciones - Ajustador (Figma node 79:5270).
 ///
@@ -56,9 +57,8 @@ class NotificacionesAjustadorPage extends ConsumerWidget {
           }
         },
       ),
-      body: SafeArea(top: false, child: casosAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => const _Empty(),
+      body: SafeArea(top: false, child: AsyncValueWidget(
+        value: casosAsync,
         data: (casos) {
           if (casos.isEmpty) return const _Empty();
           return ListView.separated(

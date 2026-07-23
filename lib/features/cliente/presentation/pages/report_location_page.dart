@@ -10,6 +10,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/utils/date_format.dart';
 import '../../../../shared/widgets/feedback/app_snackbar.dart';
+import '../../../../shared/widgets/loading_overlay.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../state/report_controller.dart';
 import '../widgets/report_step_header.dart';
@@ -171,7 +172,7 @@ class _MapCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (locating)
-              const CircularProgressIndicator(color: AppColors.blueprint)
+              const LoadingOverlay(message: 'Obteniendo ubicación…')
             else
               Container(
                 width: 50,

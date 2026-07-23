@@ -18,6 +18,7 @@ import '../state/mis_siniestros_controller.dart';
 import '../state/notificaciones_cliente_providers.dart';
 import '../state/report_controller.dart';
 import '../widgets/siniestro_card.dart';
+import '../../../../shared/widgets/async_value_widget.dart';
 
 class ClientHomePage extends ConsumerStatefulWidget {
   const ClientHomePage({super.key});
@@ -122,7 +123,8 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
                       ],
                     ),
                     const Gap(AppSpacing.md),
-                    siniestrosAsync.when(
+                    AsyncValueWidget(
+                      value: siniestrosAsync,
                       data: (siniestros) {
                         if (siniestros.isEmpty) return const _EmptyActivity();
                         return Column(
@@ -136,13 +138,6 @@ class _ClientHomePageState extends ConsumerState<ClientHomePage> {
                           )).toList(),
                         );
                       },
-                      loading: () => const Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(AppSpacing.xl),
-                          child: CircularProgressIndicator(),
-                        ),
-                      ),
-                      error: (_, _) => const _EmptyActivity(),
                     ),
                   ],
                 ),

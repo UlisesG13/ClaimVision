@@ -13,6 +13,7 @@ import '../../../../shared/state/sse_providers.dart';
 import '../../../../shared/widgets/claim_vision_bottom_nav.dart';
 import '../state/mis_siniestros_controller.dart';
 import '../widgets/siniestro_card.dart';
+import '../../../../shared/widgets/async_value_widget.dart';
 
 
 class HistorialPage extends ConsumerWidget {
@@ -75,7 +76,8 @@ class _SiniestrosTab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final siniestrosAsync = ref.watch(misSiniestrosControllerProvider);
 
-    return siniestrosAsync.when(
+    return AsyncValueWidget(
+      value: siniestrosAsync,
       data: (siniestros) {
         if (siniestros.isEmpty) return const _Empty();
         return RefreshIndicator(
@@ -98,8 +100,6 @@ class _SiniestrosTab extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => const _Empty(),
     );
   }
 }
@@ -123,14 +123,8 @@ class _AnalisisIaTab extends ConsumerWidget {
         children: [
           Text('Predicciones de daño', style: theme.textTheme.titleMedium),
           const Gap(AppSpacing.md),
-          v2Async.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.all(AppSpacing.lg),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (_, _) => _IaError(
-              message: 'No se pudo cargar el historial de predicciones.',
-            ),
+          AsyncValueWidget(
+            value: v2Async,
             data: (page) => page.data.isEmpty
                 ? _IaVacio(texto: 'Aún no hay predicciones registradas.')
                 : Column(
@@ -142,14 +136,8 @@ class _AnalisisIaTab extends ConsumerWidget {
           const Gap(AppSpacing.xl),
           Text('Transcripciones de voz', style: theme.textTheme.titleMedium),
           const Gap(AppSpacing.md),
-          nlpAsync.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.all(AppSpacing.lg),
-              child: Center(child: CircularProgressIndicator()),
-            ),
-            error: (_, _) => _IaError(
-              message: 'No se pudo cargar el historial de transcripciones.',
-            ),
+          AsyncValueWidget(
+            value: nlpAsync,
             data: (page) => page.data.isEmpty
                 ? _IaVacio(texto: 'Aún no hay transcripciones registradas.')
                 : Column(
@@ -287,30 +275,6 @@ class _IaVacio extends StatelessWidget {
         texto,
         textAlign: TextAlign.center,
         style: theme.textTheme.bodySmall,
-      ),
-    );
-  }
-}
-
-class _IaError extends StatelessWidget {
-  const _IaError({required this.message});
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.alert.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.cloud_off, color: AppColors.alert, size: 18),
-          const Gap(AppSpacing.sm),
-          Expanded(child: Text(message, style: theme.textTheme.bodySmall)),
-        ],
       ),
     );
   }

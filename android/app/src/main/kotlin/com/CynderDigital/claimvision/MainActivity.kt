@@ -7,5 +7,6 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         DeviceInspectorPlugin.register(flutterEngine, applicationContext)
+        ScreenshotProtectionPlugin.register(flutterEngine, this)
     }
 }

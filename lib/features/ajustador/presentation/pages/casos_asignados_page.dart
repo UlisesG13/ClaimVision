@@ -13,6 +13,7 @@ import '../../../../shared/state/sse_providers.dart';
 import '../../../../shared/widgets/ajustador_bottom_nav.dart';
 import '../state/casos_asignados_controller.dart';
 import '../widgets/caso_card.dart';
+import '../../../../shared/widgets/async_value_widget.dart';
 
 /// Mis Casos Asignados — bandeja del ajustador (Figma node 72:980).
 ///
@@ -86,9 +87,8 @@ class _CasosAsignadosPageState extends ConsumerState<CasosAsignadosPage> {
               ),
             ),
             Expanded(
-              child: casosAsync.when(
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+              child: AsyncValueWidget(
+                value: casosAsync,
                 error: (e, _) => _ErrorState(
                   mensaje: e is Failure
                       ? e.message

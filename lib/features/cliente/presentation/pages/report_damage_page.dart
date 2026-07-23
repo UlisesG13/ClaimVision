@@ -8,6 +8,7 @@ import '../../../../core/routes/route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/feedback/app_snackbar.dart';
+import '../../../../shared/widgets/loading_overlay.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../state/report_controller.dart';
 import '../widgets/report_step_header.dart';
@@ -50,7 +51,10 @@ class ReportDamagePage extends ConsumerWidget {
     final picker = ref.read(imagePickerServiceProvider);
     final file = source ? await picker.fromCamera() : await picker.fromGallery();
     if (file == null) return;
+    if (!context.mounted) return;
+    LoadingOverlay.show(context, message: 'Subiendo evidencia…');
     await ref.read(reportControllerProvider.notifier).subirEvidencia(file);
+    if (context.mounted) LoadingOverlay.hide(context);
   }
 
   @override
@@ -102,20 +106,9 @@ class ReportDamagePage extends ConsumerWidget {
                       ],
                     ),
                     if (state.predictandoBatch)
-                      Padding(
-                        padding: const EdgeInsets.only(top: AppSpacing.md),
-                        child: Row(
-                          children: [
-                            const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                            const Gap(AppSpacing.sm),
-                            Text('Analizando fotos con IA…',
-                                style: theme.textTheme.bodySmall),
-                          ],
-                        ),
+                      const Padding(
+                        padding: EdgeInsets.only(top: AppSpacing.md),
+                        child: LoadingOverlay(message: 'Analizando fotos con IA…'),
                       ),
                   ],
                   const Gap(AppSpacing.lg),
@@ -211,37 +204,20 @@ class _Thumb extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             child: Image.file(evidencia.file, fit: BoxFit.cover),
           ),
-          if (evidencia.subiendo)
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              ),
-              child: const Center(
-                child: SizedBox(
-                  width: 22,
-                  height: 22,
-                  child: CircularProgressIndicator(
-                      strokeWidth: 2.5, color: AppColors.white),
-                ),
-              ),
-            )
-          else ...[
+          Positioned(
+            left: 4,
+            bottom: 4,
+            child: _QualityBadge(
+              valida: evidencia.calidadValida,
+              error: evidencia.error != null,
+            ),
+          ),
+          if (evidencia.prediccionLista)
             Positioned(
               left: 4,
-              bottom: 4,
-              child: _QualityBadge(
-                valida: evidencia.calidadValida,
-                error: evidencia.error != null,
-              ),
+              top: 4,
+              child: _PredictBadge(evidencia: evidencia),
             ),
-            if (evidencia.prediccionLista)
-              Positioned(
-                left: 4,
-                top: 4,
-                child: _PredictBadge(evidencia: evidencia),
-              ),
-          ],
           Positioned(
             right: 2,
             top: 2,

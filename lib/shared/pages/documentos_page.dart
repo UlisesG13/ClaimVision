@@ -4,20 +4,41 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/errors/failures.dart';
+import '../../core/services/screenshot_protection_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../features/cliente/presentation/state/providers.dart';
 import '../../shared/domain/models/documento.dart';
+import '../widgets/async_value_widget.dart';
 import '../widgets/brand_app_bar.dart';
 import '../widgets/documento_card.dart';
 import '../widgets/documentos_upload_sheet.dart';
 import 'document_viewer_page.dart';
 
-class DocumentosPage extends ConsumerWidget {
+class DocumentosPage extends ConsumerStatefulWidget {
   const DocumentosPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DocumentosPage> createState() => _DocumentosPageState();
+}
+
+class _DocumentosPageState extends ConsumerState<DocumentosPage> {
+  final _screenshotProtection = ScreenshotProtectionService();
+
+  @override
+  void initState() {
+    super.initState();
+    _screenshotProtection.enable();
+  }
+
+  @override
+  void dispose() {
+    _screenshotProtection.disable();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final documentos = ref.watch(documentosProvider);
     final theme = Theme.of(context);
 
@@ -34,8 +55,9 @@ class DocumentosPage extends ConsumerWidget {
               fontWeight: FontWeight.bold,
             )),
       ),
-      body: SafeArea(top: false, child: documentos.when(
-        loading: () => const _ShimmerList(),
+      body: SafeArea(top: false, child: AsyncValueWidget<DocumentosResponse>(
+        value: documentos,
+        onRetry: () => ref.invalidate(documentosProvider),
         error: (err, _) => _ErrorState(
           message: err is Failure ? err.message : 'Error al cargar documentos',
           onRetry: () => ref.invalidate(documentosProvider),
@@ -205,27 +227,3 @@ class _ErrorState extends StatelessWidget {
   }
 }
 
-class _ShimmerList extends StatelessWidget {
-  const _ShimmerList();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      children: List.generate(
-        2,
-        (_) => Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-          child: Container(
-            height: 180,
-            decoration: BoxDecoration(
-              color: context.cardColor,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-              border: Border.all(color: context.borderColor),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

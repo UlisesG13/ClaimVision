@@ -5,21 +5,24 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 
 class ShimmerCard extends StatelessWidget {
-  const ShimmerCard({super.key, this.height = 100});
+  const ShimmerCard({super.key, this.height = 100, this.borderRadius});
 
   final double height;
+  final double? borderRadius;
 
   @override
   Widget build(BuildContext context) {
+    final baseColor = context.borderColor;
+    final highlightColor = context.surfaceColor;
     return Shimmer.fromColors(
-      baseColor: context.borderColor,
-      highlightColor: context.surfaceColor,
+      baseColor: baseColor.withValues(alpha: 0.3),
+      highlightColor: highlightColor.withValues(alpha: 0.6),
       child: Container(
         height: height,
         margin: const EdgeInsets.only(bottom: AppSpacing.md),
         decoration: BoxDecoration(
           color: context.cardColor,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          borderRadius: BorderRadius.circular(borderRadius ?? AppSpacing.radiusLg),
         ),
       ),
     );

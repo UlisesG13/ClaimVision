@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/providers.dart';
 import '../../../../core/routes/route_paths.dart';
+import '../../../../core/services/screenshot_protection_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/feedback/app_snackbar.dart';
@@ -35,9 +36,17 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
   final _modeloController = TextEditingController();
   final _anioController = TextEditingController();
   final _placasController = TextEditingController();
+  final _screenshotProtection = ScreenshotProtectionService();
+
+  @override
+  void initState() {
+    super.initState();
+    _screenshotProtection.enable();
+  }
 
   @override
   void dispose() {
+    _screenshotProtection.disable();
     _numeroController.dispose();
     _vigenciaController.dispose();
     _curpController.dispose();
