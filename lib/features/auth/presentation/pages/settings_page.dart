@@ -74,7 +74,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 }
               },
             ),
-      body: ListView(
+      body: SafeArea(top: false, child: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           _Header(nombre: nombre, email: email, rol: rol),
@@ -155,7 +155,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 style: theme.textTheme.bodySmall),
           ),
         ],
-      ),
+      )),
     );
   }
 

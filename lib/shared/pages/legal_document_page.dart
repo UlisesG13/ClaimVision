@@ -31,7 +31,7 @@ class LegalDocumentPage extends StatelessWidget {
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: SafeArea(top: false, child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.xl),
         child: Container(
           width: double.infinity,
@@ -46,7 +46,7 @@ class LegalDocumentPage extends StatelessWidget {
             style: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
           ),
         ),
-      ),
+      )),
     );
   }
 }

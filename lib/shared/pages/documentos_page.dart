@@ -34,7 +34,7 @@ class DocumentosPage extends ConsumerWidget {
               fontWeight: FontWeight.bold,
             )),
       ),
-      body: documentos.when(
+      body: SafeArea(top: false, child: documentos.when(
         loading: () => const _ShimmerList(),
         error: (err, _) => _ErrorState(
           message: err is Failure ? err.message : 'Error al cargar documentos',
@@ -44,6 +44,7 @@ class DocumentosPage extends ConsumerWidget {
           data: data,
           onUploadComplete: () => ref.invalidate(documentosProvider),
         ),
+      ),
       ),
     );
   }

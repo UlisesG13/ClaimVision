@@ -113,7 +113,7 @@ class _FirmaPeritajePageState extends ConsumerState<FirmaPeritajePage> {
           ),
         ),
       ),
-      body: ListView(
+      body: SafeArea(top: false, child: ListView(
         padding: const EdgeInsets.all(AppSpacing.xl),
         children: [
           _Resumen(
@@ -160,8 +160,9 @@ class _FirmaPeritajePageState extends ConsumerState<FirmaPeritajePage> {
                 ),
               ],
             ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -51,7 +51,7 @@ class SiniestroDetailPage extends ConsumerWidget {
                 ],
               ),
       ),
-      body: siniestro == null
+      body: SafeArea(top: false, child: siniestro == null
           ? const _NotFound()
           : ListView(
               padding: const EdgeInsets.all(AppSpacing.xl),
@@ -71,9 +71,12 @@ class SiniestroDetailPage extends ConsumerWidget {
                 ],
               ],
             ),
+          ),
     );
   }
 }
+
+
 
 class _CurrentStateCard extends StatelessWidget {
   const _CurrentStateCard({required this.siniestro});

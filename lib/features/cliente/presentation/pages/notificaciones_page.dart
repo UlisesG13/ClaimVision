@@ -38,12 +38,13 @@ class NotificacionesPage extends ConsumerWidget {
             ),
         ],
       ),
-      body: notificaciones.isEmpty
+      body: SafeArea(top: false, child: notificaciones.isEmpty
           ? const _Empty()
           : ListView(
               padding: const EdgeInsets.all(AppSpacing.xl),
               children: _construirSecciones(context, ref, notificaciones),
             ),
+      ),
     );
   }
 
@@ -167,7 +168,7 @@ class _NotificacionTile extends StatelessWidget {
                 height: 8,
                 decoration: const BoxDecoration(
                     color: AppColors.amber, shape: BoxShape.circle),
-              ),
+            ),
           ],
         ),
       ),

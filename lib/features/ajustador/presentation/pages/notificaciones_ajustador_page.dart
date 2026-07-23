@@ -56,7 +56,7 @@ class NotificacionesAjustadorPage extends ConsumerWidget {
           }
         },
       ),
-      body: casosAsync.when(
+      body: SafeArea(top: false, child: casosAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => const _Empty(),
         data: (casos) {
@@ -81,6 +81,7 @@ class NotificacionesAjustadorPage extends ConsumerWidget {
             },
           );
         },
+      ),
       ),
     );
   }

@@ -73,7 +73,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 }
               },
             ),
-      body: ListView(
+      body: SafeArea(top: false, child: ListView(
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
           _Header(nombre: nombre, email: email, rol: rol),
@@ -115,7 +115,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 style: theme.textTheme.bodySmall),
           ),
         ],
-      ),
+      )),
     );
   }
 

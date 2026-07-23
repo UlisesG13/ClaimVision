@@ -35,7 +35,7 @@ class DocumentViewerPage extends StatelessWidget {
               fontWeight: FontWeight.bold,
             )),
       ),
-      body: documento.esPdf ? _buildPdfView(context) : _buildImageView(context),
+      body: SafeArea(top: false, child: documento.esPdf ? _buildPdfView(context) : _buildImageView(context)),
     );
   }
 

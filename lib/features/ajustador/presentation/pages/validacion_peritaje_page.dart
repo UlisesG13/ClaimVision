@@ -69,7 +69,7 @@ class ValidacionPeritajePage extends ConsumerWidget {
           ),
         ),
       ),
-      body: ListView(
+      body: SafeArea(top: false, child: ListView(
         padding: const EdgeInsets.all(AppSpacing.xl),
         children: [
           Text('Ajusta los daños detectados',
@@ -161,7 +161,7 @@ class ValidacionPeritajePage extends ConsumerWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 
   /// Bottom sheet para crear/editar un daño. Devuelve `null` si se cancela.

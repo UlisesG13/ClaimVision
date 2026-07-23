@@ -56,11 +56,12 @@ class HistorialPage extends ConsumerWidget {
             }
           },
         ),
-        body: const TabBarView(
+        body: SafeArea(top: false, child: const TabBarView(
           children: [
             _SiniestrosTab(),
             _AnalisisIaTab(),
           ],
+        ),
         ),
       ),
     );

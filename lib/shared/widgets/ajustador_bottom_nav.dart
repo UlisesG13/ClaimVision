@@ -15,7 +15,7 @@ class AjustadorBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
+    return SafeArea(top: false, child: BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onTap,
       backgroundColor: context.cardColor,
@@ -38,6 +38,6 @@ class AjustadorBottomNav extends StatelessWidget {
           label: 'Perfil',
         ),
       ],
-    );
+    ));
   }
 }

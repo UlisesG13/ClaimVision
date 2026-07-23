@@ -91,7 +91,7 @@ class CasoDetallePage extends ConsumerWidget {
                 ),
               ),
             ),
-      body: siniestro == null
+      body: SafeArea(top: false, child: siniestro == null
           ? const Center(child: Text('No encontramos este caso.'))
           : ListView(
               padding: const EdgeInsets.all(AppSpacing.xl),
@@ -131,7 +131,8 @@ class CasoDetallePage extends ConsumerWidget {
                   const Gap(AppSpacing.lg),
                   _NarracionCard(texto: siniestro.narracionTexto!),
                 ],
-              ],
+                ],
+              ),
             ),
     );
   }

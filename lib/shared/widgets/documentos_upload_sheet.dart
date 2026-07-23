@@ -29,7 +29,7 @@ class _DocumentosUploadSheetState extends ConsumerState<DocumentosUploadSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Padding(
+    return SafeArea(top: false, child: Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -80,7 +80,7 @@ class _DocumentosUploadSheetState extends ConsumerState<DocumentosUploadSheet> {
           const Gap(AppSpacing.md),
         ],
       ),
-    );
+    ));
   }
 
   bool get _puedeSubir =>

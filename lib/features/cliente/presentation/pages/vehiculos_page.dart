@@ -26,7 +26,7 @@ class VehiculosPage extends ConsumerWidget {
         ),
         title: Text('Vehículos registrados', style: theme.textTheme.titleLarge),
       ),
-      body: siniestrosAsync.when(
+      body: SafeArea(top: false, child: siniestrosAsync.when(
         data: (siniestros) {
           final porPlacas = <String, Siniestro>{};
           for (final s in siniestros) {
@@ -44,6 +44,7 @@ class VehiculosPage extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => const _Empty(),
+      ),
       ),
     );
   }
