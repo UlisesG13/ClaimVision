@@ -32,10 +32,14 @@ class SiniestroCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Siniestro ${siniestro.folioCorto}',
-                  style: theme.textTheme.titleMedium?.copyWith(fontSize: 15)),
+              Expanded(
+                child: Text('Siniestro ${siniestro.folioCorto}',
+                    style: theme.textTheme.titleMedium?.copyWith(fontSize: 15),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
+              ),
+              const Gap(AppSpacing.sm),
               SiniestroStatusChip(estatus: siniestro.estatus),
             ],
           ),
