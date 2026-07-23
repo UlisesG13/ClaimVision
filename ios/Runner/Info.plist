@@ -11,6 +11,8 @@
 	<string>ClaimVision necesita acceso a tus fotos para adjuntar tu póliza, identificación y evidencias del siniestro.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>ClaimVision usa tu ubicación para registrar el lugar del siniestro al reportarlo.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>ClaimVision usa Face ID para que accedas a tu cuenta de forma rápida y segura sin escribir tu contraseña.</string>
 	<!-- Permite HTTP en claro SOLO hacia el backend desplegado (sin TLS).
 	     Quitar esta excepción cuando el backend tenga HTTPS. -->
 	<key>NSAppTransportSecurity</key>
