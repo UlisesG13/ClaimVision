@@ -64,7 +64,9 @@ class CasoDetallePage extends ConsumerWidget {
       bottomNavigationBar: siniestro == null
           ? null
           : Padding(
-              padding: const EdgeInsets.all(AppSpacing.xl),
+              padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl,
+                  AppSpacing.xl,
+                  AppSpacing.xl + MediaQuery.viewPaddingOf(context).bottom),
               child: SizedBox(
                 height: 50,
                 child: ElevatedButton.icon(

@@ -48,7 +48,8 @@ class ValidacionPeritajePage extends ConsumerWidget {
         title: Text('Validación de Peritaje', style: theme.textTheme.titleLarge),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
+        padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl, AppSpacing.xl,
+            AppSpacing.xl + MediaQuery.viewPaddingOf(context).bottom),
         child: SizedBox(
           height: 50,
           child: ElevatedButton.icon(

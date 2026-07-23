@@ -113,7 +113,9 @@ class _ReportAnalysisPageState extends ConsumerState<ReportAnalysisPage> {
       bottomNavigationBar: siniestro == null
           ? null
           : Padding(
-              padding: const EdgeInsets.all(AppSpacing.xl),
+              padding: EdgeInsets.fromLTRB(AppSpacing.xl, AppSpacing.xl,
+                  AppSpacing.xl,
+                  AppSpacing.xl + MediaQuery.viewPaddingOf(context).bottom),
               child: PrimaryButton(
                 label: 'Ir al inicio',
                 icon: Icons.home_outlined,

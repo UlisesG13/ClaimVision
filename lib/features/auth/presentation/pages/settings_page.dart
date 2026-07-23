@@ -95,33 +95,37 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           const Gap(AppSpacing.lg),
 
-          // ─── Cuenta ─────────────────────────────────────────────────
-          _SectionCard(
-            titulo: 'Cuenta',
-            children: [
-              ListTile(
-                leading: const Icon(Icons.description_outlined, color: AppColors.blueprint),
-                title: const Text('Mis documentos'),
-                trailing: Icon(Icons.chevron_right, color: context.textHintColor),
-                onTap: () => context.push(RoutePaths.documentos),
-              ),
-              Divider(height: 1, color: context.borderColor),
-              ListTile(
-                leading: const Icon(Icons.directions_car_outlined, color: AppColors.blueprint),
-                title: const Text('Vehículos registrados'),
-                trailing: Icon(Icons.chevron_right, color: context.textHintColor),
-                onTap: () => context.push(RoutePaths.vehiculos),
-              ),
-              Divider(height: 1, color: context.borderColor),
-              ListTile(
-                leading: const Icon(Icons.verified_user_outlined, color: AppColors.blueprint),
-                title: const Text('Consentimientos (ARCO)'),
-                trailing: Icon(Icons.chevron_right, color: context.textHintColor),
-                onTap: _mostrarConsentimientos,
-              ),
-            ],
-          ),
-          const Gap(AppSpacing.lg),
+          // ─── Cuenta (solo cliente) ──────────────────────────────────
+          // Documentos, vehículos y consentimientos ARCO son propios del
+          // cliente que vincula su póliza; el ajustador no los tiene.
+          if (esCliente) ...[
+            _SectionCard(
+              titulo: 'Cuenta',
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.description_outlined, color: AppColors.blueprint),
+                  title: const Text('Mis documentos'),
+                  trailing: Icon(Icons.chevron_right, color: context.textHintColor),
+                  onTap: () => context.push(RoutePaths.documentos),
+                ),
+                Divider(height: 1, color: context.borderColor),
+                ListTile(
+                  leading: const Icon(Icons.directions_car_outlined, color: AppColors.blueprint),
+                  title: const Text('Vehículos registrados'),
+                  trailing: Icon(Icons.chevron_right, color: context.textHintColor),
+                  onTap: () => context.push(RoutePaths.vehiculos),
+                ),
+                Divider(height: 1, color: context.borderColor),
+                ListTile(
+                  leading: const Icon(Icons.verified_user_outlined, color: AppColors.blueprint),
+                  title: const Text('Consentimientos (ARCO)'),
+                  trailing: Icon(Icons.chevron_right, color: context.textHintColor),
+                  onTap: _mostrarConsentimientos,
+                ),
+              ],
+            ),
+            const Gap(AppSpacing.lg),
+          ],
 
           // ─── Apariencia ─────────────────────────────────────────────
           const ThemeModeToggle(),
