@@ -108,7 +108,7 @@ class ReportDamagePage extends ConsumerWidget {
                     if (state.predictandoBatch)
                       const Padding(
                         padding: EdgeInsets.only(top: AppSpacing.md),
-                        child: LoadingOverlay(message: 'Analizando fotos con IA…'),
+                        child: InlineLoading(message: 'Analizando fotos con IA…'),
                       ),
                   ],
                   const Gap(AppSpacing.lg),

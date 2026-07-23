@@ -194,7 +194,7 @@ class _AnalysisCard extends StatelessWidget {
           ),
           const Gap(AppSpacing.md),
           if (analizando)
-            const LoadingOverlay(message: 'Analizando…'),
+            const InlineLoading(message: 'Analizando…', color: AppColors.amber),
           if (entidades.isEmpty && !analizando)
             Column(
               children: [
@@ -376,7 +376,7 @@ class _CostSummaryCard extends StatelessWidget {
           ),
           const Gap(AppSpacing.md),
           if (loading)
-            const LoadingOverlay(message: 'Calculando costo…'),
+            const InlineLoading(message: 'Calculando costo…'),
           if (resumen == null && !loading)
             Text(
               'Completa la predicción de daños para ver el costo estimado.',

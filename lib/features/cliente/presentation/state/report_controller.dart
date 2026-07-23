@@ -184,27 +184,45 @@ class ReportController extends Notifier<ReportState> {
         await Future.delayed(const Duration(seconds: 2));
         final status = await ref.read(iaTranscribirStatusProvider)(job.jobId);
         if (status.status == 'completed') {
+          final texto = status.result?.texto.trim() ?? '';
           state = state.copyWith(
-            transcripcion: status.result?.texto,
+            transcripcion: texto.isNotEmpty ? texto : null,
             transcribiendo: false,
+            errorMessage: texto.isEmpty
+                ? 'No se detectó voz en el audio. Escribe tu declaración manualmente.'
+                : null,
           );
           return;
         }
         if (status.status == 'failed') {
+          // El worker de transcripción del backend puede fallar (p. ej. su STT
+          // upstream). La narración por voz es opcional: guiamos a escribir en
+          // vez de mostrar el error técnico crudo del servidor.
           state = state.copyWith(
             transcribiendo: false,
-            errorMessage: status.error,
+            errorMessage:
+                'No pudimos transcribir el audio. Escribe tu declaración manualmente.',
           );
           return;
         }
       }
-      state = state.copyWith(transcribiendo: false);
-    } on Failure catch (f) {
-      state = state.copyWith(transcribiendo: false, errorMessage: f.message);
-    } catch (e) {
+      // Se agotó el polling sin completar: tampoco bloqueamos al usuario.
       state = state.copyWith(
         transcribiendo: false,
-        errorMessage: 'Error al transcribir audio: $e',
+        errorMessage:
+            'La transcripción está tardando demasiado. Escribe tu declaración manualmente.',
+      );
+    } on Failure catch (_) {
+      state = state.copyWith(
+        transcribiendo: false,
+        errorMessage:
+            'No pudimos transcribir el audio. Escribe tu declaración manualmente.',
+      );
+    } catch (_) {
+      state = state.copyWith(
+        transcribiendo: false,
+        errorMessage:
+            'No pudimos transcribir el audio. Escribe tu declaración manualmente.',
       );
     }
   }

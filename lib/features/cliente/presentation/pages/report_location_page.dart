@@ -172,7 +172,7 @@ class _MapCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (locating)
-              const LoadingOverlay(message: 'Obteniendo ubicación…')
+              const InlineLoading(message: 'Obteniendo ubicación…')
             else
               Container(
                 width: 50,
