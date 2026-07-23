@@ -3,9 +3,10 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
-import 'providers.dart';
+import '../../../../features/cliente/presentation/state/providers.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/onboarding_data.dart';
+import 'providers.dart';
 
 /// Estado del onboarding (vincular póliza). Flujo multi-paso con red → Riverpod.
 class OnboardingState {
@@ -206,7 +207,9 @@ class OnboardingController extends Notifier<OnboardingState> {
     }
   }
 
-  /// Envía consentimientos y confirma los datos. Marca `completed` al terminar.
+  /// Envía consentimientos, confirma los datos y sube los documentos.
+  /// Marca `completed` al terminar. La subida de documentos es best-effort:
+  /// si falla, el onboarding se completa igual y el usuario sube después.
   Future<void> confirm() async {
     if (!state.canConfirm) return;
     state = state.copyWith(submitting: true, clearError: true);
@@ -229,6 +232,19 @@ class OnboardingController extends Notifier<OnboardingState> {
           vehiculoPlacas: state.vehiculoPlacas.trim(),
         ),
       );
+      // Subir documentos al almacén permanente (best-effort).
+      final cedula = state.cedula;
+      final poliza = state.poliza;
+      if (cedula != null && poliza != null) {
+        try {
+          await ref.read(documentoRepositoryProvider).subir(
+                identificacion: cedula,
+                poliza: poliza,
+              );
+        } catch (_) {
+          // No bloqueamos el onboarding si falla la subida.
+        }
+      }
       state = state.copyWith(submitting: false, completed: true);
     } on Failure catch (f) {
       state = state.copyWith(submitting: false, errorMessage: f.message);

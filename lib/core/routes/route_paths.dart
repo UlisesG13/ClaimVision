@@ -44,4 +44,7 @@ class RoutePaths {
   // ── Legal (públicas, accesibles sin sesión) ──────────────────────────────
   static const String avisoPrivacidad = '/legal/aviso-privacidad';
   static const String terminos = '/legal/terminos';
+
+  // ── Documentos ──────────────────────────────────────────────────────────
+  static const String documentos = '/documentos';
 }

@@ -100,6 +100,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             titulo: 'Cuenta',
             children: [
               ListTile(
+                leading: const Icon(Icons.description_outlined, color: AppColors.blueprint),
+                title: const Text('Mis documentos'),
+                trailing: Icon(Icons.chevron_right, color: context.textHintColor),
+                onTap: () => context.push(RoutePaths.documentos),
+              ),
+              Divider(height: 1, color: context.borderColor),
+              ListTile(
                 leading: const Icon(Icons.directions_car_outlined, color: AppColors.blueprint),
                 title: const Text('Vehículos registrados'),
                 trailing: Icon(Icons.chevron_right, color: context.textHintColor),

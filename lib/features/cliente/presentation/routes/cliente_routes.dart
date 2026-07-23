@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/routes/route_paths.dart';
+import '../../../../shared/pages/documentos_page.dart';
 import '../pages/client_home_page.dart';
 import '../pages/historial_page.dart';
 import '../pages/notificaciones_page.dart';
@@ -54,5 +55,9 @@ List<GoRoute> clienteRoutes = [
     builder: (_, state) => SiniestroDetailPage(
       siniestroId: state.pathParameters['id'] ?? '',
     ),
+  ),
+  GoRoute(
+    path: RoutePaths.documentos,
+    builder: (_, _) => const DocumentosPage(),
   ),
 ];

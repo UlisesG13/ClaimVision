@@ -1,12 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/di/providers.dart';
+import '../../../../shared/domain/models/documento.dart';
 import '../../data/datasources/remote/cliente_remote_datasource.dart';
+import '../../data/datasources/remote/documento_remote_datasource.dart';
 import '../../data/datasources/remote/siniestro_remote_datasource.dart';
 import '../../data/repositories/cliente_repository_impl.dart';
+import '../../data/repositories/documento_repository_impl.dart';
 import '../../data/repositories/siniestro_repository_impl.dart';
 import '../../domain/entities/vehiculo_cliente.dart';
 import '../../domain/repositories/cliente_repository.dart';
+import '../../domain/repositories/documento_repository.dart';
 import '../../domain/repositories/siniestro_repository.dart';
 import '../../domain/usecases/get_perfil_cliente.dart';
 import '../../domain/usecases/get_siniestro_detalle.dart';
@@ -58,4 +62,18 @@ final getSiniestroDetalleProvider = Provider<GetSiniestroDetalle>((ref) {
 final vehiculosClienteProvider = FutureProvider.autoDispose<List<VehiculoCliente>>((ref) {
   ref.watch(currentSessionProvider);
   return ref.watch(siniestroRepositoryProvider).obtenerVehiculos();
+});
+
+// ── Documentos (INE + Póliza) ─────────────────────────────────────────────────
+final documentoRemoteDataSourceProvider = Provider<DocumentoRemoteDataSource>((ref) {
+  return DocumentoRemoteDataSourceImpl(ref.watch(dioProvider));
+});
+
+final documentoRepositoryProvider = Provider<DocumentoRepository>((ref) {
+  return DocumentoRepositoryImpl(ref.watch(documentoRemoteDataSourceProvider));
+});
+
+final documentosProvider = FutureProvider.autoDispose<DocumentosResponse>((ref) {
+  ref.watch(currentSessionProvider);
+  return ref.watch(documentoRepositoryProvider).obtener();
 });

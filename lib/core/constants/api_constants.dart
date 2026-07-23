@@ -17,6 +17,10 @@ class ApiConstants {
   static const String onboardingOcr = '/v1/cliente/onboarding/ocr';
   static const String onboardingConfirmar = '/v1/cliente/onboarding/confirmar-datos';
 
+  // ── Cliente v1: documentos ──────────────────────────────────────────────
+  static const String documentosSubir = '/v1/cliente/documentos/subir';
+  static const String documentosObtener = '/v1/cliente/documentos';
+
   // ── Cliente v1 ────────────────────────────────────────────────────────
   static const String clientePerfil = '/v1/cliente/perfil';
   static const String clienteSiniestros = '/v1/cliente/siniestros';
