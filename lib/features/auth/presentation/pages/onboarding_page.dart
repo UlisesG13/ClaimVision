@@ -128,19 +128,11 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                     ),
                     const Gap(AppSpacing.lg),
                     _DocumentSlot(
-                      label: 'INE Frente (PDF)',
-                      file: state.cedulaFrente,
+                      label: 'INE (Frente y Reverso)',
+                      file: state.cedula,
                       isPdf: true,
                       hint: 'Toca para agregar PDF',
-                      onTap: () => _pickPdf(controller.setIdentificacionFrente),
-                    ),
-                    const Gap(AppSpacing.md),
-                    _DocumentSlot(
-                      label: 'INE Reverso (PDF)',
-                      file: state.cedulaReverso,
-                      isPdf: true,
-                      hint: 'Toca para agregar PDF',
-                      onTap: () => _pickPdf(controller.setIdentificacionReverso),
+                      onTap: () => _pickPdf(controller.setIdentificacion),
                     ),
                     const Gap(AppSpacing.md),
                     _DocumentSlot(

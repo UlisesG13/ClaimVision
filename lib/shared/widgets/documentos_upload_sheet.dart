@@ -20,7 +20,6 @@ class DocumentosUploadSheet extends ConsumerStatefulWidget {
 
 class _DocumentosUploadSheetState extends ConsumerState<DocumentosUploadSheet> {
   File? _identificacion;
-  File? _identificacionReverso;
   File? _poliza;
   bool _subiendo = false;
 
@@ -50,15 +49,9 @@ class _DocumentosUploadSheetState extends ConsumerState<DocumentosUploadSheet> {
                   ?.copyWith(fontWeight: FontWeight.bold)),
           const Gap(AppSpacing.md),
           _DocumentoPickerRow(
-            label: 'INE Frente (PDF)',
+            label: 'INE (Frente y Reverso)',
             archivo: _identificacion,
             onPick: () => _pickPdf((f) => setState(() => _identificacion = f)),
-          ),
-          const Gap(AppSpacing.md),
-          _DocumentoPickerRow(
-            label: 'INE Reverso (PDF)',
-            archivo: _identificacionReverso,
-            onPick: () => _pickPdf((f) => setState(() => _identificacionReverso = f)),
           ),
           const Gap(AppSpacing.md),
           _DocumentoPickerRow(
@@ -89,7 +82,7 @@ class _DocumentosUploadSheetState extends ConsumerState<DocumentosUploadSheet> {
   }
 
   bool get _puedeSubir =>
-      _identificacion != null && _identificacionReverso != null && _poliza != null && !_subiendo;
+      _identificacion != null && _poliza != null && !_subiendo;
 
   Future<void> _pickPdf(void Function(File) onSelected) async {
     final file = await ref.read(filePickerServiceProvider).pickPdf();
@@ -98,15 +91,13 @@ class _DocumentosUploadSheetState extends ConsumerState<DocumentosUploadSheet> {
 
   Future<void> _subir() async {
     final id = _identificacion;
-    final idRev = _identificacionReverso;
     final pol = _poliza;
-    if (id == null || idRev == null || pol == null) return;
+    if (id == null || pol == null) return;
 
     setState(() => _subiendo = true);
     try {
       await ref.read(documentoRepositoryProvider).subir(
             identificacion: id,
-            identificacionReverso: idRev,
             poliza: pol,
           );
       if (mounted) {

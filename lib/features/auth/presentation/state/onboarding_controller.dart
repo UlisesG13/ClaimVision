@@ -12,8 +12,7 @@ import 'providers.dart';
 
 class OnboardingState {
   const OnboardingState({
-    this.cedulaFrente,
-    this.cedulaReverso,
+    this.cedula,
     this.poliza,
     this.ocrLoading = false,
     this.submitting = false,
@@ -34,8 +33,7 @@ class OnboardingState {
     this.errorMessage,
   });
 
-  final File? cedulaFrente;
-  final File? cedulaReverso;
+  final File? cedula;
   final File? poliza;
 
   final bool ocrLoading;
@@ -58,8 +56,7 @@ class OnboardingState {
 
   final String? errorMessage;
 
-  bool get hasRequiredDocuments =>
-      cedulaFrente != null && cedulaReverso != null && poliza != null;
+  bool get hasRequiredDocuments => cedula != null && poliza != null;
 
   bool get canConfirm =>
       avisoPrivacidad &&
@@ -69,8 +66,7 @@ class OnboardingState {
       !submitting;
 
   OnboardingState copyWith({
-    File? cedulaFrente,
-    File? cedulaReverso,
+    File? cedula,
     File? poliza,
     bool? ocrLoading,
     bool? submitting,
@@ -92,8 +88,7 @@ class OnboardingState {
     bool clearError = false,
   }) {
     return OnboardingState(
-      cedulaFrente: cedulaFrente ?? this.cedulaFrente,
-      cedulaReverso: cedulaReverso ?? this.cedulaReverso,
+      cedula: cedula ?? this.cedula,
       poliza: poliza ?? this.poliza,
       ocrLoading: ocrLoading ?? this.ocrLoading,
       submitting: submitting ?? this.submitting,
@@ -121,11 +116,8 @@ class OnboardingController extends Notifier<OnboardingState> {
   @override
   OnboardingState build() => const OnboardingState();
 
-  void setIdentificacionFrente(File file) =>
-      state = state.copyWith(cedulaFrente: file, clearError: true);
-
-  void setIdentificacionReverso(File file) =>
-      state = state.copyWith(cedulaReverso: file, clearError: true);
+  void setIdentificacion(File file) =>
+      state = state.copyWith(cedula: file, clearError: true);
 
   void setPoliza(File file) =>
       state = state.copyWith(poliza: file, clearError: true);
@@ -148,24 +140,24 @@ class OnboardingController extends Notifier<OnboardingState> {
   void editVehiculoPlacas(String v) => state = state.copyWith(vehiculoPlacas: v);
 
   Future<void> runOcr() async {
-    final frente = state.cedulaFrente;
+    final cedula = state.cedula;
     final poliza = state.poliza;
-    if (frente == null || state.cedulaReverso == null || poliza == null) {
+    if (cedula == null || poliza == null) {
       state = state.copyWith(
-        errorMessage: 'Agrega la INE (Frente y Reverso) y la póliza.',
+        errorMessage: 'Agrega la INE y la póliza.',
       );
       return;
     }
 
     developer.log(
-      '[OCR] Enviando: frente=${frente.path} (${frente.lengthSync()} bytes), poliza=${poliza.path} (${poliza.lengthSync()} bytes)',
+      '[OCR] Enviando: ine=${cedula.path} (${cedula.lengthSync()} bytes), poliza=${poliza.path} (${poliza.lengthSync()} bytes)',
     );
 
     state = state.copyWith(ocrLoading: true, clearError: true);
     try {
       final result = await ref.read(iaExtractAndValidateProvider)(
         poliza: poliza,
-        ine: frente,
+        ine: cedula,
       );
       developer.log('[OCR] Resultado recibido: ${result.runtimeType}');
       final p = result.poliza;
@@ -217,17 +209,15 @@ class OnboardingController extends Notifier<OnboardingState> {
           vehiculoPlacas: state.vehiculoPlacas.trim(),
         ),
       );
-      final frente = state.cedulaFrente;
-      final reverso = state.cedulaReverso;
+      final cedula = state.cedula;
       final poliza = state.poliza;
-      if (frente != null && reverso != null && poliza != null) {
+      if (cedula != null && poliza != null) {
         try {
           developer.log(
-            '[Upload] Subiendo: frente=${frente.path}, reverso=${reverso.path}, poliza=${poliza.path}',
+            '[Upload] Subiendo: ine=${cedula.path}, poliza=${poliza.path}',
           );
           await ref.read(documentoRepositoryProvider).subir(
-                identificacion: frente,
-                identificacionReverso: reverso,
+                identificacion: cedula,
                 poliza: poliza,
               );
           developer.log('[Upload] Documentos subidos correctamente');

@@ -23,13 +23,11 @@ class DocumentoRepositoryImpl implements DocumentoRepository {
   @override
   Future<DocumentosResponse> subir({
     required File identificacion,
-    File? identificacionReverso,
     required File poliza,
   }) async {
     try {
       return await _remote.subir(
         identificacion: identificacion,
-        identificacionReverso: identificacionReverso,
         poliza: poliza,
       );
     } on AppException catch (e) {

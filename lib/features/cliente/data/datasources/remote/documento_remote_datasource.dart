@@ -10,7 +10,6 @@ abstract interface class DocumentoRemoteDataSource {
   Future<DocumentosResponse> obtener();
   Future<DocumentosResponse> subir({
     required File identificacion,
-    File? identificacionReverso,
     required File poliza,
   });
 }
@@ -35,7 +34,6 @@ class DocumentoRemoteDataSourceImpl implements DocumentoRemoteDataSource {
   @override
   Future<DocumentosResponse> subir({
     required File identificacion,
-    File? identificacionReverso,
     required File poliza,
   }) async {
     try {
@@ -45,12 +43,6 @@ class DocumentoRemoteDataSourceImpl implements DocumentoRemoteDataSource {
           filename:
               'identificacion_${DateTime.now().millisecondsSinceEpoch}.${_extension(identificacion)}',
         ),
-        if (identificacionReverso != null)
-          'identificacion_reverso': await MultipartFile.fromFile(
-            identificacionReverso.path,
-            filename:
-                'identificacion_reverso_${DateTime.now().millisecondsSinceEpoch}.${_extension(identificacionReverso)}',
-          ),
         'poliza': await MultipartFile.fromFile(
           poliza.path,
           filename:
