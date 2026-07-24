@@ -135,6 +135,17 @@ class OnboardingController extends Notifier<OnboardingState> {
   void setIdentificacion(File file) =>
       state = state.copyWith(cedula: file, clearError: true);
 
+  /// Vuelve a empezar la captura de documentos: descarta INE, póliza y los datos
+  /// detectados por el OCR (por si no se leyeron bien), conservando los
+  /// consentimientos que el usuario ya haya marcado.
+  void reiniciarDocumentos() {
+    state = OnboardingState(
+      avisoPrivacidad: state.avisoPrivacidad,
+      biometria: state.biometria,
+      transferenciaTalleres: state.transferenciaTalleres,
+    );
+  }
+
   void setPoliza(File file) =>
       state = state.copyWith(poliza: file, clearError: true);
 

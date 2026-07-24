@@ -231,9 +231,7 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _Header(onBack: () {
-              if (context.canPop()) context.pop();
-            }),
+            const _Header(),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(
@@ -290,6 +288,20 @@ class _OnboardingPageState extends ConsumerState<OnboardingPage> {
                         onModelo: controller.editVehiculoModelo,
                         onAnio: controller.editVehiculoAnio,
                         onPlacas: controller.editVehiculoPlacas,
+                      ),
+                      const Gap(AppSpacing.sm),
+                      OutlinedButton.icon(
+                        onPressed: state.submitting
+                            ? null
+                            : controller.reiniciarDocumentos,
+                        icon: const Icon(Icons.refresh, size: 18),
+                        label: const Text('Volver a añadir documentos'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.blueprint,
+                          side: BorderSide(
+                              color: AppColors.blueprint.withValues(alpha: 0.4)),
+                          minimumSize: const Size.fromHeight(48),
+                        ),
                       ),
                       const Gap(AppSpacing.lg),
                       const InlineBanner(
@@ -390,8 +402,7 @@ class _SourceSheet extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.onBack});
-  final VoidCallback onBack;
+  const _Header();
 
   @override
   Widget build(BuildContext context) {
@@ -400,31 +411,13 @@ class _Header extends StatelessWidget {
       height: 84,
       color: context.surfaceColor,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      child: Row(
+      alignment: Alignment.centerLeft,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          InkWell(
-            onTap: onBack,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: context.scaffoldBgColor,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              ),
-              child: Icon(Icons.arrow_back,
-                  size: 20, color: context.textPrimaryColor),
-            ),
-          ),
-          const Gap(AppSpacing.md),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Vincula tu Póliza', style: theme.textTheme.titleLarge),
-              Text('Paso 1 de 2', style: theme.textTheme.bodySmall),
-            ],
-          ),
+          Text('Vincula tu Póliza', style: theme.textTheme.titleLarge),
+          Text('Paso 1 de 2', style: theme.textTheme.bodySmall),
         ],
       ),
     );
